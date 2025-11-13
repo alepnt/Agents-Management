@@ -23,13 +23,16 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final DocumentHistoryService documentHistoryService;
     private final CommissionService commissionService;
+    private final StatisticsService statisticsService;
 
     public InvoiceService(InvoiceRepository invoiceRepository,
                           DocumentHistoryService documentHistoryService,
-                          CommissionService commissionService) {
+                          CommissionService commissionService,
+                          StatisticsService statisticsService) {
         this.invoiceRepository = invoiceRepository;
         this.documentHistoryService = documentHistoryService;
         this.commissionService = commissionService;
+        this.statisticsService = statisticsService;
     }
 
     public List<InvoiceDTO> findAll() {
@@ -61,6 +64,7 @@ public class InvoiceService {
         );
         Invoice saved = invoiceRepository.save(invoice);
         documentHistoryService.log(DocumentType.INVOICE, saved.getId(), DocumentAction.CREATED, "Fattura creata: " + saved.getNumber());
+        statisticsService.clearCache();
         return InvoiceMapper.toDto(saved);
     }
 
@@ -74,6 +78,7 @@ public class InvoiceService {
                         documentHistoryService.log(DocumentType.INVOICE, saved.getId(), DocumentAction.STATUS_CHANGED,
                                 "Stato cambiato da " + existing.getStatus() + " a " + saved.getStatus());
                     }
+                    statisticsService.clearCache();
                     return InvoiceMapper.toDto(saved);
                 });
     }
@@ -83,6 +88,7 @@ public class InvoiceService {
                 .map(invoice -> {
                     invoiceRepository.deleteById(id);
                     documentHistoryService.log(DocumentType.INVOICE, invoice.getId(), DocumentAction.DELETED, "Fattura eliminata");
+                    statisticsService.clearCache();
                     return true;
                 })
                 .orElse(false);
@@ -97,6 +103,7 @@ public class InvoiceService {
                             "Pagamento registrato il " + paymentDate);
                     commissionService.updateAfterPayment(saved.getContractId(), saved.getAmount(),
                             paymentRequest.getAmountPaid() != null ? paymentRequest.getAmountPaid() : saved.getAmount());
+                    statisticsService.clearCache();
                     return InvoiceMapper.toDto(saved);
                 });
     }
