@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -146,6 +150,47 @@
                             <PieChart fx:id="contractStatusChart" prefHeight="240" prefWidth="220" />
                         </VBox>
                     </right>
+                </BorderPane>
+            </Tab>
+            <Tab text="Statistiche" closable="false">
+                <BorderPane padding="10">
+                    <top>
+                        <HBox spacing="10">
+                            <Label text="Anno" />
+                            <ComboBox fx:id="statsYearCombo" prefWidth="120" />
+                            <Pane HBox.hgrow="ALWAYS" />
+                            <Label text="Provvigioni su fatture pagate" />
+                        </HBox>
+                    </top>
+                    <center>
+                        <GridPane hgap="15" vgap="15">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50" />
+                                <ColumnConstraints percentWidth="50" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints vgrow="ALWAYS" />
+                                <RowConstraints vgrow="ALWAYS" />
+                            </rowConstraints>
+                            <LineChart fx:id="commissionTrendChart" title="Trend mensile" GridPane.columnSpan="2">
+                                <xAxis>
+                                    <CategoryAxis label="Mese" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Provvigioni (€)" />
+                                </yAxis>
+                            </LineChart>
+                            <BarChart fx:id="agentCommissionBarChart" title="Provvigioni per agente" GridPane.rowIndex="1">
+                                <xAxis>
+                                    <CategoryAxis label="Agente" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Provvigioni (€)" />
+                                </yAxis>
+                            </BarChart>
+                            <PieChart fx:id="teamCommissionPieChart" title="Ripartizione per team" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        </GridPane>
+                    </center>
                 </BorderPane>
             </Tab>
         </TabPane>

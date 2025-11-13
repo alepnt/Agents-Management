@@ -2,6 +2,8 @@ package com.example.client.controller;
 
 import com.example.client.command.CommandMemento;
 import com.example.client.model.ContractModel;
+import com.example.client.model.DataChangeEvent;
+import com.example.client.model.DataChangeType;
 import com.example.client.model.DocumentHistoryModel;
 import com.example.client.model.InvoiceModel;
 import com.example.client.service.DataCacheService;
@@ -10,6 +12,11 @@ import com.example.common.dto.ContractDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.InvoiceDTO;
 import com.example.common.dto.InvoicePaymentRequest;
+import com.example.common.dto.AgentCommissionDTO;
+import com.example.common.dto.AgentStatisticsDTO;
+import com.example.common.dto.MonthlyCommissionDTO;
+import com.example.common.dto.TeamCommissionDTO;
+import com.example.common.dto.TeamStatisticsDTO;
 import com.example.common.dto.NotificationMessage;
 import com.example.common.enums.ContractStatus;
 import com.example.common.enums.DocumentType;
@@ -19,7 +26,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -36,12 +46,15 @@ import javafx.util.StringConverter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -56,10 +69,12 @@ public class MainViewController {
     private final ObservableList<DocumentHistoryModel> historyItems = FXCollections.observableArrayList();
     private final Observer<NotificationMessage> notificationObserver = this::onNotification;
     private final Observer<CommandMemento> historyObserver = this::onCommandExecuted;
+    private final Observer<DataChangeEvent> dataChangeObserver = this::onDataChanged;
     private final DateTimeFormatter historyFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.systemDefault());
 
     private DocumentType currentHistoryType;
     private Long currentHistoryId;
+    private boolean updatingStatsYear;
 
     @FXML
     private TabPane mainTabPane;
@@ -159,6 +174,18 @@ public class MainViewController {
     private Label notificationLabel;
 
     @FXML
+    private ComboBox<Integer> statsYearCombo;
+
+    @FXML
+    private LineChart<String, Number> commissionTrendChart;
+
+    @FXML
+    private BarChart<String, Number> agentCommissionBarChart;
+
+    @FXML
+    private PieChart teamCommissionPieChart;
+
+    @FXML
     public void initialize() {
         invoiceStatusCombo.getItems().setAll(InvoiceStatus.values());
         contractStatusCombo.getItems().setAll(ContractStatus.values());
@@ -200,6 +227,14 @@ public class MainViewController {
             }
         });
 
+        if (statsYearCombo != null) {
+            statsYearCombo.setOnAction(event -> {
+                if (!updatingStatsYear) {
+                    refreshStatistics();
+                }
+            });
+        }
+
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab != null && Objects.equals(newTab.getText(), "Contratti")) {
                 ContractModel selected = contractTable.getSelectionModel().getSelectedItem();
@@ -219,6 +254,7 @@ public class MainViewController {
         });
 
         dataCacheService.getCaretaker().subscribe(historyObserver);
+        dataCacheService.subscribeDataChanges(dataChangeObserver);
         notificationService.subscribe(notificationObserver);
 
         refreshData();
@@ -228,6 +264,7 @@ public class MainViewController {
     public void refreshData() {
         refreshInvoices();
         refreshContracts();
+        refreshStatistics();
         notificationService.publish(new NotificationMessage("refresh", "Dati aggiornati", Instant.now()));
     }
 
@@ -347,6 +384,20 @@ public class MainViewController {
         updateContractChart();
     }
 
+    private void refreshStatistics() {
+        AgentStatisticsDTO agentStats = dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null);
+        if (statsYearCombo != null) {
+            updatingStatsYear = true;
+            statsYearCombo.getItems().setAll(agentStats.years());
+            statsYearCombo.setValue(agentStats.year());
+            updatingStatsYear = false;
+        }
+        updateCommissionTrendChart(agentStats);
+        updateAgentBarChart(agentStats);
+        TeamStatisticsDTO teamStats = dataCacheService.getTeamStatistics(agentStats.year());
+        updateTeamPieChart(teamStats);
+    }
+
     private void updateInvoiceChart() {
         Map<String, Long> counts = invoiceItems.stream()
                 .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"), Collectors.counting()));
@@ -360,6 +411,45 @@ public class MainViewController {
                 .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"), Collectors.counting()));
         contractStatusChart.setData(FXCollections.observableArrayList(counts.entrySet().stream()
                 .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
+                .toList()));
+    }
+
+    private void updateCommissionTrendChart(AgentStatisticsDTO statistics) {
+        if (commissionTrendChart == null) {
+            return;
+        }
+        commissionTrendChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Provvigioni");
+        statistics.monthlyTotals().stream()
+                .sorted((a, b) -> Integer.compare(a.month(), b.month()))
+                .forEach(entry -> series.getData().add(new XYChart.Data<>(monthLabel(entry.month()), entry.commission().doubleValue())));
+        commissionTrendChart.getData().add(series);
+    }
+
+    private void updateAgentBarChart(AgentStatisticsDTO statistics) {
+        if (agentCommissionBarChart == null) {
+            return;
+        }
+        agentCommissionBarChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Provvigioni");
+        for (AgentCommissionDTO aggregate : statistics.agentTotals()) {
+            String label = aggregate.teamName() != null && !aggregate.teamName().isBlank()
+                    ? aggregate.agentName() + " (" + aggregate.teamName() + ")"
+                    : aggregate.agentName();
+            series.getData().add(new XYChart.Data<>(label, aggregate.commission().doubleValue()));
+        }
+        agentCommissionBarChart.getData().add(series);
+    }
+
+    private void updateTeamPieChart(TeamStatisticsDTO statistics) {
+        if (teamCommissionPieChart == null) {
+            return;
+        }
+        teamCommissionPieChart.setData(FXCollections.observableArrayList(statistics.teamTotals().stream()
+                .map(team -> new PieChart.Data(team.teamName() != null && !team.teamName().isBlank() ? team.teamName() : "Senza team",
+                        team.commission().doubleValue()))
                 .toList()));
     }
 
@@ -474,6 +564,15 @@ public class MainViewController {
         }
     }
 
+    private void onDataChanged(DataChangeEvent event) {
+        if (event == null) {
+            return;
+        }
+        if (event.type() == DataChangeType.INVOICE) {
+            refreshStatistics();
+        }
+    }
+
     private void onCommandExecuted(CommandMemento memento) {
         if (memento == null || memento.getResult() == null || memento.getResult().historySnapshot().isEmpty()) {
             return;
@@ -488,6 +587,7 @@ public class MainViewController {
 
     public void shutdown() {
         notificationService.unsubscribe(notificationObserver);
+        dataCacheService.unsubscribeDataChanges(dataChangeObserver);
         dataCacheService.getCaretaker().unsubscribe(historyObserver);
     }
 
@@ -515,6 +615,14 @@ public class MainViewController {
 
     private String formatInstant(Instant instant) {
         return instant != null ? historyFormatter.format(instant) : "";
+    }
+
+    private String monthLabel(int month) {
+        try {
+            return Month.of(month).getDisplayName(TextStyle.SHORT, Locale.getDefault());
+        } catch (Exception ex) {
+            return Integer.toString(month);
+        }
     }
 
     private static class BigDecimalStringConverter extends StringConverter<BigDecimal> {

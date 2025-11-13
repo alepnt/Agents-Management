@@ -8,10 +8,12 @@ import com.example.client.model.NotificationCreate;
 import com.example.client.model.NotificationItem;
 import com.example.client.model.NotificationSubscription;
 import com.example.client.model.NotificationSubscriptionInfo;
+import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.InvoiceDTO;
 import com.example.common.dto.InvoicePaymentRequest;
+import com.example.common.dto.TeamStatisticsDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -148,6 +150,26 @@ public class BackendGateway {
     public List<DocumentHistoryDTO> contractHistory(Long id) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri("/api/contracts/" + id + "/history"))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public AgentStatisticsDTO agentStatistics(Integer year) {
+        String path = year != null ? "/api/stats/agent?year=" + year : "/api/stats/agent";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri(path))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public TeamStatisticsDTO teamStatistics(Integer year) {
+        String path = year != null ? "/api/stats/team?year=" + year : "/api/stats/team";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri(path))
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
