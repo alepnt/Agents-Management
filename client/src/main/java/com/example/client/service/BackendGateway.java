@@ -1,5 +1,13 @@
 package com.example.client.service;
 
+import com.example.client.model.ChatConversation;
+import com.example.client.model.ChatMessage;
+import com.example.client.model.ChatMessageSend;
+import com.example.client.model.MailMessage;
+import com.example.client.model.NotificationCreate;
+import com.example.client.model.NotificationItem;
+import com.example.client.model.NotificationSubscription;
+import com.example.client.model.NotificationSubscriptionInfo;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.InvoiceDTO;
@@ -15,6 +23,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -142,6 +151,105 @@ public class BackendGateway {
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
+        });
+    }
+
+    public List<NotificationItem> listNotifications(Long userId, Instant since) {
+        StringBuilder path = new StringBuilder("/api/notifications?userId=").append(userId);
+        if (since != null) {
+            path.append("&since=").append(since);
+        }
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri(path.toString()))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public List<NotificationItem> pollNotifications(Long userId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/notifications/subscribe?userId=" + userId))
+                .timeout(Duration.ofSeconds(35))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public NotificationItem publishNotification(NotificationCreate create) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/notifications"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(create), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public NotificationSubscriptionInfo registerNotificationChannel(NotificationSubscription subscription) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/notifications/subscribe"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(subscription), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public List<ChatConversation> listChatConversations(Long userId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/chat/conversations?userId=" + userId))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public List<ChatMessage> listChatMessages(Long userId, String conversationId, Instant since) {
+        StringBuilder path = new StringBuilder("/api/chat/messages?userId=")
+                .append(userId)
+                .append("&conversationId=")
+                .append(conversationId);
+        if (since != null) {
+            path.append("&since=").append(since);
+        }
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri(path.toString()))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public List<ChatMessage> pollChatMessages(Long userId, String conversationId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/chat/poll?userId=" + userId + "&conversationId=" + conversationId))
+                .timeout(Duration.ofSeconds(35))
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public ChatMessage sendChatMessage(ChatMessageSend message) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/chat/messages"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(message), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void sendMail(MailMessage mail, String delegatedToken) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri("/api/mail/send"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + delegatedToken)
+                .POST(HttpRequest.BodyPublishers.ofString(write(mail), StandardCharsets.UTF_8))
+                .build();
+        send(request, new TypeReference<Void>() {
         });
     }
 
