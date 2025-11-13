@@ -78,7 +78,11 @@ public class MailService {
 
     private List<Map<String, Object>> toRecipients(List<String> addresses) {
         return addresses.stream()
-                .map(address -> Map.of("emailAddress", Map.of("address", address)))
+                .map(address -> {
+                    Map<String, Object> recipient = new HashMap<>();
+                    recipient.put("emailAddress", Map.of("address", address));
+                    return recipient;
+                })
                 .toList();
     }
 
