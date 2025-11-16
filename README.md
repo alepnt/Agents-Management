@@ -67,3 +67,7 @@ mvn -pl server -am test
    ```
 
 Al primo avvio Flyway applicherà automaticamente lo schema e i dati seed.
+
+## Documentazione funzionale
+
+- [Gestione provvigioni e organizzazione agenti](docs/commissioni.md): requisiti condivisi con il cliente su struttura dei team, regole di provvigione e modalità di ripartizione tra gli agenti.

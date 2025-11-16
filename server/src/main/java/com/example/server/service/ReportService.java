@@ -119,7 +119,7 @@ public class ReportService {
             if (agentId != null && !Objects.equals(agentId, invoiceAgentId)) {
                 continue;
             }
-            BigDecimal commission = commissionService.computeCommission(invoice.getAmount()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal commission = commissionService.contractAgentCommission(contractId, invoice.getAmount());
             BigDecimal amount = invoice.getAmount() != null ? invoice.getAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
             rows.add(new InvoiceReportRow(
                     invoice.getNumber(),

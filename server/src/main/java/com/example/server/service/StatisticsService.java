@@ -9,8 +9,6 @@ import com.example.common.enums.InvoiceStatus;
 import com.example.server.repository.StatisticsRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Year;
 import java.util.Comparator;
 import java.util.List;
@@ -20,15 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class StatisticsService {
 
-    private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.10");
     private static final String PAID_STATUS = InvoiceStatus.PAID.name();
 
     private final StatisticsRepository statisticsRepository;
+    private final CommissionService commissionService;
     private final Map<Integer, AgentStatisticsDTO> agentCache = new ConcurrentHashMap<>();
     private final Map<Integer, TeamStatisticsDTO> teamCache = new ConcurrentHashMap<>();
 
-    public StatisticsService(StatisticsRepository statisticsRepository) {
+    public StatisticsService(StatisticsRepository statisticsRepository,
+                            CommissionService commissionService) {
         this.statisticsRepository = statisticsRepository;
+        this.commissionService = commissionService;
     }
 
     public AgentStatisticsDTO agentStatistics(Integer requestedYear) {
@@ -86,7 +86,7 @@ public class StatisticsService {
                 .map(aggregate -> new MonthlyCommissionDTO(
                         aggregate.getYear(),
                         aggregate.getMonth(),
-                        commissionValue(aggregate.getTotalAmount())))
+                        commissionService.applyDefaultCommissionRate(aggregate.getTotalAmount())))
                 .toList();
 
         List<AgentCommissionDTO> agentTotals = statisticsRepository
@@ -95,7 +95,10 @@ public class StatisticsService {
                         aggregate.getAgentId(),
                         aggregate.getAgentName(),
                         aggregate.getTeamName(),
-                        commissionValue(aggregate.getTotalAmount())))
+                        commissionService.calculateAgentCommission(
+                                aggregate.getTeamId(),
+                                aggregate.getAgentId(),
+                                aggregate.getTotalAmount())))
                 .toList();
 
         return new AgentStatisticsDTO(targetYear, List.copyOf(availableYears), monthlyTotals, agentTotals);
@@ -107,16 +110,10 @@ public class StatisticsService {
                 .map(aggregate -> new TeamCommissionDTO(
                         aggregate.getTeamId(),
                         aggregate.getTeamName(),
-                        commissionValue(aggregate.getTotalAmount())))
+                        commissionService.calculateTeamCommission(aggregate.getTeamId(), aggregate.getTotalAmount())))
                 .toList();
 
         return new TeamStatisticsDTO(targetYear, List.copyOf(availableYears), teamTotals);
     }
 
-    private BigDecimal commissionValue(BigDecimal amount) {
-        if (amount == null) {
-            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-        }
-        return amount.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP);
-    }
 }
