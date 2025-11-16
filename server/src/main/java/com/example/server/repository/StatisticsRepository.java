@@ -34,6 +34,7 @@ public interface StatisticsRepository extends org.springframework.data.repositor
     @Query("""
             SELECT a.id AS agentId,
                    u.display_name AS agentName,
+                   t.id AS teamId,
                    t.name AS teamName,
                    SUM(i.amount) AS totalAmount
             FROM invoices i
@@ -42,7 +43,7 @@ public interface StatisticsRepository extends org.springframework.data.repositor
                      JOIN users u ON a.user_id = u.id
                      JOIN teams t ON u.team_id = t.id
             WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND YEAR(i.payment_date) = :year
-            GROUP BY a.id, u.display_name, t.name
+            GROUP BY a.id, u.display_name, t.id, t.name
             ORDER BY totalAmount DESC
             """)
     List<AgentAggregate> findAgentTotals(@Param("year") int year,
@@ -76,6 +77,8 @@ public interface StatisticsRepository extends org.springframework.data.repositor
         Long getAgentId();
 
         String getAgentName();
+
+        Long getTeamId();
 
         String getTeamName();
 
