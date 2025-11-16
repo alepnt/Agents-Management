@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     role_id BIGINT NOT NULL,
     team_id BIGINT NOT NULL,
     active BIT NOT NULL DEFAULT 1,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function},
     CONSTRAINT fk_users_roles FOREIGN KEY (role_id) REFERENCES roles (id),
     CONSTRAINT fk_users_teams FOREIGN KEY (team_id) REFERENCES teams (id)
 );

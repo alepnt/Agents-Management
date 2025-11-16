@@ -8,7 +8,7 @@ BEGIN
         email NVARCHAR(255),
         phone NVARCHAR(50),
         address NVARCHAR(500),
-        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function},
         updated_at DATETIME2
     );
 
@@ -26,7 +26,7 @@ BEGIN
         unit_price DECIMAL(19, 4) NOT NULL,
         vat_rate DECIMAL(5, 2) NOT NULL,
         unit_of_measure NVARCHAR(50),
-        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function},
         updated_at DATETIME2
     );
 
