@@ -5,14 +5,14 @@ CREATE TABLE IF NOT EXISTS notifications (
     title NVARCHAR(255) NOT NULL,
     message NVARCHAR(MAX) NOT NULL,
     is_read BIT NOT NULL DEFAULT 0,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function}
 );
 
 CREATE TABLE IF NOT EXISTS notification_subscriptions (
     id BIGINT IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL,
     channel NVARCHAR(128) NOT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function}
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS messages (
     sender_id BIGINT NOT NULL,
     team_id BIGINT NULL,
     body NVARCHAR(MAX) NOT NULL,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function}
 );
 
 IF NOT EXISTS (SELECT name FROM sys.indexes WHERE name = 'idx_notifications_user')

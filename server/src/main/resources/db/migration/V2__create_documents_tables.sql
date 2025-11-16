@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     status NVARCHAR(50) NOT NULL,
     payment_date DATE,
     notes NVARCHAR(1000),
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function},
     updated_at DATETIME2,
     CONSTRAINT fk_invoices_contract FOREIGN KEY (contract_id) REFERENCES contracts (id)
 );
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS document_history (
     document_id BIGINT NOT NULL,
     action NVARCHAR(50) NOT NULL,
     description NVARCHAR(1000),
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    created_at DATETIME2 NOT NULL DEFAULT ${utc_datetime_function}
 );
 
 CREATE TABLE IF NOT EXISTS commissions (
