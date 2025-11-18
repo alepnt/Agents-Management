@@ -71,3 +71,4 @@ Al primo avvio Flyway applicherà automaticamente lo schema e i dati seed.
 ## Documentazione funzionale
 
 - [Gestione provvigioni e organizzazione agenti](docs/commissioni.md): requisiti condivisi con il cliente su struttura dei team, regole di provvigione e modalità di ripartizione tra gli agenti.
+- [Gestione dello storico documentale](docs/history.md): chiarisce che la cronologia è generata automaticamente dal backend e accessibile solo tramite endpoint di lettura.

@@ -40,6 +40,9 @@ Questo README raccoglie in un unico posto tutte le chiamate REST esposte dal bac
 ## Storico documenti
 - **GET /api/history** – ricerca paginata con query param opzionali `documentType`, `documentId`, `actions`, `from`, `to`, `q`, `page`, `size`.
 - **GET /api/history/export** – export CSV con stessi filtri (senza paginazione).
+- **GET /api/contracts/{id}/history** / **GET /api/invoices/{id}/history** – cronologia per singolo documento (solo lettura).
+
+> La creazione e l'aggiornamento dello storico sono automatici (non esistono endpoint `POST/PUT/DELETE` dedicati): gli eventi vengono registrati dai servizi di dominio in base alle operazioni eseguite su contratti e fatture.
 
 ## Notifiche
 - **GET /api/notifications?userId={id}&since=...** – lista notifiche per utente (parametro `since` ISO opzionale).
