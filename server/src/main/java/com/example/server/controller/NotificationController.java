@@ -1,9 +1,9 @@
 package com.example.server.controller;
 
+import com.example.common.dto.NotificationSubscriptionDTO;
 import com.example.server.dto.NotificationCreateRequest;
 import com.example.server.dto.NotificationResponse;
 import com.example.server.dto.NotificationSubscribeRequest;
-import com.example.server.dto.NotificationSubscriptionResponse;
 import com.example.server.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,7 +51,7 @@ public class NotificationController {
     }
 
     @PostMapping("/subscribe")
-    public ResponseEntity<NotificationSubscriptionResponse> registerChannel(@Valid @RequestBody NotificationSubscribeRequest request) {
+    public ResponseEntity<NotificationSubscriptionDTO> registerChannel(@Valid @RequestBody NotificationSubscribeRequest request) {
         return ResponseEntity.ok(notificationService.subscribe(request));
     }
 }

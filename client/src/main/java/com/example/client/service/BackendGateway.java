@@ -349,7 +349,7 @@ public class BackendGateway {
 
     public NotificationSubscriptionInfo registerNotificationChannel(NotificationSubscription subscription) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/notifications/subscribe"))
+                .uri(uri("/api/notification-subscriptions"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(subscription), StandardCharsets.UTF_8))
                 .build();
