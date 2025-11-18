@@ -116,7 +116,7 @@ public class LoginController {
     private void openMainView(AuthSession session) {
         navigate("/com/example/client/view/MainView.fxml", type -> {
             if (type == MainViewController.class) {
-                return MainViewController.create(session);
+                return MainViewController.create(session, sessionStore);
             }
             throw new IllegalStateException("Controller non supportato: " + type.getName());
         }, "Gestore Agenti");

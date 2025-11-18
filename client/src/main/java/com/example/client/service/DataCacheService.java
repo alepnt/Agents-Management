@@ -22,6 +22,7 @@ import com.example.client.command.UpdateInvoiceCommand;
 import com.example.client.model.DataChangeEvent;
 import com.example.client.model.DataChangeType;
 import com.example.client.model.DocumentHistorySearchCriteria;
+import com.example.client.session.SessionStore;
 import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.ArticleDTO;
 import com.example.common.dto.ContractDTO;
@@ -43,21 +44,41 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataCacheService {
 
-    private final BackendGateway backendGateway;
+    private final SessionStore sessionStore;
     private final CommandHistoryCaretaker caretaker = new CommandHistoryCaretaker();
     private final NotificationCenter<DataChangeEvent> dataChangeCenter = new NotificationCenter<>();
-    private final CommandExecutor executor;
     private final Map<Integer, AgentStatisticsDTO> agentStatsCache = new ConcurrentHashMap<>();
     private final Map<Integer, TeamStatisticsDTO> teamStatsCache = new ConcurrentHashMap<>();
     private final Map<String, DocumentHistoryPageDTO> historyCache = new ConcurrentHashMap<>();
 
-    public DataCacheService() {
-        this(new BackendGateway());
+    private BackendGateway backendGateway;
+    private CommandExecutor executor;
+
+    public static DataCacheService create(SessionStore sessionStore) {
+        return new DataCacheService(sessionStore, buildGateway(sessionStore));
     }
 
-    public DataCacheService(BackendGateway backendGateway) {
+    public DataCacheService(SessionStore sessionStore) {
+        this(sessionStore, buildGateway(sessionStore));
+    }
+
+    private DataCacheService(SessionStore sessionStore, BackendGateway backendGateway) {
+        this.sessionStore = sessionStore;
         this.backendGateway = backendGateway;
         this.executor = new CommandExecutor(backendGateway, caretaker);
+    }
+
+    public void restoreSession() {
+        this.backendGateway = buildGateway(sessionStore);
+        this.executor = new CommandExecutor(backendGateway, caretaker);
+        invalidateStatistics();
+        invalidateHistory();
+    }
+
+    private static BackendGateway buildGateway(SessionStore sessionStore) {
+        sessionStore.currentToken()
+                .orElseThrow(() -> new SessionExpiredException("Nessuna sessione attiva o token scaduto. Effettua nuovamente il login."));
+        return new BackendGateway(sessionStore);
     }
 
     public List<InvoiceDTO> getInvoices() {
