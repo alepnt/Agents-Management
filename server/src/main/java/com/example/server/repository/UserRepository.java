@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
 
+    List<User> findAllByOrderByDisplayNameAsc();
+
     Optional<User> findByEmail(String email);
 
     Optional<User> findByAzureId(String azureId);
