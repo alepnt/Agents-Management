@@ -762,7 +762,13 @@ public class BackendGateway {
         } catch (IOException ignored) {
             // Ignora eventuali errori di pulizia
         }
-        throw new SessionExpiredException("Sessione non autorizzata o scaduta (HTTP " + statusCode + "). " + body);
+        StringBuilder message = new StringBuilder("Sessione non autorizzata o scaduta (HTTP ")
+                .append(statusCode)
+                .append("). Effettua nuovamente il login.");
+        if (body != null && !body.isBlank()) {
+            message.append(" Dettagli: ").append(body.trim());
+        }
+        throw new SessionExpiredException(message.toString());
     }
 
     private String buildHistoryPath(String basePath,

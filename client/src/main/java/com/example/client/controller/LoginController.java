@@ -44,6 +44,7 @@ public class LoginController {
     private final AuthApiClient authApiClient;
     private final Optional<String> prefilledEmail;
     private final Optional<String> statusMessage;
+    private final Optional<String> statusStyle;
     private final CompositeValidator emailValidator = new CompositeValidator().addStrategy(new EmailValidationStrategy());
 
     public static LoginController create(SessionStore sessionStore) {
@@ -55,18 +56,23 @@ public class LoginController {
     }
 
     public static LoginController create(SessionStore sessionStore, AuthApiClient client, String prefilledEmail, String statusMessage) {
-        return new LoginController(sessionStore, client, Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage));
+        return new LoginController(sessionStore, client, Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage), Optional.of("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"));
+    }
+
+    public static LoginController create(SessionStore sessionStore, String prefilledEmail, String statusMessage, String statusStyle) {
+        return new LoginController(sessionStore, new AuthApiClient(), Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage), Optional.ofNullable(statusStyle));
     }
 
     private LoginController(SessionStore sessionStore, AuthApiClient authApiClient) {
-        this(sessionStore, authApiClient, Optional.empty(), Optional.empty());
+        this(sessionStore, authApiClient, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage) {
+    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage, Optional<String> statusStyle) {
         this.sessionStore = sessionStore;
         this.authApiClient = authApiClient;
         this.prefilledEmail = prefilledEmail;
         this.statusMessage = statusMessage;
+        this.statusStyle = statusStyle;
     }
 
     @FXML
@@ -92,7 +98,7 @@ public class LoginController {
 
             statusMessage.ifPresent(message -> {
                 statusLabel.setText(message);
-                statusLabel.setStyle("-fx-text-fill: #2e7d32; -fx-font-weight: bold;");
+                statusLabel.setStyle(statusStyle.orElse("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"));
             });
         });
     }
