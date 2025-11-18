@@ -4,6 +4,7 @@ import com.example.client.model.NotificationCreate;
 import com.example.client.model.NotificationItem;
 import com.example.client.model.NotificationSubscription;
 import com.example.client.model.NotificationSubscriptionInfo;
+import com.example.client.session.SessionStore;
 import com.example.common.dto.ChatConversationDTO;
 import com.example.common.dto.ChatMessageDTO;
 import com.example.common.dto.ChatMessageRequest;
@@ -45,13 +46,23 @@ public class BackendGateway {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final String baseUrl;
+    private final SessionStore sessionStore;
 
     public BackendGateway() {
         this("http://localhost:8080");
     }
 
     public BackendGateway(String baseUrl) {
+        this(baseUrl, new SessionStore());
+    }
+
+    public BackendGateway(SessionStore sessionStore) {
+        this("http://localhost:8080", sessionStore);
+    }
+
+    public BackendGateway(String baseUrl, SessionStore sessionStore) {
         this.baseUrl = baseUrl;
+        this.sessionStore = sessionStore;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
@@ -62,8 +73,7 @@ public class BackendGateway {
     }
 
     public List<InvoiceDTO> listInvoices() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices"))
+        HttpRequest request = authorizedRequest("/api/invoices")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -71,8 +81,7 @@ public class BackendGateway {
     }
 
     public InvoiceDTO createInvoice(InvoiceDTO invoice) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices"))
+        HttpRequest request = authorizedRequest("/api/invoices")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(invoice), StandardCharsets.UTF_8))
                 .build();
@@ -81,8 +90,7 @@ public class BackendGateway {
     }
 
     public InvoiceDTO updateInvoice(Long id, InvoiceDTO invoice) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices/" + id))
+        HttpRequest request = authorizedRequest("/api/invoices/" + id)
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(write(invoice), StandardCharsets.UTF_8))
                 .build();
@@ -91,8 +99,7 @@ public class BackendGateway {
     }
 
     public void deleteInvoice(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices/" + id))
+        HttpRequest request = authorizedRequest("/api/invoices/" + id)
                 .DELETE()
                 .build();
         send(request, new TypeReference<Void>() {
@@ -100,8 +107,7 @@ public class BackendGateway {
     }
 
     public InvoiceDTO registerInvoicePayment(Long id, InvoicePaymentRequest paymentRequest) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices/" + id + "/payments"))
+        HttpRequest request = authorizedRequest("/api/invoices/" + id + "/payments")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(paymentRequest), StandardCharsets.UTF_8))
                 .build();
@@ -110,8 +116,7 @@ public class BackendGateway {
     }
 
     public List<CustomerDTO> listCustomers() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/customers"))
+        HttpRequest request = authorizedRequest("/api/customers")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -119,8 +124,7 @@ public class BackendGateway {
     }
 
     public CustomerDTO createCustomer(CustomerDTO customer) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/customers"))
+        HttpRequest request = authorizedRequest("/api/customers")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(customer), StandardCharsets.UTF_8))
                 .build();
@@ -129,8 +133,7 @@ public class BackendGateway {
     }
 
     public CustomerDTO updateCustomer(Long id, CustomerDTO customer) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/customers/" + id))
+        HttpRequest request = authorizedRequest("/api/customers/" + id)
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(write(customer), StandardCharsets.UTF_8))
                 .build();
@@ -139,8 +142,7 @@ public class BackendGateway {
     }
 
     public void deleteCustomer(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/customers/" + id))
+        HttpRequest request = authorizedRequest("/api/customers/" + id)
                 .DELETE()
                 .build();
         send(request, new TypeReference<Void>() {
@@ -148,8 +150,7 @@ public class BackendGateway {
     }
 
     public List<ArticleDTO> listArticles() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/articles"))
+        HttpRequest request = authorizedRequest("/api/articles")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -157,8 +158,7 @@ public class BackendGateway {
     }
 
     public ArticleDTO createArticle(ArticleDTO article) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/articles"))
+        HttpRequest request = authorizedRequest("/api/articles")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(article), StandardCharsets.UTF_8))
                 .build();
@@ -167,8 +167,7 @@ public class BackendGateway {
     }
 
     public ArticleDTO updateArticle(Long id, ArticleDTO article) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/articles/" + id))
+        HttpRequest request = authorizedRequest("/api/articles/" + id)
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(write(article), StandardCharsets.UTF_8))
                 .build();
@@ -177,8 +176,7 @@ public class BackendGateway {
     }
 
     public void deleteArticle(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/articles/" + id))
+        HttpRequest request = authorizedRequest("/api/articles/" + id)
                 .DELETE()
                 .build();
         send(request, new TypeReference<Void>() {
@@ -186,8 +184,7 @@ public class BackendGateway {
     }
 
     public List<DocumentHistoryDTO> invoiceHistory(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/invoices/" + id + "/history"))
+        HttpRequest request = authorizedRequest("/api/invoices/" + id + "/history")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -195,8 +192,7 @@ public class BackendGateway {
     }
 
     public List<ContractDTO> listContracts() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/contracts"))
+        HttpRequest request = authorizedRequest("/api/contracts")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -204,8 +200,7 @@ public class BackendGateway {
     }
 
     public ContractDTO createContract(ContractDTO contract) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/contracts"))
+        HttpRequest request = authorizedRequest("/api/contracts")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(contract), StandardCharsets.UTF_8))
                 .build();
@@ -214,8 +209,7 @@ public class BackendGateway {
     }
 
     public ContractDTO updateContract(Long id, ContractDTO contract) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/contracts/" + id))
+        HttpRequest request = authorizedRequest("/api/contracts/" + id)
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(write(contract), StandardCharsets.UTF_8))
                 .build();
@@ -224,8 +218,7 @@ public class BackendGateway {
     }
 
     public void deleteContract(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/contracts/" + id))
+        HttpRequest request = authorizedRequest("/api/contracts/" + id)
                 .DELETE()
                 .build();
         send(request, new TypeReference<Void>() {
@@ -233,8 +226,7 @@ public class BackendGateway {
     }
 
     public List<DocumentHistoryDTO> contractHistory(Long id) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/contracts/" + id + "/history"))
+        HttpRequest request = authorizedRequest("/api/contracts/" + id + "/history")
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -250,8 +242,7 @@ public class BackendGateway {
                                                         int page,
                                                         int size) {
         String path = buildHistoryPath("/api/history", documentType, documentId, actions, from, to, search, page, size);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path))
+        HttpRequest request = authorizedRequest(path)
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -265,8 +256,7 @@ public class BackendGateway {
                                         Instant to,
                                         String search) {
         String path = buildHistoryPath("/api/history/export", documentType, documentId, actions, from, to, search, 0, 0);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path))
+        HttpRequest request = authorizedRequest(path)
                 .GET()
                 .build();
         return sendBytes(request);
@@ -274,8 +264,7 @@ public class BackendGateway {
 
     public AgentStatisticsDTO agentStatistics(Integer year) {
         String path = year != null ? "/api/stats/agent?year=" + year : "/api/stats/agent";
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path))
+        HttpRequest request = authorizedRequest(path)
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -284,8 +273,7 @@ public class BackendGateway {
 
     public TeamStatisticsDTO teamStatistics(Integer year) {
         String path = year != null ? "/api/stats/team?year=" + year : "/api/stats/team";
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path))
+        HttpRequest request = authorizedRequest(path)
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -297,8 +285,7 @@ public class BackendGateway {
         if (since != null) {
             path.append("&since=").append(since);
         }
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path.toString()))
+        HttpRequest request = authorizedRequest(path.toString())
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -306,8 +293,7 @@ public class BackendGateway {
     }
 
     public List<NotificationItem> pollNotifications(Long userId) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/notifications/subscribe?userId=" + userId))
+        HttpRequest request = authorizedRequest("/api/notifications/subscribe?userId=" + userId)
                 .timeout(Duration.ofSeconds(35))
                 .GET()
                 .build();
@@ -330,16 +316,14 @@ public class BackendGateway {
         if (!params.isEmpty()) {
             path.append('?').append(String.join("&", params));
         }
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path.toString()))
+        HttpRequest request = authorizedRequest(path.toString())
                 .GET()
                 .build();
         return sendBytes(request);
     }
 
     public NotificationItem publishNotification(NotificationCreate create) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/notifications"))
+        HttpRequest request = authorizedRequest("/api/notifications")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(create), StandardCharsets.UTF_8))
                 .build();
@@ -348,8 +332,7 @@ public class BackendGateway {
     }
 
     public NotificationSubscriptionInfo registerNotificationChannel(NotificationSubscription subscription) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/notification-subscriptions"))
+        HttpRequest request = authorizedRequest("/api/notification-subscriptions")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(subscription), StandardCharsets.UTF_8))
                 .build();
@@ -358,8 +341,7 @@ public class BackendGateway {
     }
 
     public List<ChatConversationDTO> listChatConversations(Long userId) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/chat/conversations?userId=" + userId))
+        HttpRequest request = authorizedRequest("/api/chat/conversations?userId=" + userId)
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -374,8 +356,7 @@ public class BackendGateway {
         if (since != null) {
             path.append("&since=").append(since);
         }
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri(path.toString()))
+        HttpRequest request = authorizedRequest(path.toString())
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
@@ -383,8 +364,7 @@ public class BackendGateway {
     }
 
     public List<ChatMessageDTO> pollChatMessages(Long userId, String conversationId) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/chat/poll?userId=" + userId + "&conversationId=" + conversationId))
+        HttpRequest request = authorizedRequest("/api/chat/poll?userId=" + userId + "&conversationId=" + conversationId)
                 .timeout(Duration.ofSeconds(35))
                 .GET()
                 .build();
@@ -393,8 +373,7 @@ public class BackendGateway {
     }
 
     public ChatMessageDTO sendChatMessage(ChatMessageRequest message) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/chat/messages"))
+        HttpRequest request = authorizedRequest("/api/chat/messages")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(write(message), StandardCharsets.UTF_8))
                 .build();
@@ -403,10 +382,9 @@ public class BackendGateway {
     }
 
     public void sendMail(MailRequest mail, String delegatedToken) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri("/api/mail/send"))
+        HttpRequest request = authorizedRequest("/api/mail/send")
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + delegatedToken)
+                .header("X-Delegated-Authorization", "Bearer " + delegatedToken)
                 .POST(HttpRequest.BodyPublishers.ofString(write(mail), StandardCharsets.UTF_8))
                 .build();
         send(request, new TypeReference<Void>() {
@@ -415,6 +393,14 @@ public class BackendGateway {
 
     private URI uri(String path) {
         return URI.create(baseUrl + path);
+    }
+
+    private HttpRequest.Builder authorizedRequest(String path) {
+        String token = sessionStore.currentToken()
+                .orElseThrow(() -> new IllegalStateException("Nessuna sessione attiva o token scaduto. Effettua nuovamente il login."));
+        return HttpRequest.newBuilder()
+                .uri(uri(path))
+                .header("Authorization", "Bearer " + token);
     }
 
     private String write(Object value) {
@@ -429,6 +415,9 @@ public class BackendGateway {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             int statusCode = response.statusCode();
+            if (statusCode == 401 || statusCode == 403) {
+                handleUnauthorized(statusCode, response.body());
+            }
             if (statusCode >= 200 && statusCode < 300) {
                 if (typeReference.getType() == Void.class || response.body() == null || response.body().isBlank()) {
                     return null;
@@ -448,6 +437,9 @@ public class BackendGateway {
         try {
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
             int statusCode = response.statusCode();
+            if (statusCode == 401 || statusCode == 403) {
+                handleUnauthorized(statusCode, "");
+            }
             if (statusCode >= 200 && statusCode < 300) {
                 byte[] body = response.body();
                 return body != null ? body : new byte[0];
@@ -459,6 +451,15 @@ public class BackendGateway {
         } catch (IOException e) {
             throw new IllegalStateException("Errore di comunicazione con il backend", e);
         }
+    }
+
+    private void handleUnauthorized(int statusCode, String body) {
+        try {
+            sessionStore.clear();
+        } catch (IOException ignored) {
+            // Ignora eventuali errori di pulizia
+        }
+        throw new IllegalStateException("Sessione non autorizzata o scaduta (HTTP " + statusCode + "). " + body);
     }
 
     private String buildHistoryPath(String basePath,
