@@ -9,6 +9,7 @@ import com.example.client.model.DocumentHistoryModel;
 import com.example.client.model.DocumentHistorySearchCriteria;
 import com.example.client.model.InvoiceModel;
 import com.example.client.model.InvoiceLineModel;
+import com.example.client.service.AuthSession;
 import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
 import com.example.common.dto.ContractDTO;
@@ -75,6 +76,7 @@ import java.nio.file.Path;
  */
 public class MainViewController {
 
+    private final AuthSession session;
     private final DataCacheService dataCacheService = new DataCacheService();
     private final NotificationService notificationService = new NotificationService();
     private final ObservableList<InvoiceModel> invoiceItems = FXCollections.observableArrayList();
@@ -95,6 +97,18 @@ public class MainViewController {
     private int historyCurrentPage;
     private long historyTotalPages;
     private DocumentHistorySearchCriteria historyCurrentCriteria = new DocumentHistorySearchCriteria();
+
+    public MainViewController() {
+        this(null);
+    }
+
+    public MainViewController(AuthSession session) {
+        this.session = session;
+    }
+
+    public static MainViewController create(AuthSession session) {
+        return new MainViewController(session);
+    }
 
     @FXML
     private TabPane mainTabPane;

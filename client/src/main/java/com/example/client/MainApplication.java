@@ -1,7 +1,9 @@
 package com.example.client;
 
 import com.example.client.controller.LoginController;
+import com.example.client.controller.MainViewController;
 import com.example.client.service.AuthApiClient;
+import com.example.client.service.AuthSession;
 import com.example.client.session.SessionStore;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -18,19 +20,50 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
-        loader.setControllerFactory(param -> {
+        var loadedSession = sessionStore.load();
+        var existingSession = loadedSession.filter(session -> !session.isExpired());
+
+        if (existingSession.isPresent()) {
+            loadMainView(stage, existingSession.get());
+        } else {
+            loadedSession.filter(AuthSession::isExpired).ifPresent(session -> {
+                try {
+                    sessionStore.clear();
+                } catch (IOException ignored) {
+                    // impossibile cancellare la sessione scaduta, proseguo con il login
+                }
+            });
+            loadLoginView(stage);
+        }
+        stage.show();
+    }
+
+    private void loadLoginView(Stage stage) throws IOException {
+        loadScene(stage, "/com/example/client/view/LoginView.fxml", param -> {
             if (param == LoginController.class) {
                 return LoginController.create(sessionStore, authApiClient);
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
-        });
+        }, "Gestore Agenti - Login");
+    }
+
+    private void loadMainView(Stage stage, AuthSession session) throws IOException {
+        loadScene(stage, "/com/example/client/view/MainView.fxml", param -> {
+            if (param == MainViewController.class) {
+                return MainViewController.create(session);
+            }
+            throw new IllegalStateException("Controller sconosciuto: " + param.getName());
+        }, "Gestore Agenti");
+    }
+
+    private void loadScene(Stage stage, String fxmlPath, javafx.util.Callback<Class<?>, Object> controllerFactory, String title) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        loader.setControllerFactory(controllerFactory);
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        stage.setTitle("Gestore Agenti - Login");
+        stage.setTitle(title);
         stage.setScene(scene);
-        stage.show();
     }
 
     public static void main(String[] args) {
