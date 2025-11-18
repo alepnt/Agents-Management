@@ -42,6 +42,8 @@ public class LoginController {
 
     private final SessionStore sessionStore;
     private final AuthApiClient authApiClient;
+    private final Optional<String> prefilledEmail;
+    private final Optional<String> statusMessage;
     private final CompositeValidator emailValidator = new CompositeValidator().addStrategy(new EmailValidationStrategy());
 
     public static LoginController create(SessionStore sessionStore) {
@@ -52,25 +54,47 @@ public class LoginController {
         return new LoginController(sessionStore, client);
     }
 
+    public static LoginController create(SessionStore sessionStore, AuthApiClient client, String prefilledEmail, String statusMessage) {
+        return new LoginController(sessionStore, client, Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage));
+    }
+
     private LoginController(SessionStore sessionStore, AuthApiClient authApiClient) {
+        this(sessionStore, authApiClient, Optional.empty(), Optional.empty());
+    }
+
+    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage) {
         this.sessionStore = sessionStore;
         this.authApiClient = authApiClient;
+        this.prefilledEmail = prefilledEmail;
+        this.statusMessage = statusMessage;
     }
 
     @FXML
     public void initialize() {
-        Platform.runLater(() -> sessionStore.load().ifPresent(session -> {
-            if (session.isExpired()) {
-                try {
-                    sessionStore.clear();
-                } catch (IOException ignored) {
-                    // ignora errori di pulizia
+        Platform.runLater(() -> {
+            prefilledEmail.ifPresent(emailField::setText);
+
+            Optional<AuthSession> existingSession = sessionStore.load();
+            if (existingSession.isPresent()) {
+                AuthSession session = existingSession.get();
+                if (session.isExpired()) {
+                    try {
+                        sessionStore.clear();
+                    } catch (IOException ignored) {
+                        // ignora errori di pulizia
+                    }
+                    statusLabel.setText("La sessione salvata è scaduta. Effettua nuovamente il login.");
+                } else {
+                    statusLabel.setText("Sessione attiva per " + session.user().displayName());
                 }
-                statusLabel.setText("La sessione salvata è scaduta. Effettua nuovamente il login.");
-            } else {
-                statusLabel.setText("Sessione attiva per " + session.user().displayName());
+                return;
             }
-        }));
+
+            statusMessage.ifPresent(message -> {
+                statusLabel.setText(message);
+                statusLabel.setStyle("-fx-text-fill: #2e7d32; -fx-font-weight: bold;");
+            });
+        });
     }
 
     @FXML
