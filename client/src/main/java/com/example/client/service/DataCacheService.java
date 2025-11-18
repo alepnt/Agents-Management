@@ -23,15 +23,22 @@ import com.example.client.model.DataChangeEvent;
 import com.example.client.model.DataChangeType;
 import com.example.client.model.DocumentHistorySearchCriteria;
 import com.example.client.session.SessionStore;
+import com.example.common.dto.AgentDTO;
 import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.ArticleDTO;
+import com.example.common.dto.CommissionDTO;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.CustomerDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.dto.InvoiceDTO;
+import com.example.common.dto.InvoiceLineDTO;
 import com.example.common.dto.InvoicePaymentRequest;
+import com.example.common.dto.MessageDTO;
+import com.example.common.dto.RoleDTO;
+import com.example.common.dto.TeamDTO;
 import com.example.common.dto.TeamStatisticsDTO;
+import com.example.common.dto.UserDTO;
 import com.example.common.observer.NotificationCenter;
 import com.example.common.observer.Observer;
 
@@ -180,6 +187,153 @@ public class DataCacheService {
     public void deleteArticle(Long id) {
         executor.execute(new DeleteArticleCommand(id));
         publishChange(DataChangeType.ARTICLE);
+    }
+
+    public List<AgentDTO> getAgents() {
+        return backendGateway.listAgents();
+    }
+
+    public AgentDTO createAgent(AgentDTO agentDTO) {
+        AgentDTO result = backendGateway.createAgent(agentDTO);
+        publishChange(DataChangeType.AGENT);
+        return result;
+    }
+
+    public AgentDTO updateAgent(Long id, AgentDTO agentDTO) {
+        AgentDTO result = backendGateway.updateAgent(id, agentDTO);
+        publishChange(DataChangeType.AGENT);
+        return result;
+    }
+
+    public void deleteAgent(Long id) {
+        backendGateway.deleteAgent(id);
+        publishChange(DataChangeType.AGENT);
+    }
+
+    public List<TeamDTO> getTeams() {
+        return backendGateway.listTeams();
+    }
+
+    public TeamDTO createTeam(TeamDTO teamDTO) {
+        TeamDTO result = backendGateway.createTeam(teamDTO);
+        publishChange(DataChangeType.TEAM);
+        return result;
+    }
+
+    public TeamDTO updateTeam(Long id, TeamDTO teamDTO) {
+        TeamDTO result = backendGateway.updateTeam(id, teamDTO);
+        publishChange(DataChangeType.TEAM);
+        return result;
+    }
+
+    public void deleteTeam(Long id) {
+        backendGateway.deleteTeam(id);
+        publishChange(DataChangeType.TEAM);
+    }
+
+    public List<RoleDTO> getRoles() {
+        return backendGateway.listRoles();
+    }
+
+    public RoleDTO createRole(RoleDTO roleDTO) {
+        RoleDTO result = backendGateway.createRole(roleDTO);
+        publishChange(DataChangeType.ROLE);
+        return result;
+    }
+
+    public RoleDTO updateRole(Long id, RoleDTO roleDTO) {
+        RoleDTO result = backendGateway.updateRole(id, roleDTO);
+        publishChange(DataChangeType.ROLE);
+        return result;
+    }
+
+    public void deleteRole(Long id) {
+        backendGateway.deleteRole(id);
+        publishChange(DataChangeType.ROLE);
+    }
+
+    public List<UserDTO> getUsers() {
+        return backendGateway.listUsers();
+    }
+
+    public UserDTO createUser(UserDTO userDTO) {
+        UserDTO result = backendGateway.createUser(userDTO);
+        publishChange(DataChangeType.USER);
+        return result;
+    }
+
+    public UserDTO updateUser(Long id, UserDTO userDTO) {
+        UserDTO result = backendGateway.updateUser(id, userDTO);
+        publishChange(DataChangeType.USER);
+        return result;
+    }
+
+    public void deleteUser(Long id) {
+        backendGateway.deleteUser(id);
+        publishChange(DataChangeType.USER);
+    }
+
+    public List<MessageDTO> getMessages() {
+        return backendGateway.listMessages();
+    }
+
+    public MessageDTO createMessage(MessageDTO messageDTO) {
+        MessageDTO result = backendGateway.createMessage(messageDTO);
+        publishChange(DataChangeType.MESSAGE);
+        return result;
+    }
+
+    public MessageDTO updateMessage(Long id, MessageDTO messageDTO) {
+        MessageDTO result = backendGateway.updateMessage(id, messageDTO);
+        publishChange(DataChangeType.MESSAGE);
+        return result;
+    }
+
+    public void deleteMessage(Long id) {
+        backendGateway.deleteMessage(id);
+        publishChange(DataChangeType.MESSAGE);
+    }
+
+    public List<CommissionDTO> getCommissions() {
+        return backendGateway.listCommissions();
+    }
+
+    public CommissionDTO createCommission(CommissionDTO commissionDTO) {
+        CommissionDTO result = backendGateway.createCommission(commissionDTO);
+        publishChange(DataChangeType.COMMISSION);
+        return result;
+    }
+
+    public CommissionDTO updateCommission(Long id, CommissionDTO commissionDTO) {
+        CommissionDTO result = backendGateway.updateCommission(id, commissionDTO);
+        publishChange(DataChangeType.COMMISSION);
+        return result;
+    }
+
+    public void deleteCommission(Long id) {
+        backendGateway.deleteCommission(id);
+        publishChange(DataChangeType.COMMISSION);
+    }
+
+    public List<InvoiceLineDTO> getInvoiceLines(Long invoiceId) {
+        return backendGateway.listInvoiceLines(invoiceId);
+    }
+
+    public InvoiceLineDTO createInvoiceLine(InvoiceLineDTO invoiceLineDTO) {
+        InvoiceLineDTO result = backendGateway.createInvoiceLine(invoiceLineDTO);
+        publishChange(DataChangeType.INVOICE);
+        return result;
+    }
+
+    public InvoiceLineDTO updateInvoiceLine(Long id, InvoiceLineDTO invoiceLineDTO) {
+        InvoiceLineDTO result = backendGateway.updateInvoiceLine(id, invoiceLineDTO);
+        publishChange(DataChangeType.INVOICE);
+        return result;
+    }
+
+    public void deleteInvoiceLine(Long id) {
+        backendGateway.deleteInvoiceLine(id);
+        publishChange(DataChangeType.INVOICE);
     }
 
     public List<DocumentHistoryDTO> getInvoiceHistory(Long id) {

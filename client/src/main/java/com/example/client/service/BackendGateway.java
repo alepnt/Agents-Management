@@ -9,16 +9,23 @@ import com.example.client.service.SessionExpiredException;
 import com.example.common.dto.ChatConversationDTO;
 import com.example.common.dto.ChatMessageDTO;
 import com.example.common.dto.ChatMessageRequest;
+import com.example.common.dto.AgentDTO;
 import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.ArticleDTO;
+import com.example.common.dto.CommissionDTO;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.CustomerDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.dto.InvoiceDTO;
+import com.example.common.dto.InvoiceLineDTO;
 import com.example.common.dto.InvoicePaymentRequest;
 import com.example.common.dto.MailRequest;
+import com.example.common.dto.MessageDTO;
+import com.example.common.dto.RoleDTO;
 import com.example.common.dto.TeamStatisticsDTO;
+import com.example.common.dto.TeamDTO;
+import com.example.common.dto.UserDTO;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -220,6 +227,301 @@ public class BackendGateway {
 
     public void deleteContract(Long id) {
         HttpRequest request = authorizedRequest("/api/contracts/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<AgentDTO> listAgents() {
+        HttpRequest request = authorizedRequest("/api/agents")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public AgentDTO getAgent(Long id) {
+        HttpRequest request = authorizedRequest("/api/agents/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public AgentDTO createAgent(AgentDTO agentDTO) {
+        HttpRequest request = authorizedRequest("/api/agents")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(agentDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public AgentDTO updateAgent(Long id, AgentDTO agentDTO) {
+        HttpRequest request = authorizedRequest("/api/agents/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(agentDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteAgent(Long id) {
+        HttpRequest request = authorizedRequest("/api/agents/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<TeamDTO> listTeams() {
+        HttpRequest request = authorizedRequest("/api/teams")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public TeamDTO getTeam(Long id) {
+        HttpRequest request = authorizedRequest("/api/teams/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public TeamDTO createTeam(TeamDTO teamDTO) {
+        HttpRequest request = authorizedRequest("/api/teams")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(teamDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public TeamDTO updateTeam(Long id, TeamDTO teamDTO) {
+        HttpRequest request = authorizedRequest("/api/teams/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(teamDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteTeam(Long id) {
+        HttpRequest request = authorizedRequest("/api/teams/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<RoleDTO> listRoles() {
+        HttpRequest request = authorizedRequest("/api/roles")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public RoleDTO getRole(Long id) {
+        HttpRequest request = authorizedRequest("/api/roles/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public RoleDTO createRole(RoleDTO roleDTO) {
+        HttpRequest request = authorizedRequest("/api/roles")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(roleDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public RoleDTO updateRole(Long id, RoleDTO roleDTO) {
+        HttpRequest request = authorizedRequest("/api/roles/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(roleDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteRole(Long id) {
+        HttpRequest request = authorizedRequest("/api/roles/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<UserDTO> listUsers() {
+        HttpRequest request = authorizedRequest("/api/users")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public UserDTO getUser(Long id) {
+        HttpRequest request = authorizedRequest("/api/users/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public UserDTO createUser(UserDTO userDTO) {
+        HttpRequest request = authorizedRequest("/api/users")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(userDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public UserDTO updateUser(Long id, UserDTO userDTO) {
+        HttpRequest request = authorizedRequest("/api/users/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(userDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteUser(Long id) {
+        HttpRequest request = authorizedRequest("/api/users/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<MessageDTO> listMessages() {
+        HttpRequest request = authorizedRequest("/api/messages")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public MessageDTO getMessage(Long id) {
+        HttpRequest request = authorizedRequest("/api/messages/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public MessageDTO createMessage(MessageDTO messageDTO) {
+        HttpRequest request = authorizedRequest("/api/messages")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(messageDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public MessageDTO updateMessage(Long id, MessageDTO messageDTO) {
+        HttpRequest request = authorizedRequest("/api/messages/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(messageDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteMessage(Long id) {
+        HttpRequest request = authorizedRequest("/api/messages/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<CommissionDTO> listCommissions() {
+        HttpRequest request = authorizedRequest("/api/commissions")
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public CommissionDTO getCommission(Long id) {
+        HttpRequest request = authorizedRequest("/api/commissions/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public CommissionDTO createCommission(CommissionDTO commissionDTO) {
+        HttpRequest request = authorizedRequest("/api/commissions")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(commissionDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public CommissionDTO updateCommission(Long id, CommissionDTO commissionDTO) {
+        HttpRequest request = authorizedRequest("/api/commissions/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(commissionDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteCommission(Long id) {
+        HttpRequest request = authorizedRequest("/api/commissions/" + id)
+                .DELETE()
+                .build();
+        send(request, new TypeReference<Void>() {
+        });
+    }
+
+    public List<InvoiceLineDTO> listInvoiceLines(Long invoiceId) {
+        String path = "/api/invoice-lines" + (invoiceId != null ? "?invoiceId=" + invoiceId : "");
+        HttpRequest request = authorizedRequest(path)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public InvoiceLineDTO getInvoiceLine(Long id) {
+        HttpRequest request = authorizedRequest("/api/invoice-lines/" + id)
+                .GET()
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public InvoiceLineDTO createInvoiceLine(InvoiceLineDTO invoiceLineDTO) {
+        HttpRequest request = authorizedRequest("/api/invoice-lines")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(write(invoiceLineDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public InvoiceLineDTO updateInvoiceLine(Long id, InvoiceLineDTO invoiceLineDTO) {
+        HttpRequest request = authorizedRequest("/api/invoice-lines/" + id)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(write(invoiceLineDTO), StandardCharsets.UTF_8))
+                .build();
+        return send(request, new TypeReference<>() {
+        });
+    }
+
+    public void deleteInvoiceLine(Long id) {
+        HttpRequest request = authorizedRequest("/api/invoice-lines/" + id)
                 .DELETE()
                 .build();
         send(request, new TypeReference<Void>() {
