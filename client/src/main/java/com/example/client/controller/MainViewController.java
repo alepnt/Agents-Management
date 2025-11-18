@@ -16,6 +16,8 @@ import com.example.client.model.RoleModel;
 import com.example.client.model.TeamModel;
 import com.example.client.model.UserModel;
 import com.example.client.service.AuthSession;
+import com.example.client.service.BackendCommunicationException;
+import com.example.client.service.BackendServiceException;
 import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
 import com.example.client.service.SessionExpiredException;
@@ -810,7 +812,7 @@ public class MainViewController {
             selectInvoice(created.getId());
             notificationService.publish(new NotificationMessage("invoice", "Fattura creata", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -828,7 +830,7 @@ public class MainViewController {
             selectInvoice(selected.getId());
             notificationService.publish(new NotificationMessage("invoice", "Fattura aggiornata", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -926,7 +928,7 @@ public class MainViewController {
             selectCustomer(created.getId());
             notificationService.publish(new NotificationMessage("customer", "Cliente creato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -944,7 +946,7 @@ public class MainViewController {
             selectCustomer(selected.getId());
             notificationService.publish(new NotificationMessage("customer", "Cliente aggiornato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -973,7 +975,7 @@ public class MainViewController {
             selectArticle(created.getId());
             notificationService.publish(new NotificationMessage("article", "Articolo creato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -991,7 +993,7 @@ public class MainViewController {
             selectArticle(selected.getId());
             notificationService.publish(new NotificationMessage("article", "Articolo aggiornato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -1020,7 +1022,7 @@ public class MainViewController {
             selectContract(created.getId());
             notificationService.publish(new NotificationMessage("contract", "Contratto creato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -1038,7 +1040,7 @@ public class MainViewController {
             selectContract(selected.getId());
             notificationService.publish(new NotificationMessage("contract", "Contratto aggiornato", Instant.now()));
         } catch (IllegalArgumentException ex) {
-            notificationService.publish(new NotificationMessage("error", ex.getMessage(), Instant.now()));
+            notifyError(ex.getMessage());
         }
     }
 
@@ -2056,6 +2058,9 @@ public class MainViewController {
         } catch (SessionExpiredException ex) {
             handleSessionExpired(ex.getMessage());
             return null;
+        } catch (BackendServiceException | BackendCommunicationException ex) {
+            notifyError(ex.getMessage());
+            return null;
         }
     }
 
@@ -2064,6 +2069,11 @@ public class MainViewController {
             runnable.run();
             return null;
         });
+    }
+
+    private void notifyError(String message) {
+        notificationService.publish(new NotificationMessage("error", message, Instant.now()));
+        AlertUtils.showError(message);
     }
 
     private void handleSessionExpired(String message) {
@@ -2092,7 +2102,7 @@ public class MainViewController {
             stage.setScene(new Scene(root));
             stage.setTitle("Gestore Agenti - Login");
         } catch (IOException e) {
-            notificationService.publish(new NotificationMessage("error", "Impossibile aprire la schermata di login: " + e.getMessage(), Instant.now()));
+            notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }
     }
 

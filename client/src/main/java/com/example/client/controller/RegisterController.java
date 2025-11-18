@@ -61,25 +61,30 @@ public class RegisterController {
         Optional<String> emailError = emailValidator.validate(emailField.getText());
         if (emailError.isPresent()) {
             setMessage(emailError.get(), false);
+            AlertUtils.showError(emailError.get());
             return;
         }
         Optional<String> passwordError = passwordValidator.validate(passwordField.getText());
         if (passwordError.isPresent()) {
             setMessage(passwordError.get(), false);
+            AlertUtils.showError(passwordError.get());
             return;
         }
         if (displayNameField.getText() == null || displayNameField.getText().isBlank()) {
             setMessage("Inserire il nome visualizzato", false);
+            AlertUtils.showError("Inserire il nome visualizzato");
             return;
         }
         if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
             setMessage("Specificare l'Azure ID", false);
+            AlertUtils.showError("Specificare l'Azure ID");
             return;
         }
         String agentCode = agentCodeField.getText();
         agentCode = (agentCode == null || agentCode.isBlank()) ? null : agentCode.trim();
         if (agentCode != null && agentCode.length() < 6) {
             setMessage("Il codice agente deve avere almeno 6 caratteri", false);
+            AlertUtils.showError("Il codice agente deve avere almeno 6 caratteri");
             return;
         }
         String teamName = teamNameField.getText();
@@ -104,8 +109,11 @@ public class RegisterController {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             setMessage("Operazione interrotta", false);
+            AlertUtils.showError("Operazione interrotta");
         } catch (IOException e) {
-            setMessage("Errore durante la registrazione: " + e.getMessage(), false);
+            String errorMessage = "Errore durante la registrazione: " + e.getMessage();
+            setMessage(errorMessage, false);
+            AlertUtils.showError(errorMessage);
         }
     }
 
