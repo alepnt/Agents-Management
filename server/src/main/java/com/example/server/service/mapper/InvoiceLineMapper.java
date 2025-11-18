@@ -41,4 +41,21 @@ public final class InvoiceLineMapper {
                 dto.getTotal()
         );
     }
+
+    public static InvoiceLine fromDto(InvoiceLineDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new InvoiceLine(
+                dto.getId(),
+                dto.getInvoiceId(),
+                dto.getArticleId(),
+                dto.getArticleCode(),
+                dto.getDescription(),
+                dto.getQuantity(),
+                dto.getUnitPrice(),
+                dto.getVatRate(),
+                dto.getTotal()
+        );
+    }
 }
