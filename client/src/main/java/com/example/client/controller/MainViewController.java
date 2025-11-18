@@ -2082,7 +2082,8 @@ public class MainViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
             loader.setControllerFactory(type -> {
                 if (type == LoginController.class) {
-                    return LoginController.create(sessionStore);
+                    String prefilledEmail = session != null && session.user() != null ? session.user().email() : null;
+                    return LoginController.create(sessionStore, prefilledEmail, reason, "-fx-text-fill: #c62828; -fx-font-weight: bold;");
                 }
                 throw new IllegalStateException("Controller non supportato: " + type.getName());
             });
