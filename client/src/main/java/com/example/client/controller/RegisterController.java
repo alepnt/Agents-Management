@@ -60,26 +60,26 @@ public class RegisterController {
     public void handleRegister(ActionEvent event) {
         Optional<String> emailError = emailValidator.validate(emailField.getText());
         if (emailError.isPresent()) {
-            messageLabel.setText(emailError.get());
+            setMessage(emailError.get(), false);
             return;
         }
         Optional<String> passwordError = passwordValidator.validate(passwordField.getText());
         if (passwordError.isPresent()) {
-            messageLabel.setText(passwordError.get());
+            setMessage(passwordError.get(), false);
             return;
         }
         if (displayNameField.getText() == null || displayNameField.getText().isBlank()) {
-            messageLabel.setText("Inserire il nome visualizzato");
+            setMessage("Inserire il nome visualizzato", false);
             return;
         }
         if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
-            messageLabel.setText("Specificare l'Azure ID");
+            setMessage("Specificare l'Azure ID", false);
             return;
         }
         String agentCode = agentCodeField.getText();
         agentCode = (agentCode == null || agentCode.isBlank()) ? null : agentCode.trim();
         if (agentCode != null && agentCode.length() < 6) {
-            messageLabel.setText("Il codice agente deve avere almeno 6 caratteri");
+            setMessage("Il codice agente deve avere almeno 6 caratteri", false);
             return;
         }
         String teamName = teamNameField.getText();
@@ -98,12 +98,14 @@ public class RegisterController {
         );
         try {
             UserSummary summary = authApiClient.register(form);
-            messageLabel.setText("Registrazione completata per " + summary.displayName());
+            String successMessage = "Registrazione completata per " + summary.displayName();
+            setMessage(successMessage + ". Verrai reindirizzato al login.", true);
+            openLoginWithPrefilledEmail(summary.email(), successMessage + ". Accedi con le credenziali appena create.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            messageLabel.setText("Operazione interrotta");
+            setMessage("Operazione interrotta", false);
         } catch (IOException e) {
-            messageLabel.setText("Errore durante la registrazione: " + e.getMessage());
+            setMessage("Errore durante la registrazione: " + e.getMessage(), false);
         }
     }
 
@@ -115,6 +117,24 @@ public class RegisterController {
             }
             throw new IllegalStateException("Controller non supportato: " + type.getName());
         }, "Gestore Agenti - Login");
+    }
+
+    private void openLoginWithPrefilledEmail(String email, String bannerMessage) {
+        navigate("/com/example/client/view/LoginView.fxml", type -> {
+            if (type == LoginController.class) {
+                return LoginController.create(sessionStore, authApiClient, email, bannerMessage);
+            }
+            throw new IllegalStateException("Controller non supportato: " + type.getName());
+        }, "Gestore Agenti - Login");
+    }
+
+    private void setMessage(String message, boolean success) {
+        messageLabel.setText(message);
+        if (success) {
+            messageLabel.setStyle("-fx-text-fill: #2e7d32; -fx-font-weight: bold;");
+        } else {
+            messageLabel.setStyle("-fx-text-fill: #c62828; -fx-font-weight: bold;");
+        }
     }
 
     private void navigate(String fxmlPath, ControllerFactory factory, String title) {
