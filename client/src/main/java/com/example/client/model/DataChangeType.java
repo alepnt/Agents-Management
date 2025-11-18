@@ -7,5 +7,11 @@ public enum DataChangeType {
     INVOICE,
     CONTRACT,
     CUSTOMER,
-    ARTICLE
+    ARTICLE,
+    AGENT,
+    TEAM,
+    ROLE,
+    USER,
+    MESSAGE,
+    COMMISSION
 }

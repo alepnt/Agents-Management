@@ -1,14 +1,20 @@
 package com.example.client.controller;
 
 import com.example.client.command.CommandMemento;
+import com.example.client.model.AgentModel;
 import com.example.client.model.ArticleModel;
+import com.example.client.model.CommissionModel;
 import com.example.client.model.ContractModel;
 import com.example.client.model.CustomerModel;
 import com.example.client.model.DataChangeEvent;
 import com.example.client.model.DocumentHistoryModel;
 import com.example.client.model.DocumentHistorySearchCriteria;
+import com.example.client.model.MessageModel;
 import com.example.client.model.InvoiceModel;
 import com.example.client.model.InvoiceLineModel;
+import com.example.client.model.RoleModel;
+import com.example.client.model.TeamModel;
+import com.example.client.model.UserModel;
 import com.example.client.service.AuthSession;
 import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
@@ -23,9 +29,15 @@ import com.example.common.dto.InvoicePaymentRequest;
 import com.example.common.dto.ArticleDTO;
 import com.example.common.dto.CustomerDTO;
 import com.example.common.dto.AgentCommissionDTO;
+import com.example.common.dto.AgentDTO;
 import com.example.common.dto.AgentStatisticsDTO;
+import com.example.common.dto.MessageDTO;
 import com.example.common.dto.TeamStatisticsDTO;
 import com.example.common.dto.NotificationMessage;
+import com.example.common.dto.CommissionDTO;
+import com.example.common.dto.RoleDTO;
+import com.example.common.dto.TeamDTO;
+import com.example.common.dto.UserDTO;
 import com.example.common.enums.ContractStatus;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
@@ -44,6 +56,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -92,6 +105,12 @@ public class MainViewController {
     private final ObservableList<CustomerModel> customerItems = FXCollections.observableArrayList();
     private final ObservableList<ArticleModel> articleItems = FXCollections.observableArrayList();
     private final ObservableList<InvoiceLineModel> invoiceLineItems = FXCollections.observableArrayList();
+    private final ObservableList<AgentModel> agentItems = FXCollections.observableArrayList();
+    private final ObservableList<TeamModel> teamItems = FXCollections.observableArrayList();
+    private final ObservableList<RoleModel> roleItems = FXCollections.observableArrayList();
+    private final ObservableList<UserModel> userItems = FXCollections.observableArrayList();
+    private final ObservableList<MessageModel> messageItems = FXCollections.observableArrayList();
+    private final ObservableList<CommissionModel> commissionItems = FXCollections.observableArrayList();
     private final ObservableList<DocumentHistoryModel> historyItems = FXCollections.observableArrayList();
     private final ObservableList<DocumentHistoryModel> historySearchItems = FXCollections.observableArrayList();
     private final Observer<NotificationMessage> notificationObserver = this::onNotification;
@@ -343,6 +362,142 @@ public class MainViewController {
     private TableColumn<ArticleModel, BigDecimal> articleVatColumn;
 
     @FXML
+    private TableView<AgentModel> agentTable;
+    @FXML
+    private TableColumn<AgentModel, String> agentCodeColumn;
+    @FXML
+    private TableColumn<AgentModel, Long> agentUserIdColumn;
+    @FXML
+    private TableColumn<AgentModel, String> agentTeamRoleColumn;
+    @FXML
+    private TextField agentUserIdField;
+    @FXML
+    private TextField agentCodeField;
+    @FXML
+    private TextField agentTeamRoleField;
+    @FXML
+    private Button agentSaveButton;
+    @FXML
+    private Button agentUpdateButton;
+    @FXML
+    private Button agentDeleteButton;
+
+    @FXML
+    private TableView<TeamModel> teamTable;
+    @FXML
+    private TableColumn<TeamModel, String> teamNameColumn;
+    @FXML
+    private TextField teamNameField;
+    @FXML
+    private Button teamSaveButton;
+    @FXML
+    private Button teamUpdateButton;
+    @FXML
+    private Button teamDeleteButton;
+
+    @FXML
+    private TableView<RoleModel> roleTable;
+    @FXML
+    private TableColumn<RoleModel, String> roleNameColumn;
+    @FXML
+    private TextField roleNameField;
+    @FXML
+    private Button roleSaveButton;
+    @FXML
+    private Button roleUpdateButton;
+    @FXML
+    private Button roleDeleteButton;
+
+    @FXML
+    private TableView<UserModel> userTable;
+    @FXML
+    private TableColumn<UserModel, String> userEmailColumn;
+    @FXML
+    private TableColumn<UserModel, String> userDisplayNameColumn;
+    @FXML
+    private TableColumn<UserModel, Long> userRoleIdColumn;
+    @FXML
+    private TableColumn<UserModel, Long> userTeamIdColumn;
+    @FXML
+    private TableColumn<UserModel, Boolean> userActiveColumn;
+    @FXML
+    private TextField userAzureIdField;
+    @FXML
+    private TextField userEmailField;
+    @FXML
+    private TextField userDisplayNameField;
+    @FXML
+    private TextField userPasswordField;
+    @FXML
+    private TextField userRoleIdField;
+    @FXML
+    private TextField userTeamIdField;
+    @FXML
+    private CheckBox userActiveCheck;
+    @FXML
+    private Button userSaveButton;
+    @FXML
+    private Button userUpdateButton;
+    @FXML
+    private Button userDeleteButton;
+
+    @FXML
+    private TableView<MessageModel> messageTable;
+    @FXML
+    private TableColumn<MessageModel, String> messageConversationColumn;
+    @FXML
+    private TableColumn<MessageModel, Long> messageSenderColumn;
+    @FXML
+    private TableColumn<MessageModel, Long> messageTeamColumn;
+    @FXML
+    private TableColumn<MessageModel, String> messageCreatedColumn;
+    @FXML
+    private TextField messageConversationField;
+    @FXML
+    private TextField messageSenderField;
+    @FXML
+    private TextField messageTeamField;
+    @FXML
+    private TextArea messageBodyArea;
+    @FXML
+    private Button messageSaveButton;
+    @FXML
+    private Button messageUpdateButton;
+    @FXML
+    private Button messageDeleteButton;
+
+    @FXML
+    private TableView<CommissionModel> commissionTable;
+    @FXML
+    private TableColumn<CommissionModel, Long> commissionAgentColumn;
+    @FXML
+    private TableColumn<CommissionModel, Long> commissionContractColumn;
+    @FXML
+    private TableColumn<CommissionModel, BigDecimal> commissionTotalColumn;
+    @FXML
+    private TableColumn<CommissionModel, BigDecimal> commissionPaidColumn;
+    @FXML
+    private TableColumn<CommissionModel, BigDecimal> commissionPendingColumn;
+    @FXML
+    private TableColumn<CommissionModel, String> commissionUpdatedColumn;
+    @FXML
+    private TextField commissionAgentField;
+    @FXML
+    private TextField commissionContractField;
+    @FXML
+    private TextField commissionTotalField;
+    @FXML
+    private TextField commissionPaidField;
+    @FXML
+    private TextField commissionPendingField;
+    @FXML
+    private Button commissionSaveButton;
+    @FXML
+    private Button commissionUpdateButton;
+    @FXML
+    private Button commissionDeleteButton;
+
+    @FXML
     private Label notificationLabel;
 
     @FXML
@@ -369,6 +524,15 @@ public class MainViewController {
         invoiceLineVatField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
         articlePriceField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
         articleVatField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
+        if (commissionTotalField != null) {
+            commissionTotalField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
+        }
+        if (commissionPaidField != null) {
+            commissionPaidField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
+        }
+        if (commissionPendingField != null) {
+            commissionPendingField.setTextFormatter(new TextFormatter<>(new BigDecimalStringConverter(), null));
+        }
 
         invoiceCustomerCombo.setItems(customerItems);
         invoiceLineArticleCombo.setItems(articleItems);
@@ -400,6 +564,50 @@ public class MainViewController {
         articleNameColumn.setCellValueFactory(cell -> cell.getValue().nameProperty());
         articlePriceColumn.setCellValueFactory(cell -> cell.getValue().unitPriceProperty());
         articleVatColumn.setCellValueFactory(cell -> cell.getValue().vatRateProperty());
+
+        if (agentTable != null) {
+            agentTable.setItems(agentItems);
+            agentCodeColumn.setCellValueFactory(new PropertyValueFactory<>("agentCode"));
+            agentUserIdColumn.setCellValueFactory(new PropertyValueFactory<>("userId"));
+            agentTeamRoleColumn.setCellValueFactory(new PropertyValueFactory<>("teamRole"));
+        }
+
+        if (teamTable != null) {
+            teamTable.setItems(teamItems);
+            teamNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        }
+
+        if (roleTable != null) {
+            roleTable.setItems(roleItems);
+            roleNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        }
+
+        if (userTable != null) {
+            userTable.setItems(userItems);
+            userEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+            userDisplayNameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+            userRoleIdColumn.setCellValueFactory(new PropertyValueFactory<>("roleId"));
+            userTeamIdColumn.setCellValueFactory(new PropertyValueFactory<>("teamId"));
+            userActiveColumn.setCellValueFactory(new PropertyValueFactory<>("active"));
+        }
+
+        if (messageTable != null) {
+            messageTable.setItems(messageItems);
+            messageConversationColumn.setCellValueFactory(new PropertyValueFactory<>("conversationId"));
+            messageSenderColumn.setCellValueFactory(new PropertyValueFactory<>("senderId"));
+            messageTeamColumn.setCellValueFactory(new PropertyValueFactory<>("teamId"));
+            messageCreatedColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
+        }
+
+        if (commissionTable != null) {
+            commissionTable.setItems(commissionItems);
+            commissionAgentColumn.setCellValueFactory(new PropertyValueFactory<>("agentId"));
+            commissionContractColumn.setCellValueFactory(new PropertyValueFactory<>("contractId"));
+            commissionTotalColumn.setCellValueFactory(new PropertyValueFactory<>("totalCommission"));
+            commissionPaidColumn.setCellValueFactory(new PropertyValueFactory<>("paidCommission"));
+            commissionPendingColumn.setCellValueFactory(new PropertyValueFactory<>("pendingCommission"));
+            commissionUpdatedColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getLastUpdated())));
+        }
 
         historyActionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
         historyDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -468,6 +676,54 @@ public class MainViewController {
             }
         });
 
+        if (agentTable != null) {
+            agentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateAgentForm(selected);
+                }
+            });
+        }
+
+        if (teamTable != null) {
+            teamTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateTeamForm(selected);
+                }
+            });
+        }
+
+        if (roleTable != null) {
+            roleTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateRoleForm(selected);
+                }
+            });
+        }
+
+        if (userTable != null) {
+            userTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateUserForm(selected);
+                }
+            });
+        }
+
+        if (messageTable != null) {
+            messageTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateMessageForm(selected);
+                }
+            });
+        }
+
+        if (commissionTable != null) {
+            commissionTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
+                if (selected != null) {
+                    populateCommissionForm(selected);
+                }
+            });
+        }
+
         if (statsYearCombo != null) {
             statsYearCombo.setOnAction(event -> {
                 if (!updatingStatsYear) {
@@ -531,6 +787,12 @@ public class MainViewController {
         refreshArticles();
         refreshInvoices();
         refreshContracts();
+        refreshAgents();
+        refreshTeams();
+        refreshRoles();
+        refreshUsers();
+        refreshMessages();
+        refreshCommissions();
         refreshStatistics();
         refreshHistorySearch(true);
         notificationService.publish(new NotificationMessage("refresh", "Dati aggiornati", Instant.now()));
@@ -794,6 +1056,222 @@ public class MainViewController {
     }
 
     @FXML
+    public void onCreateAgent() {
+        AgentDTO dto = buildAgentFromForm(null);
+        AgentDTO created = withSession(() -> dataCacheService.createAgent(dto));
+        refreshAgents();
+        selectAgent(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("agent", "Agente creato", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateAgent() {
+        AgentModel selected = agentTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un agente", Instant.now()));
+            return;
+        }
+        AgentDTO dto = buildAgentFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateAgent(selected.getId(), dto));
+        refreshAgents();
+        selectAgent(selected.getId());
+        notificationService.publish(new NotificationMessage("agent", "Agente aggiornato", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteAgent() {
+        AgentModel selected = agentTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un agente da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteAgent(selected.getId()));
+        refreshAgents();
+        clearAgentForm();
+        notificationService.publish(new NotificationMessage("agent", "Agente eliminato", Instant.now()));
+    }
+
+    @FXML
+    public void onCreateTeam() {
+        TeamModel model = buildTeamFromForm(null);
+        TeamDTO created = withSession(() -> dataCacheService.createTeam(model.toDto()));
+        refreshTeams();
+        selectTeam(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("team", "Team creato", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateTeam() {
+        TeamModel selected = teamTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un team", Instant.now()));
+            return;
+        }
+        TeamModel model = buildTeamFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateTeam(selected.getId(), model.toDto()));
+        refreshTeams();
+        selectTeam(selected.getId());
+        notificationService.publish(new NotificationMessage("team", "Team aggiornato", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteTeam() {
+        TeamModel selected = teamTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un team da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteTeam(selected.getId()));
+        refreshTeams();
+        clearTeamForm();
+        notificationService.publish(new NotificationMessage("team", "Team eliminato", Instant.now()));
+    }
+
+    @FXML
+    public void onCreateRole() {
+        RoleModel model = buildRoleFromForm(null);
+        RoleDTO created = withSession(() -> dataCacheService.createRole(model.toDto()));
+        refreshRoles();
+        selectRole(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("role", "Ruolo creato", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateRole() {
+        RoleModel selected = roleTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un ruolo", Instant.now()));
+            return;
+        }
+        RoleModel model = buildRoleFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateRole(selected.getId(), model.toDto()));
+        refreshRoles();
+        selectRole(selected.getId());
+        notificationService.publish(new NotificationMessage("role", "Ruolo aggiornato", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteRole() {
+        RoleModel selected = roleTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un ruolo da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteRole(selected.getId()));
+        refreshRoles();
+        clearRoleForm();
+        notificationService.publish(new NotificationMessage("role", "Ruolo eliminato", Instant.now()));
+    }
+
+    @FXML
+    public void onCreateUser() {
+        UserModel model = buildUserFromForm(null);
+        UserDTO created = withSession(() -> dataCacheService.createUser(model.toDto()));
+        refreshUsers();
+        selectUser(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("user", "Utente creato", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateUser() {
+        UserModel selected = userTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un utente", Instant.now()));
+            return;
+        }
+        UserModel model = buildUserFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateUser(selected.getId(), model.toDto()));
+        refreshUsers();
+        selectUser(selected.getId());
+        notificationService.publish(new NotificationMessage("user", "Utente aggiornato", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteUser() {
+        UserModel selected = userTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un utente da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteUser(selected.getId()));
+        refreshUsers();
+        clearUserForm();
+        notificationService.publish(new NotificationMessage("user", "Utente eliminato", Instant.now()));
+    }
+
+    @FXML
+    public void onCreateMessage() {
+        MessageModel model = buildMessageFromForm(null);
+        MessageDTO created = withSession(() -> dataCacheService.createMessage(model.toDto()));
+        refreshMessages();
+        selectMessage(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("message", "Messaggio creato", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateMessage() {
+        MessageModel selected = messageTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un messaggio", Instant.now()));
+            return;
+        }
+        MessageModel model = buildMessageFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateMessage(selected.getId(), model.toDto()));
+        refreshMessages();
+        selectMessage(selected.getId());
+        notificationService.publish(new NotificationMessage("message", "Messaggio aggiornato", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteMessage() {
+        MessageModel selected = messageTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona un messaggio da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteMessage(selected.getId()));
+        refreshMessages();
+        clearMessageForm();
+        notificationService.publish(new NotificationMessage("message", "Messaggio eliminato", Instant.now()));
+    }
+
+    @FXML
+    public void onCreateCommission() {
+        CommissionModel model = buildCommissionFromForm(null);
+        CommissionDTO created = withSession(() -> dataCacheService.createCommission(model.toDto()));
+        refreshCommissions();
+        selectCommission(created != null ? created.getId() : null);
+        notificationService.publish(new NotificationMessage("commission", "Commissione creata", Instant.now()));
+    }
+
+    @FXML
+    public void onUpdateCommission() {
+        CommissionModel selected = commissionTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona una commissione", Instant.now()));
+            return;
+        }
+        CommissionModel model = buildCommissionFromForm(selected.getId());
+        withSession(() -> dataCacheService.updateCommission(selected.getId(), model.toDto()));
+        refreshCommissions();
+        selectCommission(selected.getId());
+        notificationService.publish(new NotificationMessage("commission", "Commissione aggiornata", Instant.now()));
+    }
+
+    @FXML
+    public void onDeleteCommission() {
+        CommissionModel selected = commissionTable.getSelectionModel().getSelectedItem();
+        if (selected == null || selected.getId() == null) {
+            notificationService.publish(new NotificationMessage("warn", "Seleziona una commissione da eliminare", Instant.now()));
+            return;
+        }
+        withSession(() -> dataCacheService.deleteCommission(selected.getId()));
+        refreshCommissions();
+        clearCommissionForm();
+        notificationService.publish(new NotificationMessage("commission", "Commissione eliminata", Instant.now()));
+    }
+
+    @FXML
     public void onApplyHistoryFilters() {
         refreshHistorySearch(true);
         notificationService.publish(new NotificationMessage("history", "Filtri applicati", Instant.now()));
@@ -917,6 +1395,48 @@ public class MainViewController {
         }
         contractItems.setAll(dtos.stream().map(ContractModel::fromDto).toList());
         updateContractChart();
+    }
+
+    private void refreshAgents() {
+        List<AgentDTO> dtos = withSession(dataCacheService::getAgents);
+        if (dtos != null) {
+            agentItems.setAll(dtos.stream().map(AgentModel::fromDto).toList());
+        }
+    }
+
+    private void refreshTeams() {
+        List<TeamDTO> dtos = withSession(dataCacheService::getTeams);
+        if (dtos != null) {
+            teamItems.setAll(dtos.stream().map(TeamModel::fromDto).toList());
+        }
+    }
+
+    private void refreshRoles() {
+        List<RoleDTO> dtos = withSession(dataCacheService::getRoles);
+        if (dtos != null) {
+            roleItems.setAll(dtos.stream().map(RoleModel::fromDto).toList());
+        }
+    }
+
+    private void refreshUsers() {
+        List<UserDTO> dtos = withSession(dataCacheService::getUsers);
+        if (dtos != null) {
+            userItems.setAll(dtos.stream().map(UserModel::fromDto).toList());
+        }
+    }
+
+    private void refreshMessages() {
+        List<MessageDTO> dtos = withSession(dataCacheService::getMessages);
+        if (dtos != null) {
+            messageItems.setAll(dtos.stream().map(MessageModel::fromDto).toList());
+        }
+    }
+
+    private void refreshCommissions() {
+        List<CommissionDTO> dtos = withSession(dataCacheService::getCommissions);
+        if (dtos != null) {
+            commissionItems.setAll(dtos.stream().map(CommissionModel::fromDto).toList());
+        }
     }
 
     private void refreshHistorySearch(boolean resetPage) {
@@ -1076,6 +1596,64 @@ public class MainViewController {
                 contractStatusCombo.getValue() != null ? contractStatusCombo.getValue() : ContractStatus.DRAFT);
     }
 
+    private AgentDTO buildAgentFromForm(Long id) {
+        Long userId = parseLong(agentUserIdField.getText()).orElse(null);
+        String code = normalize(agentCodeField.getText());
+        String role = normalize(agentTeamRoleField.getText());
+        return new AgentDTO(id, userId, code, role);
+    }
+
+    private TeamModel buildTeamFromForm(Long id) {
+        TeamModel model = new TeamModel();
+        model.setId(id);
+        model.setName(normalize(teamNameField.getText()));
+        return model;
+    }
+
+    private RoleModel buildRoleFromForm(Long id) {
+        RoleModel model = new RoleModel();
+        model.setId(id);
+        model.setName(normalize(roleNameField.getText()));
+        return model;
+    }
+
+    private UserModel buildUserFromForm(Long id) {
+        UserModel model = new UserModel();
+        model.setId(id);
+        model.setAzureId(normalize(userAzureIdField.getText()));
+        model.setEmail(normalize(userEmailField.getText()));
+        model.setDisplayName(normalize(userDisplayNameField.getText()));
+        model.setPassword(normalize(userPasswordField.getText()));
+        model.setRoleId(parseLong(userRoleIdField.getText()).orElse(null));
+        model.setTeamId(parseLong(userTeamIdField.getText()).orElse(null));
+        model.setActive(userActiveCheck != null && userActiveCheck.isSelected());
+        model.setCreatedAt(java.time.LocalDateTime.now());
+        return model;
+    }
+
+    private MessageModel buildMessageFromForm(Long id) {
+        MessageModel model = new MessageModel();
+        model.setId(id);
+        model.setConversationId(normalize(messageConversationField.getText()));
+        model.setSenderId(parseLong(messageSenderField.getText()).orElse(null));
+        model.setTeamId(parseLong(messageTeamField.getText()).orElse(null));
+        model.setBody(messageBodyArea.getText());
+        model.setCreatedAt(Instant.now());
+        return model;
+    }
+
+    private CommissionModel buildCommissionFromForm(Long id) {
+        CommissionModel model = new CommissionModel();
+        model.setId(id);
+        model.setAgentId(parseLong(commissionAgentField.getText()).orElse(null));
+        model.setContractId(parseLong(commissionContractField.getText()).orElse(null));
+        model.setTotalCommission(parseBigDecimal(commissionTotalField.getText()).orElse(BigDecimal.ZERO));
+        model.setPaidCommission(parseBigDecimal(commissionPaidField.getText()).orElse(BigDecimal.ZERO));
+        model.setPendingCommission(parseBigDecimal(commissionPendingField.getText()).orElse(BigDecimal.ZERO));
+        model.setLastUpdated(Instant.now());
+        return model;
+    }
+
     private void populateInvoiceForm(InvoiceModel model) {
         invoiceNumberField.setText(model.getNumber());
         if (model.getCustomerId() != null) {
@@ -1162,6 +1740,106 @@ public class MainViewController {
         articleTable.getSelectionModel().clearSelection();
     }
 
+    private void populateAgentForm(AgentModel model) {
+        agentUserIdField.setText(model.getUserId() != null ? model.getUserId().toString() : "");
+        agentCodeField.setText(model.getAgentCode());
+        agentTeamRoleField.setText(model.getTeamRole());
+    }
+
+    private void clearAgentForm() {
+        agentUserIdField.clear();
+        agentCodeField.clear();
+        agentTeamRoleField.clear();
+        if (agentTable != null) {
+            agentTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    private void populateTeamForm(TeamModel model) {
+        teamNameField.setText(model.getName());
+    }
+
+    private void clearTeamForm() {
+        teamNameField.clear();
+        if (teamTable != null) {
+            teamTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    private void populateRoleForm(RoleModel model) {
+        roleNameField.setText(model.getName());
+    }
+
+    private void clearRoleForm() {
+        roleNameField.clear();
+        if (roleTable != null) {
+            roleTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    private void populateUserForm(UserModel model) {
+        userAzureIdField.setText(model.getAzureId());
+        userEmailField.setText(model.getEmail());
+        userDisplayNameField.setText(model.getDisplayName());
+        userPasswordField.setText(model.getPassword());
+        userRoleIdField.setText(model.getRoleId() != null ? model.getRoleId().toString() : "");
+        userTeamIdField.setText(model.getTeamId() != null ? model.getTeamId().toString() : "");
+        if (userActiveCheck != null && model.activeProperty() != null) {
+            userActiveCheck.setSelected(model.isActive());
+        }
+    }
+
+    private void clearUserForm() {
+        userAzureIdField.clear();
+        userEmailField.clear();
+        userDisplayNameField.clear();
+        userPasswordField.clear();
+        userRoleIdField.clear();
+        userTeamIdField.clear();
+        if (userActiveCheck != null) {
+            userActiveCheck.setSelected(false);
+        }
+        if (userTable != null) {
+            userTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    private void populateMessageForm(MessageModel model) {
+        messageConversationField.setText(model.getConversationId());
+        messageSenderField.setText(model.getSenderId() != null ? model.getSenderId().toString() : "");
+        messageTeamField.setText(model.getTeamId() != null ? model.getTeamId().toString() : "");
+        messageBodyArea.setText(model.getBody());
+    }
+
+    private void clearMessageForm() {
+        messageConversationField.clear();
+        messageSenderField.clear();
+        messageTeamField.clear();
+        messageBodyArea.clear();
+        if (messageTable != null) {
+            messageTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    private void populateCommissionForm(CommissionModel model) {
+        commissionAgentField.setText(model.getAgentId() != null ? model.getAgentId().toString() : "");
+        commissionContractField.setText(model.getContractId() != null ? model.getContractId().toString() : "");
+        commissionTotalField.setText(model.getTotalCommission() != null ? model.getTotalCommission().toPlainString() : "");
+        commissionPaidField.setText(model.getPaidCommission() != null ? model.getPaidCommission().toPlainString() : "");
+        commissionPendingField.setText(model.getPendingCommission() != null ? model.getPendingCommission().toPlainString() : "");
+    }
+
+    private void clearCommissionForm() {
+        commissionAgentField.clear();
+        commissionContractField.clear();
+        commissionTotalField.clear();
+        commissionPaidField.clear();
+        commissionPendingField.clear();
+        if (commissionTable != null) {
+            commissionTable.getSelectionModel().clearSelection();
+        }
+    }
+
     private void loadHistory(DocumentType type, Long documentId) {
         if (documentId == null) {
             historyItems.clear();
@@ -1220,6 +1898,66 @@ public class MainViewController {
                 .ifPresent(item -> articleTable.getSelectionModel().select(item));
     }
 
+    private void selectAgent(Long id) {
+        if (id == null || agentTable == null) {
+            return;
+        }
+        agentTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> agentTable.getSelectionModel().select(item));
+    }
+
+    private void selectTeam(Long id) {
+        if (id == null || teamTable == null) {
+            return;
+        }
+        teamTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> teamTable.getSelectionModel().select(item));
+    }
+
+    private void selectRole(Long id) {
+        if (id == null || roleTable == null) {
+            return;
+        }
+        roleTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> roleTable.getSelectionModel().select(item));
+    }
+
+    private void selectUser(Long id) {
+        if (id == null || userTable == null) {
+            return;
+        }
+        userTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> userTable.getSelectionModel().select(item));
+    }
+
+    private void selectMessage(Long id) {
+        if (id == null || messageTable == null) {
+            return;
+        }
+        messageTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> messageTable.getSelectionModel().select(item));
+    }
+
+    private void selectCommission(Long id) {
+        if (id == null || commissionTable == null) {
+            return;
+        }
+        commissionTable.getItems().stream()
+                .filter(item -> id.equals(item.getId()))
+                .findFirst()
+                .ifPresent(item -> commissionTable.getSelectionModel().select(item));
+    }
+
     private void onNotification(NotificationMessage notification) {
         if (notificationLabel != null) {
             notificationLabel.setText(notification.getPayload());
@@ -1236,6 +1974,12 @@ public class MainViewController {
             case ARTICLE -> refreshArticles();
             case CONTRACT -> {
             }
+            case AGENT -> refreshAgents();
+            case TEAM -> refreshTeams();
+            case ROLE -> refreshRoles();
+            case USER -> refreshUsers();
+            case MESSAGE -> refreshMessages();
+            case COMMISSION -> refreshCommissions();
         }
     }
 
