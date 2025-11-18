@@ -1,4 +1,4 @@
-package com.example.server.dto;
+package com.example.common.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,5 +11,5 @@ public record MailRequest(@NotBlank String subject,
                           @NotEmpty List<@Email String> to,
                           List<@Email String> cc,
                           List<@Email String> bcc,
-                          List<MailAttachmentRequest> attachments) {
+                          List<MailAttachmentDTO> attachments) {
 }

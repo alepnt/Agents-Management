@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.common.api.DocumentHistoryApiContract;
 import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/history")
-public class DocumentHistoryController {
+public class DocumentHistoryController implements DocumentHistoryApiContract {
 
     private final DocumentHistoryService documentHistoryService;
 
@@ -29,6 +30,7 @@ public class DocumentHistoryController {
         this.documentHistoryService = documentHistoryService;
     }
 
+    @Override
     @GetMapping
     public DocumentHistoryPageDTO search(@RequestParam(value = "documentType", required = false) DocumentType documentType,
                                          @RequestParam(value = "documentId", required = false) Long documentId,
@@ -44,6 +46,7 @@ public class DocumentHistoryController {
         return documentHistoryService.search(query);
     }
 
+    @Override
     @GetMapping("/export")
     public ResponseEntity<byte[]> export(@RequestParam(value = "documentType", required = false) DocumentType documentType,
                                          @RequestParam(value = "documentId", required = false) Long documentId,

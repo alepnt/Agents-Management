@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.common.api.ReportApiContract;
 import com.example.server.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -15,7 +16,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/reports")
-public class ReportController {
+public class ReportController implements ReportApiContract {
 
     private final ReportService reportService;
 
@@ -23,6 +24,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    @Override
     @GetMapping("/closed-invoices")
     public ResponseEntity<byte[]> closedInvoices(@RequestParam(value = "from", required = false)
                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

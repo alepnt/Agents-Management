@@ -1,7 +1,7 @@
 package com.example.server.service;
 
-import com.example.server.dto.MailAttachmentRequest;
-import com.example.server.dto.MailRequest;
+import com.example.common.dto.MailAttachmentDTO;
+import com.example.common.dto.MailRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.http.HttpHeaders;
@@ -86,7 +86,7 @@ public class MailService {
                 .toList();
     }
 
-    private Map<String, Object> toAttachment(MailAttachmentRequest request) {
+    private Map<String, Object> toAttachment(MailAttachmentDTO request) {
         Map<String, Object> attachment = new HashMap<>();
         attachment.put("@odata.type", "#microsoft.graph.fileAttachment");
         attachment.put("name", request.filename());
