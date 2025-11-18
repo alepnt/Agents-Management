@@ -1,15 +1,13 @@
 package com.example.server.service;
 
+import com.example.common.dto.NotificationSubscriptionDTO;
 import com.example.server.domain.Notification;
-import com.example.server.domain.NotificationSubscription;
 import com.example.server.domain.Team;
 import com.example.server.domain.User;
 import com.example.server.dto.NotificationCreateRequest;
 import com.example.server.dto.NotificationResponse;
 import com.example.server.dto.NotificationSubscribeRequest;
-import com.example.server.dto.NotificationSubscriptionResponse;
 import com.example.server.repository.NotificationRepository;
-import com.example.server.repository.NotificationSubscriptionRepository;
 import com.example.server.repository.TeamRepository;
 import com.example.server.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,34 +27,33 @@ import java.util.stream.Stream;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final NotificationSubscriptionRepository subscriptionRepository;
+    private final NotificationSubscriptionService subscriptionService;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final NotificationPublisher publisher;
     private final Clock clock;
 
     public NotificationService(NotificationRepository notificationRepository,
-                               NotificationSubscriptionRepository subscriptionRepository,
+                               NotificationSubscriptionService subscriptionService,
                                UserRepository userRepository,
                                TeamRepository teamRepository,
                                NotificationPublisher publisher,
                                Clock clock) {
         this.notificationRepository = notificationRepository;
-        this.subscriptionRepository = subscriptionRepository;
+        this.subscriptionService = subscriptionService;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.publisher = publisher;
         this.clock = clock;
     }
 
-    public NotificationSubscriptionResponse subscribe(NotificationSubscribeRequest request) {
+    public NotificationSubscriptionDTO subscribe(NotificationSubscribeRequest request) {
         NotificationSubscribeRequest requiredRequest = Objects.requireNonNull(request, "request must not be null");
-        User user = requireUser(requiredRequest.userId());
-        NotificationSubscription subscription = Objects.requireNonNull(NotificationSubscription
-                .create(user.getId(), requiredRequest.channel(), Instant.now(clock)),
-                "subscription must not be null");
-        NotificationSubscription saved = subscriptionRepository.save(subscription);
-        return new NotificationSubscriptionResponse(saved.getId(), saved.getUserId(), saved.getChannel(), saved.getCreatedAt());
+        NotificationSubscriptionDTO dto = new NotificationSubscriptionDTO();
+        dto.setUserId(requiredRequest.userId());
+        dto.setChannel(requiredRequest.channel());
+        dto.setCreatedAt(Instant.now(clock));
+        return subscriptionService.create(dto);
     }
 
     public List<NotificationResponse> findNotifications(Long userId, Instant since) {
