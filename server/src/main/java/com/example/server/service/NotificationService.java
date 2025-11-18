@@ -1,11 +1,10 @@
 package com.example.server.service;
 
+import com.example.common.dto.NotificationDTO;
 import com.example.common.dto.NotificationSubscriptionDTO;
 import com.example.server.domain.Notification;
 import com.example.server.domain.Team;
 import com.example.server.domain.User;
-import com.example.server.dto.NotificationCreateRequest;
-import com.example.server.dto.NotificationResponse;
 import com.example.server.dto.NotificationSubscribeRequest;
 import com.example.server.repository.NotificationRepository;
 import com.example.server.repository.TeamRepository;
@@ -56,7 +55,7 @@ public class NotificationService {
         return subscriptionService.create(dto);
     }
 
-    public List<NotificationResponse> findNotifications(Long userId, Instant since) {
+    public List<NotificationDTO> findNotifications(Long userId, Instant since) {
         User user = requireUser(userId);
         Stream<Notification> userNotifications = Optional.ofNullable(since)
                 .map(instant -> notificationRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(user.getId(), instant).stream())
@@ -70,36 +69,70 @@ public class NotificationService {
 
         return Stream.concat(userNotifications, teamNotifications)
                 .sorted(Comparator.comparing(Notification::getCreatedAt).reversed())
-                .map(this::toResponse)
+                .map(this::toDto)
                 .toList();
     }
 
-    public NotificationResponse createNotification(NotificationCreateRequest request) {
-        NotificationCreateRequest requiredRequest = Objects.requireNonNull(request, "request must not be null");
-        Assert.isTrue(requiredRequest.userId() != null || requiredRequest.teamId() != null,
+    public NotificationDTO createNotification(NotificationDTO request) {
+        NotificationDTO requiredRequest = Objects.requireNonNull(request, "request must not be null");
+        Assert.hasText(requiredRequest.getTitle(), "Il titolo è obbligatorio");
+        Assert.hasText(requiredRequest.getMessage(), "Il messaggio è obbligatorio");
+        Assert.isTrue(requiredRequest.getUserId() != null || requiredRequest.getTeamId() != null,
                 "È necessario specificare un destinatario per la notifica");
-        Assert.isTrue(!(requiredRequest.userId() != null && requiredRequest.teamId() != null),
+        Assert.isTrue(!(requiredRequest.getUserId() != null && requiredRequest.getTeamId() != null),
                 "Una notifica può essere destinata a un utente o a un team, non a entrambi");
 
         Notification notification;
-        if (requiredRequest.userId() != null) {
-            User user = requireUser(requiredRequest.userId());
-            notification = Objects.requireNonNull(Notification.forUser(user.getId(), requiredRequest.title(),
-                    requiredRequest.message(), Instant.now(clock)), "notification must not be null");
+        if (requiredRequest.getUserId() != null) {
+            User user = requireUser(requiredRequest.getUserId());
+            notification = Objects.requireNonNull(Notification.forUser(user.getId(), requiredRequest.getTitle(),
+                    requiredRequest.getMessage(), Instant.now(clock)), "notification must not be null");
         } else {
-            Team team = teamRepository.findById(requiredRequest.teamId())
-                    .orElseThrow(() -> new IllegalArgumentException("Team non trovato: " + requiredRequest.teamId()));
-            notification = Objects.requireNonNull(Notification.forTeam(team.getId(), requiredRequest.title(),
-                    requiredRequest.message(), Instant.now(clock)), "notification must not be null");
+            Team team = teamRepository.findById(requiredRequest.getTeamId())
+                    .orElseThrow(() -> new IllegalArgumentException("Team non trovato: " + requiredRequest.getTeamId()));
+            notification = Objects.requireNonNull(Notification.forTeam(team.getId(), requiredRequest.getTitle(),
+                    requiredRequest.getMessage(), Instant.now(clock)), "notification must not be null");
         }
 
         Notification saved = notificationRepository.save(notification);
         publisher.publish(saved);
-        return toResponse(saved);
+        return toDto(saved);
     }
 
-    public void registerSubscriber(Long userId, DeferredResult<List<NotificationResponse>> deferredResult) {
-        DeferredResult<List<NotificationResponse>> requiredDeferredResult = Objects.requireNonNull(deferredResult,
+    public Optional<NotificationDTO> updateNotification(Long id, NotificationDTO request) {
+        Long requiredId = Objects.requireNonNull(id, "id must not be null");
+        NotificationDTO requiredRequest = Objects.requireNonNull(request, "notification must not be null");
+
+        return notificationRepository.findById(requiredId)
+                .map(existing -> {
+                    Assert.isTrue(existing.getUserId() != null || existing.getTeamId() != null,
+                            "La notifica deve avere un destinatario");
+
+                    String title = Optional.ofNullable(requiredRequest.getTitle()).orElse(existing.getTitle());
+                    String message = Optional.ofNullable(requiredRequest.getMessage()).orElse(existing.getMessage());
+                    Assert.hasText(title, "Il titolo è obbligatorio");
+                    Assert.hasText(message, "Il messaggio è obbligatorio");
+
+                    Notification updated = existing
+                            .withTitle(title)
+                            .withMessage(message)
+                            .withRead(Optional.ofNullable(requiredRequest.getRead()).orElse(existing.isRead()));
+
+                    Notification saved = notificationRepository.save(updated);
+                    return toDto(saved);
+                });
+    }
+
+    public void deleteNotification(Long id) {
+        Long requiredId = Objects.requireNonNull(id, "id must not be null");
+        if (!notificationRepository.existsById(requiredId)) {
+            throw new IllegalArgumentException("Notifica non trovata: " + requiredId);
+        }
+        notificationRepository.deleteById(requiredId);
+    }
+
+    public void registerSubscriber(Long userId, DeferredResult<List<NotificationDTO>> deferredResult) {
+        DeferredResult<List<NotificationDTO>> requiredDeferredResult = Objects.requireNonNull(deferredResult,
                 "deferredResult must not be null");
         User user = requireUser(userId);
         List<NotificationPublisher.Subscription> subscriptions = new ArrayList<>();
@@ -107,7 +140,7 @@ public class NotificationService {
         var listener = new java.util.concurrent.atomic.AtomicBoolean(true);
         java.util.function.Consumer<Notification> consumer = notification -> {
             if (listener.getAndSet(false)) {
-                NotificationResponse response = toResponse(Objects.requireNonNull(notification, "notification must not be null"));
+                NotificationDTO response = toDto(Objects.requireNonNull(notification, "notification must not be null"));
                 requiredDeferredResult.setResult(List.of(response));
             }
         };
@@ -120,7 +153,7 @@ public class NotificationService {
         Runnable cancelAction = () -> subscriptions.forEach(NotificationPublisher.Subscription::cancel);
         requiredDeferredResult.onCompletion(cancelAction);
         requiredDeferredResult.onTimeout(() -> {
-            List<NotificationResponse> emptyResult = List.of();
+            List<NotificationDTO> emptyResult = List.of();
             requiredDeferredResult.setResult(emptyResult);
             cancelAction.run();
         });
@@ -132,13 +165,15 @@ public class NotificationService {
                 .orElseThrow(() -> new IllegalArgumentException("Utente non trovato: " + requiredUserId));
     }
 
-    private NotificationResponse toResponse(Notification notification) {
-        return new NotificationResponse(notification.getId(),
-                notification.getUserId(),
-                notification.getTeamId(),
-                notification.getTitle(),
-                notification.getMessage(),
-                notification.isRead(),
-                notification.getCreatedAt());
+    private NotificationDTO toDto(Notification notification) {
+        NotificationDTO dto = new NotificationDTO();
+        dto.setId(notification.getId());
+        dto.setUserId(notification.getUserId());
+        dto.setTeamId(notification.getTeamId());
+        dto.setTitle(notification.getTitle());
+        dto.setMessage(notification.getMessage());
+        dto.setRead(notification.isRead());
+        dto.setCreatedAt(notification.getCreatedAt());
+        return dto;
     }
 }

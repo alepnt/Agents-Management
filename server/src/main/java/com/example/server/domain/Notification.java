@@ -77,6 +77,10 @@ public class Notification {
         return message;
     }
 
+    public Notification withMessage(String message) {
+        return new Notification(id, userId, teamId, title, message, read, createdAt);
+    }
+
     public Boolean isRead() {
         return Boolean.TRUE.equals(read);
     }
@@ -87,6 +91,10 @@ public class Notification {
 
     public Notification markRead() {
         return new Notification(id, userId, teamId, title, message, Boolean.TRUE, createdAt);
+    }
+
+    public Notification withRead(Boolean read) {
+        return new Notification(id, userId, teamId, title, message, read, createdAt);
     }
 
     public Notification withId(Long id) {
