@@ -68,12 +68,20 @@ public class RegisterController {
             messageLabel.setText(passwordError.get());
             return;
         }
+        if (displayNameField.getText() == null || displayNameField.getText().isBlank()) {
+            messageLabel.setText("Inserire il nome visualizzato");
+            return;
+        }
         if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
             messageLabel.setText("Specificare l'Azure ID");
             return;
         }
         String agentCode = agentCodeField.getText();
         agentCode = (agentCode == null || agentCode.isBlank()) ? null : agentCode.trim();
+        if (agentCode != null && agentCode.length() < 6) {
+            messageLabel.setText("Il codice agente deve avere almeno 6 caratteri");
+            return;
+        }
         String teamName = teamNameField.getText();
         teamName = (teamName == null || teamName.isBlank()) ? null : teamName.trim();
         String roleName = roleNameField.getText();
