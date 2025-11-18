@@ -1,9 +1,9 @@
 package com.example.client.view;
 
-import com.example.client.model.ChatConversation;
-import com.example.client.model.ChatMessage;
-import com.example.client.model.ChatMessageSend;
 import com.example.client.service.BackendGateway;
+import com.example.common.dto.ChatConversationDTO;
+import com.example.common.dto.ChatMessageDTO;
+import com.example.common.dto.ChatMessageRequest;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChatView extends BorderPane {
 
     private final BackendGateway backendGateway;
-    private final ObservableList<ChatConversation> conversations = FXCollections.observableArrayList();
+    private final ObservableList<ChatConversationDTO> conversations = FXCollections.observableArrayList();
     private final ObservableList<String> messages = FXCollections.observableArrayList();
-    private final ListView<ChatConversation> conversationList = new ListView<>(conversations);
+    private final ListView<ChatConversationDTO> conversationList = new ListView<>(conversations);
     private final ListView<String> messageList = new ListView<>(messages);
     private final TextArea composer = new TextArea();
     private final Button sendButton = new Button("Invia");
@@ -68,7 +68,7 @@ public class ChatView extends BorderPane {
         if (userId == null) {
             return;
         }
-        List<ChatConversation> data = backendGateway.listChatConversations(userId);
+        List<ChatConversationDTO> data = backendGateway.listChatConversations(userId);
         Platform.runLater(() -> conversations.setAll(data));
     }
 
@@ -76,7 +76,7 @@ public class ChatView extends BorderPane {
         if (userId == null || conversationId == null) {
             return;
         }
-        List<ChatMessage> data = backendGateway.listChatMessages(userId, conversationId, null);
+        List<ChatMessageDTO> data = backendGateway.listChatMessages(userId, conversationId, null);
         Platform.runLater(() -> {
             messages.setAll(data.stream()
                     .map(msg -> String.format("%s: %s", msg.createdAt(), msg.body()))
@@ -88,7 +88,7 @@ public class ChatView extends BorderPane {
         if (userId == null || conversationId == null || composer.getText().isBlank()) {
             return;
         }
-        backendGateway.sendChatMessage(new ChatMessageSend(userId, conversationId, composer.getText()));
+        backendGateway.sendChatMessage(new ChatMessageRequest(userId, conversationId, composer.getText()));
         composer.clear();
         loadMessages();
     }
@@ -100,7 +100,7 @@ public class ChatView extends BorderPane {
         executor.submit(() -> {
             while (polling.get()) {
                 try {
-                    List<ChatMessage> newMessages = backendGateway.pollChatMessages(userId, conversationId);
+                    List<ChatMessageDTO> newMessages = backendGateway.pollChatMessages(userId, conversationId);
                     if (!newMessages.isEmpty()) {
                         Platform.runLater(() -> newMessages.forEach(msg -> messages.add(String.format("%s: %s",
                                 msg.createdAt(), msg.body()))));

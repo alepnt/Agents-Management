@@ -1,8 +1,8 @@
 package com.example.client.view;
 
-import com.example.client.model.MailAttachment;
-import com.example.client.model.MailMessage;
 import com.example.client.service.BackendGateway;
+import com.example.common.dto.MailAttachmentDTO;
+import com.example.common.dto.MailRequest;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -31,7 +31,7 @@ public class MailComposerView extends BorderPane {
     private final TextArea attachmentContent = new TextArea();
     private final ObservableList<String> attachments = FXCollections.observableArrayList();
     private final ListView<String> attachmentList = new ListView<>(attachments);
-    private final List<MailAttachment> attachmentData = new ArrayList<>();
+    private final List<MailAttachmentDTO> attachmentData = new ArrayList<>();
 
     private String delegatedToken;
 
@@ -74,7 +74,7 @@ public class MailComposerView extends BorderPane {
         if (attachmentName.getText().isBlank() || attachmentType.getText().isBlank() || attachmentContent.getText().isBlank()) {
             return;
         }
-        attachmentData.add(new MailAttachment(attachmentName.getText(), attachmentType.getText(), attachmentContent.getText()));
+        attachmentData.add(new MailAttachmentDTO(attachmentName.getText(), attachmentType.getText(), attachmentContent.getText()));
         attachments.add(String.format("%s (%s)", attachmentName.getText(), attachmentType.getText()));
         attachmentName.clear();
         attachmentType.clear();
@@ -85,7 +85,7 @@ public class MailComposerView extends BorderPane {
         if (delegatedToken == null || delegatedToken.isBlank()) {
             throw new IllegalStateException("Token delegato non configurato");
         }
-        MailMessage mailMessage = new MailMessage(
+        MailRequest mailMessage = new MailRequest(
                 subjectField.getText(),
                 bodyArea.getText(),
                 parseAddresses(toField.getText()),
@@ -108,7 +108,7 @@ public class MailComposerView extends BorderPane {
                 .collect(Collectors.toList());
     }
 
-    private List<MailAttachment> buildAttachments() {
+    private List<MailAttachmentDTO> buildAttachments() {
         return List.copyOf(attachmentData);
     }
 

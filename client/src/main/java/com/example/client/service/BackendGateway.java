@@ -1,13 +1,12 @@
 package com.example.client.service;
 
-import com.example.client.model.ChatConversation;
-import com.example.client.model.ChatMessage;
-import com.example.client.model.ChatMessageSend;
-import com.example.client.model.MailMessage;
 import com.example.client.model.NotificationCreate;
 import com.example.client.model.NotificationItem;
 import com.example.client.model.NotificationSubscription;
 import com.example.client.model.NotificationSubscriptionInfo;
+import com.example.common.dto.ChatConversationDTO;
+import com.example.common.dto.ChatMessageDTO;
+import com.example.common.dto.ChatMessageRequest;
 import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.ArticleDTO;
 import com.example.common.dto.ContractDTO;
@@ -16,6 +15,7 @@ import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.dto.InvoiceDTO;
 import com.example.common.dto.InvoicePaymentRequest;
+import com.example.common.dto.MailRequest;
 import com.example.common.dto.TeamStatisticsDTO;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
@@ -357,7 +357,7 @@ public class BackendGateway {
         });
     }
 
-    public List<ChatConversation> listChatConversations(Long userId) {
+    public List<ChatConversationDTO> listChatConversations(Long userId) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri("/api/chat/conversations?userId=" + userId))
                 .GET()
@@ -366,7 +366,7 @@ public class BackendGateway {
         });
     }
 
-    public List<ChatMessage> listChatMessages(Long userId, String conversationId, Instant since) {
+    public List<ChatMessageDTO> listChatMessages(Long userId, String conversationId, Instant since) {
         StringBuilder path = new StringBuilder("/api/chat/messages?userId=")
                 .append(userId)
                 .append("&conversationId=")
@@ -382,7 +382,7 @@ public class BackendGateway {
         });
     }
 
-    public List<ChatMessage> pollChatMessages(Long userId, String conversationId) {
+    public List<ChatMessageDTO> pollChatMessages(Long userId, String conversationId) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri("/api/chat/poll?userId=" + userId + "&conversationId=" + conversationId))
                 .timeout(Duration.ofSeconds(35))
@@ -392,7 +392,7 @@ public class BackendGateway {
         });
     }
 
-    public ChatMessage sendChatMessage(ChatMessageSend message) {
+    public ChatMessageDTO sendChatMessage(ChatMessageRequest message) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri("/api/chat/messages"))
                 .header("Content-Type", "application/json")
@@ -402,7 +402,7 @@ public class BackendGateway {
         });
     }
 
-    public void sendMail(MailMessage mail, String delegatedToken) {
+    public void sendMail(MailRequest mail, String delegatedToken) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri("/api/mail/send"))
                 .header("Content-Type", "application/json")

@@ -1,6 +1,7 @@
 package com.example.server.controller;
 
-import com.example.server.dto.MailRequest;
+import com.example.common.api.MailApiContract;
+import com.example.common.dto.MailRequest;
 import com.example.server.service.MailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/mail")
-public class MailController {
+public class MailController implements MailApiContract {
 
     private final MailService mailService;
 
@@ -21,6 +22,7 @@ public class MailController {
         this.mailService = mailService;
     }
 
+    @Override
     @PostMapping("/send")
     public ResponseEntity<Void> sendMail(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
                                          @Valid @RequestBody MailRequest request) {

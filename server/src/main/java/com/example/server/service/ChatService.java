@@ -1,10 +1,10 @@
 package com.example.server.service;
 
+import com.example.common.dto.ChatConversationDTO;
+import com.example.common.dto.ChatMessageDTO;
+import com.example.common.dto.ChatMessageRequest;
 import com.example.server.domain.Message;
 import com.example.server.domain.User;
-import com.example.server.dto.ChatConversationSummary;
-import com.example.server.dto.ChatMessageRequest;
-import com.example.server.dto.ChatMessageResponse;
 import com.example.server.repository.MessageRepository;
 import com.example.server.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class ChatService {
         this.clock = clock;
     }
 
-    public List<ChatConversationSummary> listConversations(Long userId) {
+    public List<ChatConversationDTO> listConversations(Long userId) {
         User user = requireUser(userId);
         Map<String, List<Message>> grouped = StreamSupport.stream(messageRepository.findAll().spliterator(), false)
                 .filter(message -> canAccessConversation(user, message.getConversationId()))
@@ -54,16 +54,16 @@ public class ChatService {
                     messages.sort(Comparator.comparing(Message::getCreatedAt).reversed());
                     Message latest = messages.getFirst();
                     String title = buildConversationTitle(entry.getKey(), user);
-                    return new ChatConversationSummary(entry.getKey(),
+                    return new ChatConversationDTO(entry.getKey(),
                             title,
                             latest.getCreatedAt(),
                             truncate(latest.getBody()));
                 })
-                .sorted(Comparator.comparing(ChatConversationSummary::lastActivity).reversed())
+                .sorted(Comparator.comparing(ChatConversationDTO::lastActivity).reversed())
                 .toList();
     }
 
-    public List<ChatMessageResponse> getMessages(Long userId, String conversationId, Instant since) {
+    public List<ChatMessageDTO> getMessages(Long userId, String conversationId, Instant since) {
         User user = requireUser(userId);
         String requiredConversationId = Objects.requireNonNull(conversationId, "conversationId must not be null");
         assertCanAccess(user, requiredConversationId);
@@ -76,7 +76,7 @@ public class ChatService {
         return messages.stream().map(this::toResponse).toList();
     }
 
-    public ChatMessageResponse sendMessage(ChatMessageRequest request) {
+    public ChatMessageDTO sendMessage(ChatMessageRequest request) {
         ChatMessageRequest requiredRequest = Objects.requireNonNull(request, "request must not be null");
         User sender = requireUser(requiredRequest.senderId());
         String conversationId = Objects.requireNonNull(requiredRequest.conversationId(),
@@ -85,17 +85,17 @@ public class ChatService {
         Message message = Objects.requireNonNull(Message.create(conversationId, sender.getId(), sender.getTeamId(),
                 requiredRequest.body(), Instant.now(clock)), "message must not be null");
         Message saved = messageRepository.save(message);
-        ChatMessageResponse response = toResponse(saved);
+        ChatMessageDTO response = toResponse(saved);
         chatPublisher.publish(response);
         return response;
     }
 
     public void registerConversationListener(Long userId,
                                              String conversationId,
-                                             DeferredResult<List<ChatMessageResponse>> deferredResult) {
+                                             DeferredResult<List<ChatMessageDTO>> deferredResult) {
         User user = requireUser(userId);
         String requiredConversationId = Objects.requireNonNull(conversationId, "conversationId must not be null");
-        DeferredResult<List<ChatMessageResponse>> requiredDeferredResult = Objects.requireNonNull(deferredResult,
+        DeferredResult<List<ChatMessageDTO>> requiredDeferredResult = Objects.requireNonNull(deferredResult,
                 "deferredResult must not be null");
         assertCanAccess(user, requiredConversationId);
 
@@ -104,7 +104,7 @@ public class ChatService {
 
         subscriptions.add(chatPublisher.subscribe(requiredConversationId, message -> {
             if (pending.getAndSet(false)) {
-                ChatMessageResponse nonNullMessage = Objects.requireNonNull(message, "message must not be null");
+                ChatMessageDTO nonNullMessage = Objects.requireNonNull(message, "message must not be null");
                 requiredDeferredResult.setResult(List.of(nonNullMessage));
             }
         }));
@@ -112,7 +112,7 @@ public class ChatService {
         Runnable cancel = () -> subscriptions.forEach(ChatPublisher.Subscription::cancel);
         requiredDeferredResult.onCompletion(cancel);
         requiredDeferredResult.onTimeout(() -> {
-            List<ChatMessageResponse> emptyResult = List.of();
+            List<ChatMessageDTO> emptyResult = List.of();
             requiredDeferredResult.setResult(emptyResult);
             cancel.run();
         });
@@ -153,8 +153,8 @@ public class ChatService {
         return body.length() > 60 ? body.substring(0, 57) + "..." : body;
     }
 
-    private ChatMessageResponse toResponse(Message message) {
-        return new ChatMessageResponse(message.getId(),
+    private ChatMessageDTO toResponse(Message message) {
+        return new ChatMessageDTO(message.getId(),
                 message.getConversationId(),
                 message.getSenderId(),
                 message.getTeamId(),
