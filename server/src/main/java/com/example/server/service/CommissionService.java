@@ -1,5 +1,6 @@
 package com.example.server.service;
 
+import com.example.common.dto.CommissionDTO;
 import com.example.server.domain.Agent;
 import com.example.server.domain.Commission;
 import com.example.server.domain.Contract;
@@ -8,6 +9,7 @@ import com.example.server.repository.AgentRepository;
 import com.example.server.repository.CommissionRepository;
 import com.example.server.repository.ContractRepository;
 import com.example.server.repository.UserRepository;
+import com.example.server.service.mapper.CommissionMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,7 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 public class CommissionService {
@@ -50,6 +54,60 @@ public class CommissionService {
         this.agentRepository = agentRepository;
         this.userRepository = userRepository;
         this.clock = clock;
+    }
+
+    public List<CommissionDTO> findAll() {
+        return StreamSupport.stream(commissionRepository.findAll().spliterator(), false)
+                .map(CommissionMapper::toDto)
+                .toList();
+    }
+
+    public Optional<CommissionDTO> findById(Long id) {
+        return commissionRepository.findById(Objects.requireNonNull(id, "id must not be null"))
+                .map(CommissionMapper::toDto);
+    }
+
+    public CommissionDTO create(CommissionDTO commissionDTO) {
+        Commission source = Objects.requireNonNull(CommissionMapper.fromDto(
+                Objects.requireNonNull(commissionDTO, "commission must not be null")),
+                "mapped commission must not be null");
+        Commission toSave = new Commission(
+                null,
+                Objects.requireNonNull(source.getAgentId(), "agentId must not be null"),
+                Objects.requireNonNull(source.getContractId(), "contractId must not be null"),
+                defaultAmount(source.getTotalCommission(), BigDecimal.ZERO),
+                defaultAmount(source.getPaidCommission(), BigDecimal.ZERO),
+                defaultAmount(source.getPendingCommission(), source.getTotalCommission()),
+                Instant.now(clock)
+        );
+        return CommissionMapper.toDto(commissionRepository.save(toSave));
+    }
+
+    public Optional<CommissionDTO> update(Long id, CommissionDTO commissionDTO) {
+        Commission source = Objects.requireNonNull(CommissionMapper.fromDto(
+                Objects.requireNonNull(commissionDTO, "commission must not be null")),
+                "mapped commission must not be null");
+        return commissionRepository.findById(Objects.requireNonNull(id, "id must not be null"))
+                .map(existing -> new Commission(
+                        existing.getId(),
+                        defaultValue(source.getAgentId(), existing.getAgentId()),
+                        defaultValue(source.getContractId(), existing.getContractId()),
+                        defaultAmount(source.getTotalCommission(), existing.getTotalCommission()),
+                        defaultAmount(source.getPaidCommission(), existing.getPaidCommission()),
+                        defaultAmount(source.getPendingCommission(), existing.getPendingCommission()),
+                        Instant.now(clock)
+                ))
+                .map(commissionRepository::save)
+                .map(CommissionMapper::toDto);
+    }
+
+    public boolean delete(Long id) {
+        return commissionRepository.findById(Objects.requireNonNull(id, "id must not be null"))
+                .map(existing -> {
+                    commissionRepository.deleteById(existing.getId());
+                    return true;
+                })
+                .orElse(false);
     }
 
     public List<Commission> updateAfterPayment(Long contractId, BigDecimal invoiceAmount, BigDecimal amountPaid) {
@@ -171,6 +229,20 @@ public class CommissionService {
         return rule.shares().stream()
                 .sorted(Comparator.comparingInt(AgentCommissionShare::ranking).thenComparing(AgentCommissionShare::agentId))
                 .toList();
+    }
+
+    private <T> T defaultValue(T value, T fallback) {
+        return value != null ? value : fallback;
+    }
+
+    private BigDecimal defaultAmount(BigDecimal value, BigDecimal fallback) {
+        if (value != null) {
+            return value;
+        }
+        if (fallback != null) {
+            return fallback;
+        }
+        return BigDecimal.ZERO;
     }
 
     private TeamCommissionRule resolveRuleForAgent(Long agentId) {

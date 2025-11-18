@@ -22,4 +22,19 @@ public final class CommissionMapper {
                 commission.getLastUpdated()
         );
     }
+
+    public static Commission fromDto(CommissionDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new Commission(
+                dto.getId(),
+                dto.getAgentId(),
+                dto.getContractId(),
+                dto.getTotalCommission(),
+                dto.getPaidCommission(),
+                dto.getPendingCommission(),
+                dto.getLastUpdated()
+        );
+    }
 }
