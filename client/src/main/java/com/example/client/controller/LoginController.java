@@ -6,6 +6,7 @@ import com.example.client.service.LoginForm;
 import com.example.client.session.SessionStore;
 import com.example.client.validation.CompositeValidator;
 import com.example.client.validation.EmailValidationStrategy;
+import com.example.client.controller.MainViewController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -93,6 +94,7 @@ public class LoginController {
             AuthSession session = authApiClient.login(form);
             sessionStore.save(session);
             statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
+            openMainView(session);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             statusLabel.setText("Operazione interrotta: " + e.getMessage());
@@ -109,6 +111,15 @@ public class LoginController {
             }
             throw new IllegalStateException("Controller non supportato: " + type.getName());
         }, "Gestore Agenti - Registrazione");
+    }
+
+    private void openMainView(AuthSession session) {
+        navigate("/com/example/client/view/MainView.fxml", type -> {
+            if (type == MainViewController.class) {
+                return MainViewController.create(session);
+            }
+            throw new IllegalStateException("Controller non supportato: " + type.getName());
+        }, "Gestore Agenti");
     }
 
     private void navigate(String fxmlPath, ControllerFactory factory, String title) {
