@@ -45,6 +45,7 @@ public class LoginController {
     private final Optional<String> prefilledEmail;
     private final Optional<String> statusMessage;
     private final Optional<String> statusStyle;
+    private final MainViewFactory mainViewFactory;
     private final CompositeValidator emailValidator = new CompositeValidator().addStrategy(new EmailValidationStrategy());
 
     public static LoginController create(SessionStore sessionStore) {
@@ -63,16 +64,25 @@ public class LoginController {
         return new LoginController(sessionStore, new AuthApiClient(), Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage), Optional.ofNullable(statusStyle));
     }
 
+    public static LoginController create(SessionStore sessionStore, AuthApiClient client, MainViewFactory mainViewFactory) {
+        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), Optional.empty(), mainViewFactory);
+    }
+
     private LoginController(SessionStore sessionStore, AuthApiClient authApiClient) {
         this(sessionStore, authApiClient, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage, Optional<String> statusStyle) {
+        this(sessionStore, authApiClient, prefilledEmail, statusMessage, statusStyle, MainViewController::create);
+    }
+
+    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage, Optional<String> statusStyle, MainViewFactory mainViewFactory) {
         this.sessionStore = sessionStore;
         this.authApiClient = authApiClient;
         this.prefilledEmail = prefilledEmail;
         this.statusMessage = statusMessage;
         this.statusStyle = statusStyle;
+        this.mainViewFactory = mainViewFactory;
     }
 
     @FXML
@@ -146,7 +156,7 @@ public class LoginController {
     private void openMainView(AuthSession session) {
         navigate("/com/example/client/view/MainView.fxml", type -> {
             if (type == MainViewController.class) {
-                return MainViewController.create(session, sessionStore);
+                return mainViewFactory.create(session, sessionStore);
             }
             throw new IllegalStateException("Controller non supportato: " + type.getName());
         }, "Gestore Agenti");
@@ -173,5 +183,10 @@ public class LoginController {
     @FunctionalInterface
     private interface ControllerFactory {
         Object create(Class<?> type);
+    }
+
+    @FunctionalInterface
+    public interface MainViewFactory {
+        MainViewController create(AuthSession session, SessionStore sessionStore);
     }
 }
