@@ -107,15 +107,15 @@ public class LoginController {
     public void handleLogin(ActionEvent event) {
         Optional<String> validationError = emailValidator.validate(emailField.getText());
         if (validationError.isPresent()) {
-            statusLabel.setText(validationError.get());
+            showValidationError(validationError.get());
             return;
         }
         if (accessTokenArea.getText() == null || accessTokenArea.getText().isBlank()) {
-            statusLabel.setText("Inserire un access token Microsoft valido");
+            showValidationError("Inserire un access token Microsoft valido");
             return;
         }
         if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
-            statusLabel.setText("Inserire l'identificativo Azure dell'utente");
+            showValidationError("Inserire l'identificativo Azure dell'utente");
             return;
         }
 
@@ -127,9 +127,9 @@ public class LoginController {
             openMainView(session);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            statusLabel.setText("Operazione interrotta: " + e.getMessage());
+            showValidationError("Operazione interrotta: " + e.getMessage());
         } catch (IOException e) {
-            statusLabel.setText("Autenticazione fallita: " + e.getMessage());
+            showValidationError("Autenticazione fallita: " + e.getMessage());
         }
     }
 
@@ -161,8 +161,13 @@ public class LoginController {
             stage.setScene(new Scene(root));
             stage.setTitle(title);
         } catch (IOException e) {
-            statusLabel.setText("Impossibile aprire la vista richiesta: " + e.getMessage());
+            showValidationError("Impossibile aprire la vista richiesta: " + e.getMessage());
         }
+    }
+
+    private void showValidationError(String message) {
+        statusLabel.setText(message);
+        AlertUtils.showError(message);
     }
 
     @FunctionalInterface

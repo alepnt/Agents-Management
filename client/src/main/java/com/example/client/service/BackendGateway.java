@@ -727,12 +727,13 @@ public class BackendGateway {
                 }
                 return objectMapper.readValue(response.body(), typeReference);
             }
-            throw new IllegalStateException("Errore chiamata API: " + statusCode + " - " + response.body());
+            handleHttpError(statusCode, response.body());
+            return null;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Chiamata interrotta", e);
         } catch (IOException e) {
-            throw new IllegalStateException("Errore di comunicazione con il backend", e);
+            throw new BackendCommunicationException("Errore di comunicazione con il backend. Verifica la connessione e riprova.", e);
         }
     }
 
@@ -747,12 +748,13 @@ public class BackendGateway {
                 byte[] body = response.body();
                 return body != null ? body : new byte[0];
             }
-            throw new IllegalStateException("Errore chiamata API: " + statusCode);
+            handleHttpError(statusCode, response.body() != null ? new String(response.body(), StandardCharsets.UTF_8) : "");
+            return new byte[0];
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Chiamata interrotta", e);
         } catch (IOException e) {
-            throw new IllegalStateException("Errore di comunicazione con il backend", e);
+            throw new BackendCommunicationException("Errore di comunicazione con il backend. Verifica la connessione e riprova.", e);
         }
     }
 
@@ -769,6 +771,21 @@ public class BackendGateway {
             message.append(" Dettagli: ").append(body.trim());
         }
         throw new SessionExpiredException(message.toString());
+    }
+
+    private void handleHttpError(int statusCode, String body) {
+        String details = body != null ? body.trim() : "";
+        String userMessage = switch (statusCode) {
+            case 400 -> "La richiesta non è valida. Controlla i dati inseriti.";
+            case 404 -> "Risorsa richiesta non trovata o non più disponibile.";
+            case 409 -> "Conflitto con lo stato corrente dei dati. Aggiorna la pagina e riprova.";
+            case 500 -> "Errore interno del server. Riprova più tardi.";
+            default -> "Errore dal server (HTTP " + statusCode + ").";
+        };
+        if (!details.isBlank()) {
+            userMessage = userMessage + " Dettagli: " + details;
+        }
+        throw new BackendServiceException(statusCode, userMessage);
     }
 
     private String buildHistoryPath(String basePath,
