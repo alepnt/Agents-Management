@@ -5,6 +5,7 @@ import com.example.client.model.NotificationItem;
 import com.example.client.model.NotificationSubscription;
 import com.example.client.model.NotificationSubscriptionInfo;
 import com.example.client.session.SessionStore;
+import com.example.client.service.SessionExpiredException;
 import com.example.common.dto.ChatConversationDTO;
 import com.example.common.dto.ChatMessageDTO;
 import com.example.common.dto.ChatMessageRequest;
@@ -397,7 +398,7 @@ public class BackendGateway {
 
     private HttpRequest.Builder authorizedRequest(String path) {
         String token = sessionStore.currentToken()
-                .orElseThrow(() -> new IllegalStateException("Nessuna sessione attiva o token scaduto. Effettua nuovamente il login."));
+                .orElseThrow(() -> new SessionExpiredException("Nessuna sessione attiva o token scaduto. Effettua nuovamente il login."));
         return HttpRequest.newBuilder()
                 .uri(uri(path))
                 .header("Authorization", "Bearer " + token);
@@ -459,7 +460,7 @@ public class BackendGateway {
         } catch (IOException ignored) {
             // Ignora eventuali errori di pulizia
         }
-        throw new IllegalStateException("Sessione non autorizzata o scaduta (HTTP " + statusCode + "). " + body);
+        throw new SessionExpiredException("Sessione non autorizzata o scaduta (HTTP " + statusCode + "). " + body);
     }
 
     private String buildHistoryPath(String basePath,

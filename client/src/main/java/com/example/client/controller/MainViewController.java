@@ -12,6 +12,8 @@ import com.example.client.model.InvoiceLineModel;
 import com.example.client.service.AuthSession;
 import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
+import com.example.client.service.SessionExpiredException;
+import com.example.client.session.SessionStore;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
@@ -34,6 +36,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
@@ -50,6 +55,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.io.File;
@@ -67,6 +73,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Locale;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,7 +84,8 @@ import java.nio.file.Path;
 public class MainViewController {
 
     private final AuthSession session;
-    private final DataCacheService dataCacheService = new DataCacheService();
+    private final SessionStore sessionStore;
+    private final DataCacheService dataCacheService;
     private final NotificationService notificationService = new NotificationService();
     private final ObservableList<InvoiceModel> invoiceItems = FXCollections.observableArrayList();
     private final ObservableList<ContractModel> contractItems = FXCollections.observableArrayList();
@@ -97,17 +105,23 @@ public class MainViewController {
     private int historyCurrentPage;
     private long historyTotalPages;
     private DocumentHistorySearchCriteria historyCurrentCriteria = new DocumentHistorySearchCriteria();
+    private boolean sessionExpired;
 
     public MainViewController() {
-        this(null);
+        this(null, new SessionStore());
     }
 
-    public MainViewController(AuthSession session) {
+    public MainViewController(AuthSession session, SessionStore sessionStore) {
         this.session = session;
+        this.sessionStore = sessionStore;
+        this.dataCacheService = DataCacheService.create(sessionStore);
+        if (session != null) {
+            this.dataCacheService.restoreSession();
+        }
     }
 
-    public static MainViewController create(AuthSession session) {
-        return new MainViewController(session);
+    public static MainViewController create(AuthSession session, SessionStore sessionStore) {
+        return new MainViewController(session, sessionStore);
     }
 
     @FXML
@@ -526,7 +540,10 @@ public class MainViewController {
     public void onCreateInvoice() {
         try {
             InvoiceDTO dto = buildInvoiceFromForm(null);
-            InvoiceDTO created = dataCacheService.createInvoice(dto);
+            InvoiceDTO created = withSession(() -> dataCacheService.createInvoice(dto));
+            if (created == null) {
+                return;
+            }
             refreshInvoices();
             selectInvoice(created.getId());
             notificationService.publish(new NotificationMessage("invoice", "Fattura creata", Instant.now()));
@@ -544,7 +561,7 @@ public class MainViewController {
         }
         try {
             InvoiceDTO dto = buildInvoiceFromForm(selected.getId());
-            dataCacheService.updateInvoice(selected.getId(), dto);
+            withSession(() -> dataCacheService.updateInvoice(selected.getId(), dto));
             refreshInvoices();
             selectInvoice(selected.getId());
             notificationService.publish(new NotificationMessage("invoice", "Fattura aggiornata", Instant.now()));
@@ -560,7 +577,7 @@ public class MainViewController {
             notificationService.publish(new NotificationMessage("warn", "Seleziona una fattura da eliminare", Instant.now()));
             return;
         }
-        dataCacheService.deleteInvoice(selected.getId());
+        withSession(() -> dataCacheService.deleteInvoice(selected.getId()));
         refreshInvoices();
         historyItems.clear();
         notificationService.publish(new NotificationMessage("invoice", "Fattura eliminata", Instant.now()));
@@ -576,7 +593,7 @@ public class MainViewController {
         BigDecimal amountPaid = parseBigDecimal(invoicePaymentAmountField.getText()).orElse(selected.getAmount());
         LocalDate paymentDate = invoicePaymentDatePicker.getValue();
         InvoicePaymentRequest request = new InvoicePaymentRequest(paymentDate, amountPaid);
-        dataCacheService.registerPayment(selected.getId(), request);
+        withSession(() -> dataCacheService.registerPayment(selected.getId(), request));
         refreshInvoices();
         selectInvoice(selected.getId());
         notificationService.publish(new NotificationMessage("invoice", "Pagamento registrato", Instant.now()));
@@ -639,7 +656,10 @@ public class MainViewController {
     public void onCreateCustomer() {
         try {
             CustomerDTO dto = buildCustomerFromForm(null);
-            CustomerDTO created = dataCacheService.createCustomer(dto);
+            CustomerDTO created = withSession(() -> dataCacheService.createCustomer(dto));
+            if (created == null) {
+                return;
+            }
             refreshCustomers();
             selectCustomer(created.getId());
             notificationService.publish(new NotificationMessage("customer", "Cliente creato", Instant.now()));
@@ -657,7 +677,7 @@ public class MainViewController {
         }
         try {
             CustomerDTO dto = buildCustomerFromForm(selected.getId());
-            dataCacheService.updateCustomer(selected.getId(), dto);
+            withSession(() -> dataCacheService.updateCustomer(selected.getId(), dto));
             refreshCustomers();
             selectCustomer(selected.getId());
             notificationService.publish(new NotificationMessage("customer", "Cliente aggiornato", Instant.now()));
@@ -673,7 +693,7 @@ public class MainViewController {
             notificationService.publish(new NotificationMessage("warn", "Seleziona un cliente", Instant.now()));
             return;
         }
-        dataCacheService.deleteCustomer(selected.getId());
+        withSession(() -> dataCacheService.deleteCustomer(selected.getId()));
         refreshCustomers();
         clearCustomerForm();
         notificationService.publish(new NotificationMessage("customer", "Cliente eliminato", Instant.now()));
@@ -683,7 +703,10 @@ public class MainViewController {
     public void onCreateArticle() {
         try {
             ArticleDTO dto = buildArticleFromForm(null);
-            ArticleDTO created = dataCacheService.createArticle(dto);
+            ArticleDTO created = withSession(() -> dataCacheService.createArticle(dto));
+            if (created == null) {
+                return;
+            }
             refreshArticles();
             selectArticle(created.getId());
             notificationService.publish(new NotificationMessage("article", "Articolo creato", Instant.now()));
@@ -701,7 +724,7 @@ public class MainViewController {
         }
         try {
             ArticleDTO dto = buildArticleFromForm(selected.getId());
-            dataCacheService.updateArticle(selected.getId(), dto);
+            withSession(() -> dataCacheService.updateArticle(selected.getId(), dto));
             refreshArticles();
             selectArticle(selected.getId());
             notificationService.publish(new NotificationMessage("article", "Articolo aggiornato", Instant.now()));
@@ -717,7 +740,7 @@ public class MainViewController {
             notificationService.publish(new NotificationMessage("warn", "Seleziona un articolo", Instant.now()));
             return;
         }
-        dataCacheService.deleteArticle(selected.getId());
+        withSession(() -> dataCacheService.deleteArticle(selected.getId()));
         refreshArticles();
         clearArticleForm();
         notificationService.publish(new NotificationMessage("article", "Articolo eliminato", Instant.now()));
@@ -727,7 +750,10 @@ public class MainViewController {
     public void onCreateContract() {
         try {
             ContractDTO dto = buildContractFromForm(null);
-            ContractDTO created = dataCacheService.createContract(dto);
+            ContractDTO created = withSession(() -> dataCacheService.createContract(dto));
+            if (created == null) {
+                return;
+            }
             refreshContracts();
             selectContract(created.getId());
             notificationService.publish(new NotificationMessage("contract", "Contratto creato", Instant.now()));
@@ -745,7 +771,7 @@ public class MainViewController {
         }
         try {
             ContractDTO dto = buildContractFromForm(selected.getId());
-            dataCacheService.updateContract(selected.getId(), dto);
+            withSession(() -> dataCacheService.updateContract(selected.getId(), dto));
             refreshContracts();
             selectContract(selected.getId());
             notificationService.publish(new NotificationMessage("contract", "Contratto aggiornato", Instant.now()));
@@ -761,7 +787,7 @@ public class MainViewController {
             notificationService.publish(new NotificationMessage("warn", "Seleziona un contratto da eliminare", Instant.now()));
             return;
         }
-        dataCacheService.deleteContract(selected.getId());
+        withSession(() -> dataCacheService.deleteContract(selected.getId()));
         refreshContracts();
         historyItems.clear();
         notificationService.publish(new NotificationMessage("contract", "Contratto eliminato", Instant.now()));
@@ -822,7 +848,10 @@ public class MainViewController {
     @FXML
     public void onHistoryExportCsv() {
         DocumentHistorySearchCriteria criteria = historyCurrentCriteria != null ? historyCurrentCriteria : buildHistoryCriteria();
-        byte[] csv = dataCacheService.exportDocumentHistory(criteria);
+        byte[] csv = withSession(() -> dataCacheService.exportDocumentHistory(criteria));
+        if (csv == null) {
+            return;
+        }
         saveToFile(csv, "storico-documenti.csv", "csv", "File CSV");
     }
 
@@ -831,7 +860,10 @@ public class MainViewController {
         Long agentId = parseLong(historyAgentIdField != null ? historyAgentIdField.getText() : null).orElse(null);
         LocalDate from = historyFromDatePicker != null ? historyFromDatePicker.getValue() : null;
         LocalDate to = historyToDatePicker != null ? historyToDatePicker.getValue() : null;
-        byte[] pdf = dataCacheService.downloadClosedInvoiceReport(from, to, agentId);
+        byte[] pdf = withSession(() -> dataCacheService.downloadClosedInvoiceReport(from, to, agentId));
+        if (pdf == null) {
+            return;
+        }
         saveToFile(pdf, "report-fatture-chiuse.pdf", "pdf", "Documento PDF");
     }
 
@@ -839,7 +871,10 @@ public class MainViewController {
         Long selectedCustomerId = Optional.ofNullable(invoiceCustomerCombo.getSelectionModel().getSelectedItem())
                 .map(CustomerModel::getId)
                 .orElse(null);
-        List<CustomerDTO> dtos = dataCacheService.getCustomers();
+        List<CustomerDTO> dtos = withSession(dataCacheService::getCustomers);
+        if (dtos == null) {
+            return;
+        }
         customerItems.setAll(dtos.stream().map(CustomerModel::fromDto).toList());
         if (selectedCustomerId != null) {
             customerItems.stream()
@@ -853,7 +888,10 @@ public class MainViewController {
         Long selectedArticleId = Optional.ofNullable(invoiceLineArticleCombo.getSelectionModel().getSelectedItem())
                 .map(ArticleModel::getId)
                 .orElse(null);
-        List<ArticleDTO> dtos = dataCacheService.getArticles();
+        List<ArticleDTO> dtos = withSession(dataCacheService::getArticles);
+        if (dtos == null) {
+            return;
+        }
         articleItems.setAll(dtos.stream().map(ArticleModel::fromDto).toList());
         if (selectedArticleId != null) {
             articleItems.stream()
@@ -864,13 +902,19 @@ public class MainViewController {
     }
 
     private void refreshInvoices() {
-        List<InvoiceDTO> dtos = dataCacheService.getInvoices();
+        List<InvoiceDTO> dtos = withSession(dataCacheService::getInvoices);
+        if (dtos == null) {
+            return;
+        }
         invoiceItems.setAll(dtos.stream().map(InvoiceModel::fromDto).toList());
         updateInvoiceChart();
     }
 
     private void refreshContracts() {
-        List<ContractDTO> dtos = dataCacheService.getContracts();
+        List<ContractDTO> dtos = withSession(dataCacheService::getContracts);
+        if (dtos == null) {
+            return;
+        }
         contractItems.setAll(dtos.stream().map(ContractModel::fromDto).toList());
         updateContractChart();
     }
@@ -885,7 +929,7 @@ public class MainViewController {
         DocumentHistorySearchCriteria criteria = buildHistoryCriteria();
         historyCurrentCriteria = criteria;
         int size = historyPageSizeCombo != null && historyPageSizeCombo.getValue() != null ? historyPageSizeCombo.getValue() : 25;
-        DocumentHistoryPageDTO page = dataCacheService.searchDocumentHistory(criteria, historyCurrentPage, size);
+        DocumentHistoryPageDTO page = withSession(() -> dataCacheService.searchDocumentHistory(criteria, historyCurrentPage, size));
         if (page == null || page.getItems() == null) {
             historySearchItems.clear();
             updateHistoryPagination(null);
@@ -897,7 +941,10 @@ public class MainViewController {
     }
 
     private void refreshStatistics() {
-        AgentStatisticsDTO agentStats = dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null);
+        AgentStatisticsDTO agentStats = withSession(() -> dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null));
+        if (agentStats == null) {
+            return;
+        }
         if (statsYearCombo != null) {
             updatingStatsYear = true;
             statsYearCombo.getItems().setAll(agentStats.years());
@@ -906,7 +953,10 @@ public class MainViewController {
         }
         updateCommissionTrendChart(agentStats);
         updateAgentBarChart(agentStats);
-        TeamStatisticsDTO teamStats = dataCacheService.getTeamStatistics(agentStats.year());
+        TeamStatisticsDTO teamStats = withSession(() -> dataCacheService.getTeamStatistics(agentStats.year()));
+        if (teamStats == null) {
+            return;
+        }
         updateTeamPieChart(teamStats);
     }
 
@@ -1119,10 +1169,14 @@ public class MainViewController {
         }
         currentHistoryType = type;
         currentHistoryId = documentId;
-        List<DocumentHistoryDTO> entries = switch (type) {
+        List<DocumentHistoryDTO> entries = withSession(() -> switch (type) {
             case INVOICE -> dataCacheService.getInvoiceHistory(documentId);
             case CONTRACT -> dataCacheService.getContractHistory(documentId);
-        };
+        });
+        if (entries == null) {
+            historyItems.clear();
+            return;
+        }
         historyItems.setAll(entries.stream().map(DocumentHistoryModel::fromDto).toList());
     }
 
@@ -1249,6 +1303,51 @@ public class MainViewController {
         }
         if (historyNextButton != null) {
             historyNextButton.setDisable(!page.hasNext());
+        }
+    }
+
+    private <T> T withSession(Supplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (SessionExpiredException ex) {
+            handleSessionExpired(ex.getMessage());
+            return null;
+        }
+    }
+
+    private void withSession(Runnable runnable) {
+        withSession(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    private void handleSessionExpired(String message) {
+        if (sessionExpired) {
+            return;
+        }
+        sessionExpired = true;
+        dataCacheService.invalidateHistory();
+        dataCacheService.invalidateStatistics();
+        notificationService.publish(new NotificationMessage("session", message, Instant.now()));
+        showLoginPrompt(message);
+    }
+
+    private void showLoginPrompt(String reason) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
+            loader.setControllerFactory(type -> {
+                if (type == LoginController.class) {
+                    return LoginController.create(sessionStore);
+                }
+                throw new IllegalStateException("Controller non supportato: " + type.getName());
+            });
+            Parent root = loader.load();
+            Stage stage = (Stage) mainTabPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestore Agenti - Login");
+        } catch (IOException e) {
+            notificationService.publish(new NotificationMessage("error", "Impossibile aprire la schermata di login: " + e.getMessage(), Instant.now()));
         }
     }
 

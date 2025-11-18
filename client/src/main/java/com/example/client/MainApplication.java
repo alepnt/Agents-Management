@@ -50,7 +50,7 @@ public class MainApplication extends Application {
     private void loadMainView(Stage stage, AuthSession session) throws IOException {
         loadScene(stage, "/com/example/client/view/MainView.fxml", param -> {
             if (param == MainViewController.class) {
-                return MainViewController.create(session);
+                return MainViewController.create(session, sessionStore);
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
         }, "Gestore Agenti");
