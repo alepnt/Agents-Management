@@ -14,6 +14,7 @@ import com.microsoft.aad.msal4j.MsalServiceException;
 import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.SilentParameters;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Instant;
@@ -143,9 +144,7 @@ public class MsalTokenProvider implements TokenProvider {
             byte[] payload = Base64.getUrlDecoder().decode(parts[1]);
             return OBJECT_MAPPER.readValue(payload, new TypeReference<>() {
             });
-        } catch (IllegalArgumentException e) {
-            return Collections.emptyMap();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | IOException e) {
             return Collections.emptyMap();
         }
     }
@@ -174,7 +173,8 @@ public class MsalTokenProvider implements TokenProvider {
             return new MsalAuthenticationException(
                     "Errore di configurazione MSAL durante " + phase + ": " + clientException.errorCode(), clientException);
         }
-        return new MsalAuthenticationException("Errore durante " + phase + ": " + error.getMessage(), error);
+        String message = error != null ? error.getMessage() : "errore sconosciuto";
+        return new MsalAuthenticationException("Errore durante " + phase + ": " + message, error);
     }
 
     private Throwable unwrap(Throwable throwable) {
