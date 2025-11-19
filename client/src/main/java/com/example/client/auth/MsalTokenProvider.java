@@ -1,5 +1,7 @@
 package com.example.client.auth;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.ITokenCacheAccessAspect;
@@ -10,12 +12,13 @@ import com.microsoft.aad.msal4j.MsalException;
 import com.microsoft.aad.msal4j.MsalInteractionRequiredException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.microsoft.aad.msal4j.PublicClientApplication;
-import com.microsoft.aad.msal4j.PublicClientApplicationBuilder;
 import com.microsoft.aad.msal4j.SilentParameters;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -23,8 +26,11 @@ import java.util.concurrent.CompletionException;
 
 public class MsalTokenProvider implements TokenProvider {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private final PublicClientApplication application;
     private final URI redirectUri;
+    private final String authority;
     private final Set<String> scopes;
     private final TokenCache cache;
     private volatile IAuthenticationResult lastResult;
@@ -32,11 +38,12 @@ public class MsalTokenProvider implements TokenProvider {
     public MsalTokenProvider(MsalConfiguration configuration) throws MalformedURLException {
         this.redirectUri = configuration.redirectUri();
         this.scopes = Set.copyOf(configuration.scopes());
+        this.authority = configuration.authority();
         this.cache = new TokenCache();
-        PublicClientApplicationBuilder builder = PublicClientApplication.builder(configuration.clientId())
+        this.application = PublicClientApplication.builder(configuration.clientId())
                 .authority(configuration.authority())
-                .setTokenCacheAccessAspect(cache);
-        this.application = builder.build();
+                .setTokenCacheAccessAspect(cache)
+                .build();
     }
 
     public static TokenProvider fromEnvironment() throws MalformedURLException {
@@ -76,7 +83,8 @@ public class MsalTokenProvider implements TokenProvider {
     public synchronized MsalAuthenticationResult acquireTokenInteractive() throws MsalAuthenticationException {
         try {
             InteractiveRequestParameters parameters = InteractiveRequestParameters
-                    .builder(redirectUri, scopes)
+                    .builder(redirectUri)
+                    .scopes(scopes)
                     .build();
             lastResult = application.acquireToken(parameters).join();
             return mapResult(lastResult);
@@ -97,14 +105,16 @@ public class MsalTokenProvider implements TokenProvider {
             return null;
         }
         IAccount account = result.account();
-        Map<String, ?> claims = result.idTokenClaims();
-        String displayName = claims != null ? (String) claims.getOrDefault("name",
-                account != null ? account.username() : null) : account != null ? account.username() : null;
-        String objectId = claims != null ? (String) claims.getOrDefault("oid", null) : null;
-        if (objectId == null && account != null) {
-            objectId = account.homeAccountId();
-        }
-        String tenantId = claims != null ? (String) claims.getOrDefault("tid", null) : null;
+        Map<String, Object> claims = extractIdTokenClaims(result);
+        String displayName = firstNonBlank(
+                (String) claims.get("name"),
+                account != null ? account.username() : null
+        );
+        String objectId = firstNonBlank(
+                (String) claims.get("oid"),
+                account != null ? account.homeAccountId() : null
+        );
+        String tenantId = (String) claims.get("tid");
         MsalAccount msalAccount = new MsalAccount(
                 account != null ? account.username() : null,
                 displayName,
@@ -113,7 +123,39 @@ public class MsalTokenProvider implements TokenProvider {
                 account != null ? account.homeAccountId() : null
         );
         Instant expiresOn = result.expiresOnDate() != null ? result.expiresOnDate().toInstant() : null;
-        return new MsalAuthenticationResult(result.accessToken(), result.refreshToken(), expiresOn, result.authority(), msalAccount);
+        return new MsalAuthenticationResult(result.accessToken(), null, expiresOn, authority, msalAccount);
+    }
+
+    private Map<String, Object> extractIdTokenClaims(IAuthenticationResult result) {
+        try {
+            String idToken = result.idToken();
+            if (idToken == null || idToken.isBlank()) {
+                return Collections.emptyMap();
+            }
+            String[] parts = idToken.split("\\.");
+            if (parts.length < 2) {
+                return Collections.emptyMap();
+            }
+            byte[] payload = Base64.getUrlDecoder().decode(parts[1]);
+            return OBJECT_MAPPER.readValue(payload, new TypeReference<>() {
+            });
+        } catch (IllegalArgumentException e) {
+            return Collections.emptyMap();
+        } catch (Exception e) {
+            return Collections.emptyMap();
+        }
+    }
+
+    private String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private MsalAuthenticationException asAuthenticationException(String phase, Throwable error) {
