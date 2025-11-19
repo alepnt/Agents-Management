@@ -98,7 +98,9 @@ class DataCacheServiceTest {
                     "token-" + azureId,
                     "Bearer",
                     Instant.now().plusSeconds(3600),
-                    new UserSummary(1L, azureId + "@example.com", "User " + azureId, azureId, 1L, 1L)
+                    new UserSummary(1L, azureId + "@example.com", "User " + azureId, azureId, 1L, 1L),
+                    null,
+                    null
             );
         }
     }

@@ -1,5 +1,7 @@
 package com.example.client;
 
+import com.example.client.auth.MsalTokenProvider;
+import com.example.client.auth.TokenProvider;
 import com.example.client.controller.LoginController;
 import com.example.client.controller.MainViewController;
 import com.example.client.service.AuthApiClient;
@@ -15,8 +17,16 @@ import java.io.IOException;
 
 public class MainApplication extends Application {
 
+    private static TokenProvider sharedTokenProvider;
+
     private final SessionStore sessionStore = new SessionStore();
     private final AuthApiClient authApiClient = new AuthApiClient();
+    private final TokenProvider tokenProvider;
+
+    public MainApplication() {
+        this.tokenProvider = buildTokenProvider();
+        sharedTokenProvider = this.tokenProvider;
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -41,17 +51,18 @@ public class MainApplication extends Application {
     private void loadLoginView(Stage stage) throws IOException {
         loadLoginScene(stage, param -> {
             if (param == LoginController.class) {
-                return LoginController.create(sessionStore, authApiClient);
+                return LoginController.create(sessionStore, authApiClient, tokenProvider);
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
         });
     }
 
-    public static void showLoginSelection(Stage stage, SessionStore sessionStore, String prefilledEmail,
+    public static void showLoginSelection(Stage stage, SessionStore sessionStore,
                                           String statusMessage, String statusStyle) throws IOException {
+        TokenProvider provider = sharedTokenProvider != null ? sharedTokenProvider : MsalTokenProvider.disabled("Servizio MSAL non disponibile");
         loadLoginScene(stage, param -> {
             if (param == LoginController.class) {
-                return LoginController.create(sessionStore, prefilledEmail, statusMessage, statusStyle);
+                return LoginController.create(sessionStore, new AuthApiClient(), provider, statusMessage, statusStyle);
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
         });
@@ -88,5 +99,14 @@ public class MainApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private TokenProvider buildTokenProvider() {
+        try {
+            return MsalTokenProvider.fromEnvironment();
+        } catch (Exception e) {
+            System.err.println("MSAL non disponibile: " + e.getMessage());
+            return MsalTokenProvider.disabled("MSAL non configurato: " + e.getMessage());
+        }
     }
 }

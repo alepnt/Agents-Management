@@ -1,12 +1,13 @@
 package com.example.client.controller;
 
+import com.example.client.auth.MsalAuthenticationException;
+import com.example.client.auth.MsalAuthenticationResult;
+import com.example.client.auth.MsalTokenProvider;
+import com.example.client.auth.TokenProvider;
 import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.LoginForm;
 import com.example.client.session.SessionStore;
-import com.example.client.validation.CompositeValidator;
-import com.example.client.validation.EmailValidationStrategy;
-import com.example.client.controller.MainViewController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,23 +17,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class LoginController {
 
-    @FXML
-    private TextField emailField;
-    @FXML
-    private TextField displayNameField;
-    @FXML
-    private TextField azureIdField;
-    @FXML
-    private TextArea accessTokenArea;
     @FXML
     private Label statusLabel;
     @FXML
@@ -42,54 +35,60 @@ public class LoginController {
 
     private final SessionStore sessionStore;
     private final AuthApiClient authApiClient;
-    private final Optional<String> prefilledEmail;
     private final Optional<String> statusMessage;
     private final Optional<String> statusStyle;
     private final MainViewFactory mainViewFactory;
-    private final CompositeValidator emailValidator = new CompositeValidator().addStrategy(new EmailValidationStrategy());
+    private final TokenProvider tokenProvider;
 
     public static LoginController create(SessionStore sessionStore) {
-        return new LoginController(sessionStore, new AuthApiClient());
+        return new LoginController(sessionStore, new AuthApiClient(), Optional.empty(), Optional.empty(), defaultTokenProvider(), MainViewController::create);
     }
 
     public static LoginController create(SessionStore sessionStore, AuthApiClient client) {
-        return new LoginController(sessionStore, client);
+        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), defaultTokenProvider(), MainViewController::create);
     }
 
     public static LoginController create(SessionStore sessionStore, AuthApiClient client, String prefilledEmail, String statusMessage) {
-        return new LoginController(sessionStore, client, Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage), Optional.of("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"));
+        return new LoginController(sessionStore, client, Optional.ofNullable(statusMessage), Optional.of("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"), defaultTokenProvider(), MainViewController::create);
     }
 
     public static LoginController create(SessionStore sessionStore, String prefilledEmail, String statusMessage, String statusStyle) {
-        return new LoginController(sessionStore, new AuthApiClient(), Optional.ofNullable(prefilledEmail), Optional.ofNullable(statusMessage), Optional.ofNullable(statusStyle));
+        return new LoginController(sessionStore, new AuthApiClient(), Optional.ofNullable(statusMessage), Optional.ofNullable(statusStyle), defaultTokenProvider(), MainViewController::create);
     }
 
     public static LoginController create(SessionStore sessionStore, AuthApiClient client, MainViewFactory mainViewFactory) {
-        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), Optional.empty(), mainViewFactory);
+        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), defaultTokenProvider(), mainViewFactory);
     }
 
-    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient) {
-        this(sessionStore, authApiClient, Optional.empty(), Optional.empty(), Optional.empty());
+    public static LoginController create(SessionStore sessionStore, AuthApiClient client, TokenProvider tokenProvider) {
+        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), tokenProvider, MainViewController::create);
     }
 
-    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage, Optional<String> statusStyle) {
-        this(sessionStore, authApiClient, prefilledEmail, statusMessage, statusStyle, MainViewController::create);
+    public static LoginController create(SessionStore sessionStore, AuthApiClient client, TokenProvider tokenProvider, MainViewFactory mainViewFactory) {
+        return new LoginController(sessionStore, client, Optional.empty(), Optional.empty(), tokenProvider, mainViewFactory);
     }
 
-    private LoginController(SessionStore sessionStore, AuthApiClient authApiClient, Optional<String> prefilledEmail, Optional<String> statusMessage, Optional<String> statusStyle, MainViewFactory mainViewFactory) {
+    public static LoginController create(SessionStore sessionStore, AuthApiClient client, TokenProvider tokenProvider, String statusMessage, String statusStyle) {
+        return new LoginController(sessionStore, client, Optional.ofNullable(statusMessage), Optional.ofNullable(statusStyle), tokenProvider, MainViewController::create);
+    }
+
+    private LoginController(SessionStore sessionStore,
+                            AuthApiClient authApiClient,
+                            Optional<String> statusMessage,
+                            Optional<String> statusStyle,
+                            TokenProvider tokenProvider,
+                            MainViewFactory mainViewFactory) {
         this.sessionStore = sessionStore;
         this.authApiClient = authApiClient;
-        this.prefilledEmail = prefilledEmail;
         this.statusMessage = statusMessage;
         this.statusStyle = statusStyle;
         this.mainViewFactory = mainViewFactory;
+        this.tokenProvider = tokenProvider == null ? MsalTokenProvider.disabled("Servizio MSAL non configurato") : tokenProvider;
     }
 
     @FXML
     public void initialize() {
         Platform.runLater(() -> {
-            prefilledEmail.ifPresent(emailField::setText);
-
             Optional<AuthSession> existingSession = sessionStore.load();
             if (existingSession.isPresent()) {
                 AuthSession session = existingSession.get();
@@ -97,7 +96,7 @@ public class LoginController {
                     try {
                         sessionStore.clear();
                     } catch (IOException ignored) {
-                        // ignora errori di pulizia
+                        // impossibile pulire la sessione, ma proseguiamo con il login
                     }
                     statusLabel.setText("La sessione salvata è scaduta. Effettua nuovamente il login.");
                 } else {
@@ -111,42 +110,25 @@ public class LoginController {
                 statusLabel.setStyle(statusStyle.orElse("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"));
             });
         });
-
-        azureIdField.focusedProperty().addListener((obs, oldValue, focused) -> {
-            if (!focused) {
-                lookupSavedSessionForAzureId();
-            }
-        });
     }
 
     @FXML
     public void handleLogin(ActionEvent event) {
-        Optional<String> validationError = emailValidator.validate(emailField.getText());
-        if (validationError.isPresent()) {
-            showValidationError(validationError.get());
-            return;
-        }
-        if (accessTokenArea.getText() == null || accessTokenArea.getText().isBlank()) {
-            showValidationError("Inserire un access token Microsoft valido");
-            return;
-        }
-        if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
-            showValidationError("Inserire l'identificativo Azure dell'utente");
-            return;
-        }
+        loginButton.setDisable(true);
+        updateStatus("Connessione a Microsoft in corso...");
 
-        LoginForm form = new LoginForm(accessTokenArea.getText().trim(), emailField.getText().trim(), displayNameField.getText().trim(), azureIdField.getText().trim());
-        try {
-            AuthSession session = authApiClient.login(form);
-            sessionStore.saveForUser(form.azureId(), session);
-            statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
-            openMainView(session);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            showValidationError("Operazione interrotta: " + e.getMessage());
-        } catch (IOException e) {
-            showValidationError("Autenticazione fallita: " + e.getMessage());
-        }
+        CompletableFuture
+                .supplyAsync(this::acquireMsalToken)
+                .thenApply(this::authenticateWithBackend)
+                .whenComplete((session, error) -> Platform.runLater(() -> {
+                    loginButton.setDisable(false);
+                    if (error != null) {
+                        handleAuthenticationError(error);
+                    } else if (session != null) {
+                        statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
+                        openMainView(session);
+                    }
+                }));
     }
 
     @FXML
@@ -186,22 +168,93 @@ public class LoginController {
         AlertUtils.showError(message);
     }
 
-    private void lookupSavedSessionForAzureId() {
-        String azureId = azureIdField.getText();
-        if (azureId == null || azureId.isBlank()) {
-            return;
-        }
-        sessionStore.loadForUser(azureId.trim()).ifPresent(session ->
-                statusLabel.setText("Sessione salvata per " + session.user().displayName()));
-    }
-
     @FunctionalInterface
     private interface ControllerFactory {
         Object create(Class<?> type);
     }
 
-    @FunctionalInterface
-    public interface MainViewFactory {
-        MainViewController create(AuthSession session, SessionStore sessionStore);
+    private static TokenProvider defaultTokenProvider() {
+        try {
+            return MsalTokenProvider.fromEnvironment();
+        } catch (Exception e) {
+            return MsalTokenProvider.disabled("MSAL non configurato: " + e.getMessage());
+        }
+    }
+
+    private void updateStatus(String message) {
+        statusLabel.setText(message);
+    }
+
+    private MsalAuthenticationResult acquireMsalToken() {
+        try {
+            Optional<MsalAuthenticationResult> cached = tokenProvider.acquireTokenSilently();
+            if (cached.isPresent()) {
+                Platform.runLater(() -> updateStatus("Token Microsoft trovato. Sto collegando l'account..."));
+                return cached.get();
+            }
+            Platform.runLater(() -> updateStatus("Autenticazione Microsoft in corso..."));
+            return tokenProvider.acquireTokenInteractive();
+        } catch (MsalAuthenticationException e) {
+            throw new CompletionException(e);
+        }
+    }
+
+    private AuthSession authenticateWithBackend(MsalAuthenticationResult msalResult) {
+        try {
+            LoginForm form = buildLoginForm(msalResult);
+            Platform.runLater(() -> updateStatus("Verifica delle credenziali con il portale Gestore Agenti..."));
+            AuthSession session = authApiClient.login(form);
+            sessionStore.saveForUser(form.azureId(), session);
+            return session;
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CompletionException(e);
+        }
+    }
+
+    private LoginForm buildLoginForm(MsalAuthenticationResult msalResult) {
+        String email = msalResult.account() != null ? msalResult.account().username() : null;
+        String displayName = msalResult.account() != null ? msalResult.account().displayName() : null;
+        String azureId = msalResult.account() != null ? firstNonBlank(msalResult.account().objectId(), msalResult.account().homeAccountId()) : null;
+        if (azureId == null || azureId.isBlank()) {
+            throw new IllegalStateException("Impossibile determinare l'identificativo Azure dell'account Microsoft");
+        }
+        return new LoginForm(msalResult.accessToken(), email, displayName, azureId, msalResult.authority(), msalResult.refreshToken());
+    }
+
+    private void handleAuthenticationError(Throwable throwable) {
+        Throwable root = unwrap(throwable);
+        if (root instanceof MsalAuthenticationException) {
+            showValidationError(root.getMessage());
+        } else if (root instanceof IOException) {
+            showValidationError("Autenticazione fallita: " + root.getMessage());
+        } else if (root instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+            showValidationError("Operazione interrotta. Riprova.");
+        } else {
+            showValidationError("Errore inatteso durante il login: " + root.getMessage());
+        }
+    }
+
+    private Throwable unwrap(Throwable throwable) {
+        Throwable current = throwable;
+        while (current instanceof CompletionException && current.getCause() != null) {
+            current = current.getCause();
+        }
+        return current;
+    }
+
+    private String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
     }
 }

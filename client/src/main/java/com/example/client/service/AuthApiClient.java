@@ -30,13 +30,20 @@ public class AuthApiClient {
     public AuthSession login(LoginForm form) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/api/auth/login"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(serialize(new LoginPayload(form.accessToken(), form.email(), form.displayName(), form.azureId()))))
+                .POST(HttpRequest.BodyPublishers.ofString(serialize(new LoginPayload(
+                        form.accessToken(),
+                        form.email(),
+                        form.displayName(),
+                        form.azureId(),
+                        form.authority(),
+                        form.refreshToken()
+                ))))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         ensureSuccess(response);
         AuthResponsePayload payload = deserialize(response.body(), AuthResponsePayload.class);
-        return new AuthSession(payload.accessToken(), payload.tokenType(), payload.expiresAt(), payload.user());
+        return new AuthSession(payload.accessToken(), payload.tokenType(), payload.expiresAt(), payload.user(), payload.authority(), payload.refreshToken());
     }
 
     public UserSummary register(RegisterForm form) throws IOException, InterruptedException {
@@ -65,12 +72,12 @@ public class AuthApiClient {
         return mapper.readValue(body, type);
     }
 
-    private record LoginPayload(String accessToken, String email, String displayName, String azureId) {
+    private record LoginPayload(String accessToken, String email, String displayName, String azureId, String authority, String refreshToken) {
     }
 
     private record RegisterPayload(String azureId, String email, String displayName, String agentCode, String password, String teamName, String roleName) {
     }
 
-    private record AuthResponsePayload(String accessToken, String tokenType, java.time.Instant expiresAt, UserSummary user) {
+    private record AuthResponsePayload(String accessToken, String tokenType, java.time.Instant expiresAt, UserSummary user, String authority, String refreshToken) {
     }
 }

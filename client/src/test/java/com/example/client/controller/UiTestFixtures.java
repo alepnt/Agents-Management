@@ -1,5 +1,9 @@
 package com.example.client.controller;
 
+import com.example.client.auth.MsalAccount;
+import com.example.client.auth.MsalAuthenticationException;
+import com.example.client.auth.MsalAuthenticationResult;
+import com.example.client.auth.TokenProvider;
 import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.UserSummary;
@@ -10,6 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.Optional;
+import java.util.Queue;
 
 final class UiTestFixtures {
 
@@ -34,7 +41,9 @@ final class UiTestFixtures {
                 "dummy-token",
                 "Bearer",
                 Instant.now().plusSeconds(3600),
-                new UserSummary(1L, "demo@example.com", "Demo User", "azure-1", 1L, 1L)
+                new UserSummary(1L, "demo@example.com", "Demo User", "azure-1", 1L, 1L),
+                "https://login.microsoftonline.com/mock",
+                "refresh-token"
         );
     }
 
@@ -96,5 +105,68 @@ final class UiTestFixtures {
         public MainViewController create(AuthSession session, SessionStore sessionStore) {
             return new StubMainViewController(session, sessionStore);
         }
+    }
+
+    static class StubTokenProvider implements TokenProvider {
+        private final Queue<Optional<MsalAuthenticationResult>> silentResponses = new ArrayDeque<>();
+        private final Queue<Object> interactiveResponses = new ArrayDeque<>();
+
+        void enqueueSilent(Optional<MsalAuthenticationResult> result) {
+            silentResponses.add(result);
+        }
+
+        void enqueueInteractiveSuccess(MsalAuthenticationResult result) {
+            interactiveResponses.add(result);
+        }
+
+        void enqueueInteractiveFailure(MsalAuthenticationException exception) {
+            interactiveResponses.add(exception);
+        }
+
+        void reset() {
+            silentResponses.clear();
+            interactiveResponses.clear();
+        }
+
+        @Override
+        public Optional<MsalAuthenticationResult> acquireTokenSilently() throws MsalAuthenticationException {
+            if (silentResponses.isEmpty()) {
+                return Optional.empty();
+            }
+            Optional<MsalAuthenticationResult> result = silentResponses.remove();
+            if (result == null) {
+                throw new MsalAuthenticationException("Risposta silenziosa MSAL non valida");
+            }
+            return result;
+        }
+
+        @Override
+        public MsalAuthenticationResult acquireTokenInteractive() throws MsalAuthenticationException {
+            if (interactiveResponses.isEmpty()) {
+                throw new MsalAuthenticationException("Nessuna risposta interattiva MSAL configurata");
+            }
+            Object response = interactiveResponses.remove();
+            if (response instanceof MsalAuthenticationException exception) {
+                throw exception;
+            }
+            return (MsalAuthenticationResult) response;
+        }
+    }
+
+    static MsalAuthenticationResult msalResultFor(AuthSession session) {
+        MsalAccount account = new MsalAccount(
+                session.user().email(),
+                session.user().displayName(),
+                session.user().azureId(),
+                "test-tenant",
+                session.user().azureId()
+        );
+        return new MsalAuthenticationResult(
+                session.accessToken(),
+                session.refreshToken(),
+                session.expiresAt(),
+                session.authority(),
+                account
+        );
     }
 }

@@ -2163,8 +2163,7 @@ public class MainViewController {
     private void navigateToLogin(String message, String style) {
         try {
             Stage stage = (Stage) mainTabPane.getScene().getWindow();
-            String prefilledEmail = session != null && session.user() != null ? session.user().email() : null;
-            MainApplication.showLoginSelection(stage, sessionStore, prefilledEmail, message, style);
+            MainApplication.showLoginSelection(stage, sessionStore, message, style);
         } catch (IOException e) {
             notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }

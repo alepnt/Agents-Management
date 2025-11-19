@@ -6,8 +6,14 @@ public record AuthSession(
         String accessToken,
         String tokenType,
         Instant expiresAt,
-        UserSummary user
+        UserSummary user,
+        String authority,
+        String refreshToken
 ) {
+    public AuthSession(String accessToken, String tokenType, Instant expiresAt, UserSummary user) {
+        this(accessToken, tokenType, expiresAt, user, null, null);
+    }
+
     public boolean isExpired() {
         return expiresAt != null && expiresAt.isBefore(Instant.now());
     }
