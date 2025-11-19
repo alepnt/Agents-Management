@@ -5,6 +5,7 @@ import com.example.client.session.SessionStore;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
@@ -19,6 +20,7 @@ import org.testfx.util.WaitForAsyncUtils;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 
 class DashboardUiTest extends ApplicationTest {
@@ -65,5 +67,16 @@ class DashboardUiTest extends ApplicationTest {
         verifyThat("#mainTabPane", NodeMatchers.isVisible());
         TabPane tabPane = lookup("#mainTabPane").query();
         assertEquals("Fatture", tabPane.getTabs().get(0).getText());
+    }
+
+    @Test
+    void logoutRequiresNewAuthentication() {
+        WaitForAsyncUtils.waitForFxEvents();
+        clickOn("Esci");
+        WaitForAsyncUtils.waitForFxEvents();
+        verifyThat("#loginButton", NodeMatchers.isVisible());
+        Labeled statusLabel = lookup("#statusLabel").queryLabeled();
+        assertEquals(MainViewController.LOGOUT_STATUS_MESSAGE, statusLabel.getText());
+        assertTrue(sessionStore.load().isEmpty());
     }
 }

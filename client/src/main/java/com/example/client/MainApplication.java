@@ -39,12 +39,22 @@ public class MainApplication extends Application {
     }
 
     private void loadLoginView(Stage stage) throws IOException {
-        loadScene(stage, "/com/example/client/view/LoginView.fxml", param -> {
+        loadLoginScene(stage, param -> {
             if (param == LoginController.class) {
                 return LoginController.create(sessionStore, authApiClient);
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
-        }, "Gestore Agenti - Login");
+        });
+    }
+
+    public static void showLoginSelection(Stage stage, SessionStore sessionStore, String prefilledEmail,
+                                          String statusMessage, String statusStyle) throws IOException {
+        loadLoginScene(stage, param -> {
+            if (param == LoginController.class) {
+                return LoginController.create(sessionStore, prefilledEmail, statusMessage, statusStyle);
+            }
+            throw new IllegalStateException("Controller sconosciuto: " + param.getName());
+        });
     }
 
     private void loadMainView(Stage stage, AuthSession session) throws IOException {
@@ -54,6 +64,16 @@ public class MainApplication extends Application {
             }
             throw new IllegalStateException("Controller sconosciuto: " + param.getName());
         }, "Gestore Agenti");
+    }
+
+    private static void loadLoginScene(Stage stage, javafx.util.Callback<Class<?>, Object> controllerFactory) throws IOException {
+        FXMLLoader loader = new FXMLLoader(MainApplication.class.getResource("/com/example/client/view/LoginView.fxml"));
+        loader.setControllerFactory(controllerFactory);
+
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setTitle("Gestore Agenti - Login");
+        stage.setScene(scene);
     }
 
     private void loadScene(Stage stage, String fxmlPath, javafx.util.Callback<Class<?>, Object> controllerFactory, String title) throws IOException {
