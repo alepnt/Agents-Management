@@ -31,4 +31,11 @@ public class NotificationCenter<T> implements Subject<T> {
     public Collection<Observer<T>> getObservers() {
         return Collections.unmodifiableSet(observers);
     }
+
+    /**
+     * Rimuove tutti gli observer registrati.
+     */
+    public void clearObservers() {
+        observers.clear();
+    }
 }

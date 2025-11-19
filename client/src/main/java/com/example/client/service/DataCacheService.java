@@ -76,8 +76,14 @@ public class DataCacheService {
     }
 
     public void restoreSession() {
+        clearSessionData();
         this.backendGateway = buildGateway(sessionStore);
         this.executor = new CommandExecutor(backendGateway, caretaker);
+    }
+
+    public void clearSessionData() {
+        caretaker.reset();
+        dataChangeCenter.clearObservers();
         invalidateStatistics();
         invalidateHistory();
     }

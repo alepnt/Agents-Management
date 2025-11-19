@@ -31,4 +31,12 @@ public class CommandHistoryCaretaker {
     public void unsubscribe(Observer<CommandMemento> observer) {
         notificationCenter.removeObserver(observer);
     }
+
+    /**
+     * Pulisce la history e rimuove eventuali observer registrati.
+     */
+    public void reset() {
+        history.clear();
+        notificationCenter.clearObservers();
+    }
 }
