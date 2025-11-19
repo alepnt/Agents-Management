@@ -79,10 +79,10 @@ class DataCacheServiceTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Map<T, ?> extractMap(DataCacheService service, String fieldName) throws Exception {
+    private <K, V> Map<K, V> extractMap(DataCacheService service, String fieldName) throws Exception {
         Field field = DataCacheService.class.getDeclaredField(fieldName);
         field.setAccessible(true);
-        return (Map<T, ?>) field.get(service);
+        return (Map<K, V>) field.get(service);
     }
 
     @SuppressWarnings("unchecked")
