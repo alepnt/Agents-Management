@@ -1,5 +1,6 @@
 package com.example.client.controller;
 
+import com.example.client.auth.MsalAuthenticationException;
 import com.example.client.service.AuthSession;
 import com.example.client.service.UserSummary;
 import com.example.client.session.SessionStore;
@@ -19,7 +20,11 @@ import org.testfx.util.WaitForAsyncUtils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 
 class LoginUiTest extends ApplicationTest {
@@ -29,7 +34,9 @@ class LoginUiTest extends ApplicationTest {
     private Map<String, AuthSession> availableSessions;
     private UiTestFixtures.StubAuthApiClient authApiClient;
     private UiTestFixtures.StubMainViewFactory mainViewFactory;
+    private UiTestFixtures.StubTokenProvider tokenProvider;
     private Stage primaryStage;
+    private AtomicInteger loginInvocations;
 
     @BeforeAll
     static void configureHeadless() {
@@ -42,8 +49,13 @@ class LoginUiTest extends ApplicationTest {
         session = UiTestFixtures.demoSession();
         availableSessions = new HashMap<>();
         availableSessions.put(session.user().azureId(), session);
-        authApiClient = new UiTestFixtures.StubAuthApiClient(form -> availableSessions.get(form.azureId()));
+        loginInvocations = new AtomicInteger();
+        authApiClient = new UiTestFixtures.StubAuthApiClient(form -> {
+            loginInvocations.incrementAndGet();
+            return availableSessions.get(form.azureId());
+        });
         mainViewFactory = new UiTestFixtures.StubMainViewFactory();
+        tokenProvider = new UiTestFixtures.StubTokenProvider();
         FxToolkit.registerPrimaryStage();
     }
 
@@ -70,7 +82,9 @@ class LoginUiTest extends ApplicationTest {
                 "second-token",
                 "Bearer",
                 session.expiresAt().plusSeconds(600),
-                new UserSummary(2L, "second@example.com", "Second User", "azure-2", 2L, 2L)
+                new UserSummary(2L, "second@example.com", "Second User", "azure-2", 2L, 2L),
+                session.authority(),
+                "refresh-second"
         );
         availableSessions.put(secondSession.user().azureId(), secondSession);
 
@@ -85,17 +99,29 @@ class LoginUiTest extends ApplicationTest {
         var storedFirst = sessionStore.loadForUser(session.user().azureId());
         var storedSecond = sessionStore.loadForUser(secondSession.user().azureId());
 
-        org.junit.jupiter.api.Assertions.assertTrue(storedFirst.isPresent(), "La sessione del primo utente deve esistere");
-        org.junit.jupiter.api.Assertions.assertEquals(session.accessToken(), storedFirst.get().accessToken());
-        org.junit.jupiter.api.Assertions.assertTrue(storedSecond.isPresent(), "La sessione del secondo utente deve esistere");
-        org.junit.jupiter.api.Assertions.assertEquals(secondSession.accessToken(), storedSecond.get().accessToken());
+        assertTrue(storedFirst.isPresent(), "La sessione del primo utente deve esistere");
+        assertEquals(session.accessToken(), storedFirst.get().accessToken());
+        assertTrue(storedSecond.isPresent(), "La sessione del secondo utente deve esistere");
+        assertEquals(secondSession.accessToken(), storedSecond.get().accessToken());
+    }
+
+    @Test
+    void msalFailureIsShownToUser() {
+        tokenProvider.enqueueSilent(Optional.empty());
+        tokenProvider.enqueueInteractiveFailure(new MsalAuthenticationException("Browser bloccato"));
+
+        clickOn("#loginButton");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThat("#statusLabel", NodeMatchers.hasText("Browser bloccato"));
+        assertEquals(0, loginInvocations.get());
     }
 
     private void loadLoginScene() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
         loader.setControllerFactory(type -> {
             if (type == LoginController.class) {
-                return LoginController.create(sessionStore, authApiClient, mainViewFactory);
+                return LoginController.create(sessionStore, authApiClient, tokenProvider, mainViewFactory);
             }
             throw new IllegalStateException("Controller non gestito: " + type.getName());
         });
@@ -116,10 +142,8 @@ class LoginUiTest extends ApplicationTest {
     }
 
     private void performLogin(AuthSession sessionToUse) {
-        clickOn("#emailField").write(sessionToUse.user().email());
-        clickOn("#displayNameField").write(sessionToUse.user().displayName());
-        clickOn("#azureIdField").write(sessionToUse.user().azureId());
-        clickOn("#accessTokenArea").write(sessionToUse.accessToken());
+        tokenProvider.enqueueSilent(Optional.empty());
+        tokenProvider.enqueueInteractiveSuccess(UiTestFixtures.msalResultFor(sessionToUse));
 
         clickOn("#loginButton");
         WaitForAsyncUtils.waitForFxEvents();
