@@ -1,5 +1,6 @@
 package com.example.client.controller;
 
+import com.example.client.MainApplication;
 import com.example.client.command.CommandMemento;
 import com.example.client.model.AgentModel;
 import com.example.client.model.ArticleModel;
@@ -50,9 +51,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
@@ -84,10 +82,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.nio.file.Files;
@@ -97,6 +95,9 @@ import java.nio.file.Path;
  * Controller principale della dashboard JavaFX.
  */
 public class MainViewController {
+
+    static final String LOGOUT_STATUS_MESSAGE = "Sessione terminata. Effettua nuovamente il login.";
+    private static final String LOGOUT_STATUS_STYLE = "-fx-text-fill: #1565c0; -fx-font-weight: bold;";
 
     private final AuthSession session;
     private final SessionStore sessionStore;
@@ -798,6 +799,19 @@ public class MainViewController {
         refreshStatistics();
         refreshHistorySearch(true);
         notificationService.publish(new NotificationMessage("refresh", "Dati aggiornati", Instant.now()));
+    }
+
+    @FXML
+    private void onLogout() {
+        try {
+            sessionStore.clear();
+        } catch (IOException e) {
+            notifyError("Impossibile cancellare la sessione: " + e.getMessage());
+        }
+        dataCacheService.invalidateHistory();
+        dataCacheService.invalidateStatistics();
+        notificationService.publish(new NotificationMessage("session", "Logout eseguito", Instant.now()));
+        navigateToLogin(LOGOUT_STATUS_MESSAGE, LOGOUT_STATUS_STYLE);
     }
 
     @FXML
@@ -2088,19 +2102,14 @@ public class MainViewController {
     }
 
     private void showLoginPrompt(String reason) {
+        navigateToLogin(reason, "-fx-text-fill: #c62828; -fx-font-weight: bold;");
+    }
+
+    private void navigateToLogin(String message, String style) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
-            loader.setControllerFactory(type -> {
-                if (type == LoginController.class) {
-                    String prefilledEmail = session != null && session.user() != null ? session.user().email() : null;
-                    return LoginController.create(sessionStore, prefilledEmail, reason, "-fx-text-fill: #c62828; -fx-font-weight: bold;");
-                }
-                throw new IllegalStateException("Controller non supportato: " + type.getName());
-            });
-            Parent root = loader.load();
             Stage stage = (Stage) mainTabPane.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Gestore Agenti - Login");
+            String prefilledEmail = session != null && session.user() != null ? session.user().email() : null;
+            MainApplication.showLoginSelection(stage, sessionStore, prefilledEmail, message, style);
         } catch (IOException e) {
             notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }

@@ -15,6 +15,7 @@
             <Label text="Gestore Agenti" />
             <Pane HBox.hgrow="ALWAYS" />
             <Button text="Aggiorna" onAction="#refreshData" />
+            <Button text="Esci" onAction="#onLogout" />
         </ToolBar>
     </top>
     <center>
