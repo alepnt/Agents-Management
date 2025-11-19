@@ -111,6 +111,12 @@ public class LoginController {
                 statusLabel.setStyle(statusStyle.orElse("-fx-text-fill: #2e7d32; -fx-font-weight: bold;"));
             });
         });
+
+        azureIdField.focusedProperty().addListener((obs, oldValue, focused) -> {
+            if (!focused) {
+                lookupSavedSessionForAzureId();
+            }
+        });
     }
 
     @FXML
@@ -132,7 +138,7 @@ public class LoginController {
         LoginForm form = new LoginForm(accessTokenArea.getText().trim(), emailField.getText().trim(), displayNameField.getText().trim(), azureIdField.getText().trim());
         try {
             AuthSession session = authApiClient.login(form);
-            sessionStore.save(session);
+            sessionStore.saveForUser(form.azureId(), session);
             statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
             openMainView(session);
         } catch (InterruptedException e) {
@@ -178,6 +184,15 @@ public class LoginController {
     private void showValidationError(String message) {
         statusLabel.setText(message);
         AlertUtils.showError(message);
+    }
+
+    private void lookupSavedSessionForAzureId() {
+        String azureId = azureIdField.getText();
+        if (azureId == null || azureId.isBlank()) {
+            return;
+        }
+        sessionStore.loadForUser(azureId.trim()).ifPresent(session ->
+                statusLabel.setText("Sessione salvata per " + session.user().displayName()));
     }
 
     @FunctionalInterface
