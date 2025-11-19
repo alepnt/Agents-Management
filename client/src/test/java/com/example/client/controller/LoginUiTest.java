@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.matcher.base.NodeMatchers;
+import org.testfx.matcher.control.LabeledMatchers;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.IOException;
@@ -113,7 +114,7 @@ class LoginUiTest extends ApplicationTest {
         clickOn("#loginButton");
         WaitForAsyncUtils.waitForFxEvents();
 
-        verifyThat("#statusLabel", NodeMatchers.hasText("Browser bloccato"));
+        verifyThat("#statusLabel", LabeledMatchers.hasText("Browser bloccato"));
         assertEquals(0, loginInvocations.get());
     }
 

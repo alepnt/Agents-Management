@@ -40,6 +40,11 @@ public class LoginController {
     private final MainViewFactory mainViewFactory;
     private final TokenProvider tokenProvider;
 
+    @FunctionalInterface
+    public interface MainViewFactory {
+        MainViewController create(AuthSession session, SessionStore sessionStore);
+    }
+
     public static LoginController create(SessionStore sessionStore) {
         return new LoginController(sessionStore, new AuthApiClient(), Optional.empty(), Optional.empty(), defaultTokenProvider(), MainViewController::create);
     }

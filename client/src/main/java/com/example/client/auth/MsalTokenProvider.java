@@ -35,18 +35,22 @@ public class MsalTokenProvider implements TokenProvider {
     private final TokenCache cache;
     private volatile IAuthenticationResult lastResult;
 
-    public MsalTokenProvider(MsalConfiguration configuration) throws MalformedURLException {
+    public MsalTokenProvider(MsalConfiguration configuration) {
         this.redirectUri = configuration.redirectUri();
         this.scopes = Set.copyOf(configuration.scopes());
         this.authority = configuration.authority();
         this.cache = new TokenCache();
-        this.application = PublicClientApplication.builder(configuration.clientId())
-                .authority(configuration.authority())
-                .setTokenCacheAccessAspect(cache)
-                .build();
+        try {
+            this.application = PublicClientApplication.builder(configuration.clientId())
+                    .authority(configuration.authority())
+                    .setTokenCacheAccessAspect(cache)
+                    .build();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Configurazione MSAL non valida: " + e.getMessage(), e);
+        }
     }
 
-    public static TokenProvider fromEnvironment() throws MalformedURLException {
+    public static TokenProvider fromEnvironment() {
         return new MsalTokenProvider(MsalConfiguration.fromEnvironment());
     }
 
