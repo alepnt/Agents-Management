@@ -24,9 +24,9 @@ final class UiTestFixtures {
     }
 
     static SessionStore newTemporarySessionStore() throws IOException {
-        Path sessionFile = Files.createTempFile("gestore-agenti-session", ".json");
-        sessionFile.toFile().deleteOnExit();
-        return new SessionStore(sessionFile);
+        Path sessionDir = Files.createTempDirectory("gestore-agenti-session");
+        sessionDir.toFile().deleteOnExit();
+        return new SessionStore(sessionDir);
     }
 
     static AuthSession demoSession() {
@@ -44,20 +44,39 @@ final class UiTestFixtures {
     }
 
     static class StubAuthApiClient extends AuthApiClient {
-        private final AuthSession session;
+        private final java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver;
+        private final java.util.function.Supplier<UserSummary> registerSupplier;
 
         StubAuthApiClient(AuthSession session) {
-            this.session = session;
+            this(form -> session, session::user);
+        }
+
+        StubAuthApiClient(java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver) {
+            this(loginResolver, () -> null);
+        }
+
+        StubAuthApiClient(java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver,
+                          java.util.function.Supplier<UserSummary> registerSupplier) {
+            this.loginResolver = loginResolver;
+            this.registerSupplier = registerSupplier;
         }
 
         @Override
         public AuthSession login(com.example.client.service.LoginForm form) {
+            AuthSession session = loginResolver.apply(form);
+            if (session == null) {
+                throw new IllegalStateException("Nessuna sessione di test disponibile per " + form.azureId());
+            }
             return session;
         }
 
         @Override
         public UserSummary register(com.example.client.service.RegisterForm form) {
-            return session.user();
+            UserSummary summary = registerSupplier.get();
+            if (summary == null) {
+                throw new IllegalStateException("Nessun utente di test disponibile per la registrazione");
+            }
+            return summary;
         }
     }
 
@@ -73,14 +92,6 @@ final class UiTestFixtures {
     }
 
     static class StubMainViewFactory implements LoginController.MainViewFactory {
-        private final AuthSession session;
-        private final SessionStore sessionStore;
-
-        StubMainViewFactory(AuthSession session, SessionStore sessionStore) {
-            this.session = session;
-            this.sessionStore = sessionStore;
-        }
-
         @Override
         public MainViewController create(AuthSession session, SessionStore sessionStore) {
             return new StubMainViewController(session, sessionStore);
