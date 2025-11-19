@@ -808,9 +808,10 @@ public class MainViewController {
         } catch (IOException e) {
             notifyError("Impossibile cancellare la sessione: " + e.getMessage());
         }
-        dataCacheService.invalidateHistory();
-        dataCacheService.invalidateStatistics();
+        clearViewState();
+        dataCacheService.clearSessionData();
         notificationService.publish(new NotificationMessage("session", "Logout eseguito", Instant.now()));
+        shutdown();
         navigateToLogin(LOGOUT_STATUS_MESSAGE, LOGOUT_STATUS_STYLE);
     }
 
@@ -2095,10 +2096,64 @@ public class MainViewController {
             return;
         }
         sessionExpired = true;
-        dataCacheService.invalidateHistory();
-        dataCacheService.invalidateStatistics();
+        clearViewState();
+        dataCacheService.clearSessionData();
         notificationService.publish(new NotificationMessage("session", message, Instant.now()));
+        shutdown();
         showLoginPrompt(message);
+    }
+
+    private void clearViewState() {
+        invoiceItems.clear();
+        contractItems.clear();
+        customerItems.clear();
+        articleItems.clear();
+        invoiceLineItems.clear();
+        agentItems.clear();
+        teamItems.clear();
+        roleItems.clear();
+        userItems.clear();
+        messageItems.clear();
+        commissionItems.clear();
+        historyItems.clear();
+        historySearchItems.clear();
+
+        currentHistoryType = null;
+        currentHistoryId = null;
+        historyCurrentPage = 0;
+        historyTotalPages = 0;
+        historyCurrentCriteria = new DocumentHistorySearchCriteria();
+
+        if (invoiceStatusChart != null) {
+            invoiceStatusChart.getData().clear();
+        }
+        if (contractStatusChart != null) {
+            contractStatusChart.getData().clear();
+        }
+        if (commissionTrendChart != null) {
+            commissionTrendChart.getData().clear();
+        }
+        if (agentCommissionBarChart != null) {
+            agentCommissionBarChart.getData().clear();
+        }
+        if (teamCommissionPieChart != null) {
+            teamCommissionPieChart.setData(FXCollections.observableArrayList());
+        }
+        if (historyPageInfoLabel != null) {
+            historyPageInfoLabel.setText("Pagina 0 di 0");
+        }
+        if (historyTotalLabel != null) {
+            historyTotalLabel.setText("0 risultati");
+        }
+        if (historyPrevButton != null) {
+            historyPrevButton.setDisable(true);
+        }
+        if (historyNextButton != null) {
+            historyNextButton.setDisable(true);
+        }
+        if (notificationLabel != null) {
+            notificationLabel.setText("");
+        }
     }
 
     private void showLoginPrompt(String reason) {
