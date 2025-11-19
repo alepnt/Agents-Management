@@ -79,8 +79,6 @@ public class MsalTokenProvider implements TokenProvider {
                 return Optional.empty();
             }
             throw asAuthenticationException("acquisizione silenziosa", root);
-        } catch (MalformedURLException ex) {
-            throw new MsalAuthenticationException("Configurazione MSAL non valida", ex);
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione silenziosa", ex);
         }
@@ -97,8 +95,6 @@ public class MsalTokenProvider implements TokenProvider {
             return mapResult(lastResult);
         } catch (CompletionException ex) {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
-        } catch (MalformedURLException ex) {
-            throw new MsalAuthenticationException("Configurazione MSAL non valida", ex);
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
         }
