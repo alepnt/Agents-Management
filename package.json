@@ -1,0 +1,9 @@
+{
+  "name": "gestore-agenti",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Utility scripts for the Gestore Agenti workspace.",
+  "scripts": {
+    "build": "echo 'Nessun build npm: il progetto usa solo moduli Maven'"
+  }
+}

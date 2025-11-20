@@ -45,6 +45,10 @@ Il modulo server può essere impacchettato come JAR eseguibile con:
 mvn -pl server -am clean package
 ```
 
+### Note di rete
+
+L'ambiente richiede l'uso del proxy interno `proxy:8080` per scaricare le dipendenze Maven. Il file `.mvn/settings.xml` è stato aggiornato per utilizzare questo proxy; se `mvn clean install` restituisce `403 Forbidden` è necessario consentire l'accesso a `https://repo.maven.apache.org` o configurare un mirror raggiungibile.
+
 Il file risultante sarà disponibile in `server/target/gestore-agenti-server-0.0.1-SNAPSHOT.jar`.
 
 ## Test di integrazione
