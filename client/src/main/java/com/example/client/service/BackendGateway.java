@@ -5,7 +5,6 @@ import com.example.client.model.NotificationItem;
 import com.example.client.model.NotificationSubscription;
 import com.example.client.model.NotificationSubscriptionInfo;
 import com.example.client.session.SessionStore;
-import com.example.client.service.SessionExpiredException;
 import com.example.common.dto.ChatConversationDTO;
 import com.example.common.dto.ChatMessageDTO;
 import com.example.common.dto.ChatMessageRequest;
