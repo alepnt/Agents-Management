@@ -2197,7 +2197,7 @@ public class MainViewController {
             if (value == null || value.isBlank()) {
                 return Optional.empty();
             }
-            return Optional.of(Long.parseLong(value));
+            return Optional.of(Long.valueOf(value));
         } catch (NumberFormatException ex) {
             return Optional.empty();
         }
