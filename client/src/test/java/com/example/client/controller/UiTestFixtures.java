@@ -97,8 +97,11 @@ final class UiTestFixtures {
     }
 
     static class StubMainViewController extends MainViewController {
-        StubMainViewController(AuthSession session, SessionStore sessionStore) {
+        private final Stage fallbackStage;
+
+        StubMainViewController(AuthSession session, SessionStore sessionStore, Stage fallbackStage) {
             super(session, sessionStore);
+            this.fallbackStage = fallbackStage;
         }
 
         @Override
@@ -109,11 +112,6 @@ final class UiTestFixtures {
         @Override
         protected void performLogoutNavigation() {
             try {
-                Stage stage = getCurrentStage();
-                if (stage == null) {
-                    throw new IllegalStateException("Stage di test non disponibile per il logout");
-                }
-
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
                 StubTokenProvider tokenProvider = new StubTokenProvider();
                 loader.setControllerFactory(param -> {
@@ -130,10 +128,27 @@ final class UiTestFixtures {
                 });
 
                 Parent root = loader.load();
+                String theme = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
+
+                Stage targetStage = getCurrentStage();
+                if (targetStage == null) {
+                    targetStage = fallbackStage;
+                }
+
+                if (targetStage == null) {
+                    try {
+                        targetStage = FxToolkit.registerPrimaryStage();
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Impossibile determinare lo stage di test per il logout", e);
+                    }
+                }
+
                 Scene scene = new Scene(root);
-                scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
-                stage.setScene(scene);
-                stage.setTitle("Gestore Agenti - Login");
+                scene.getStylesheets().add(theme);
+
+                targetStage.setScene(scene);
+                targetStage.setTitle("Gestore Agenti - Login");
+                targetStage.show();
             } catch (IOException e) {
                 throw new RuntimeException("Impossibile aprire la schermata di login di test", e);
             }
@@ -141,9 +156,23 @@ final class UiTestFixtures {
     }
 
     static class StubMainViewFactory implements LoginController.MainViewFactory {
+        private Stage fallbackStage;
+
+        StubMainViewFactory() {
+            this(null);
+        }
+
+        StubMainViewFactory(Stage fallbackStage) {
+            this.fallbackStage = fallbackStage;
+        }
+
+        void setFallbackStage(Stage fallbackStage) {
+            this.fallbackStage = fallbackStage;
+        }
+
         @Override
         public MainViewController create(AuthSession session, SessionStore sessionStore) {
-            return new StubMainViewController(session, sessionStore);
+            return new StubMainViewController(session, sessionStore, fallbackStage);
         }
     }
 
