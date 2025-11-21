@@ -134,7 +134,10 @@ final class UiTestFixtures {
                 }
 
                 if (stage != null) {
-                    Scene scene = new Scene(root);
+                    Scene scene = currentScene != null ? currentScene : new Scene(root);
+                    if (scene.getRoot() != root) {
+                        scene.setRoot(root);
+                    }
                     if (!scene.getStylesheets().contains(theme)) {
                         scene.getStylesheets().add(theme);
                     }
