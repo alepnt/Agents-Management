@@ -140,7 +140,7 @@ public class CommissionService {
             }
 
             Commission updatedCommission = base.update(totalCommission, paidCommission, pendingCommission, Instant.now(clock));
-            updated.add(Objects.requireNonNull(commissionRepository.save(updatedCommission), "commission must not be null"));
+            updated.add(commissionRepository.save(updatedCommission));
         }
         return updated;
     }

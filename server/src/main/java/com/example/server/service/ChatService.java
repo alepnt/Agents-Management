@@ -136,7 +136,7 @@ public class ChatService {
         if (conversationId.startsWith(TEAM_PREFIX)) {
             long teamId = Long.parseLong(conversationId, TEAM_PREFIX.length(), conversationId.length(), 10);
             Long userTeamId = user.getTeamId();
-            return userTeamId != null && userTeamId.longValue() == teamId;
+            return userTeamId != null && userTeamId == teamId;
         }
         return true;
     }

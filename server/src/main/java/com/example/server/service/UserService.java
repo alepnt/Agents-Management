@@ -139,7 +139,7 @@ public class UserService {
                         "updated user must not be null"))
                 .orElseGet(() -> registerAzureUser(requiredRequest));
 
-        savedUser = Objects.requireNonNull(userRepository.save(savedUser), "saved user must not be null");
+        savedUser = userRepository.save(savedUser);
 
         Instant expiresAt = Instant.now(clock).plusSeconds(3600);
         return new AuthResponse(delegatedToken, "Bearer", expiresAt, toSummary(savedUser));
@@ -160,7 +160,7 @@ public class UserService {
             user = user.withPasswordHash(hashPassword(requiredRequest.password()));
         }
 
-        User saved = Objects.requireNonNull(userRepository.save(user), "saved user must not be null");
+        User saved = userRepository.save(user);
         Long savedId = Objects.requireNonNull(saved.getId(), "user id must not be null");
 
         if (requiredRequest.agentCode() != null && !requiredRequest.agentCode().isBlank()) {

@@ -43,7 +43,7 @@ public class InvoiceLineService {
     @Transactional
     public InvoiceLineDTO create(InvoiceLineDTO dto) {
         InvoiceLine toSave = validateAndNormalize(null, Objects.requireNonNull(dto, "invoice line must not be null"));
-        InvoiceLine saved = Objects.requireNonNull(invoiceLineRepository.save(toSave), "invoice line must not be null");
+        InvoiceLine saved = invoiceLineRepository.save(toSave);
         return InvoiceLineMapper.toDto(saved);
     }
 

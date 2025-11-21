@@ -112,9 +112,7 @@ public class ReportService {
             Long invoiceAgentId = null;
             if (contractId != null) {
                 Optional<Contract> contract = contractCache.computeIfAbsent(contractId, id -> contractRepository.findById(id));
-                if (contract.isPresent()) {
-                    invoiceAgentId = contract.get().getAgentId();
-                }
+                invoiceAgentId = contract.flatMap(found -> Optional.ofNullable(found.getAgentId())).orElse(null);
             }
             if (agentId != null && !Objects.equals(agentId, invoiceAgentId)) {
                 continue;
