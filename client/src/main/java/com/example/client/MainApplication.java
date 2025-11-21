@@ -83,6 +83,7 @@ public class MainApplication extends Application {
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(MainApplication.class.getResource("/com/example/client/style/theme.css").toExternalForm());
         stage.setTitle("Gestore Agenti - Login");
         stage.setScene(scene);
     }
@@ -93,6 +94,7 @@ public class MainApplication extends Application {
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
         stage.setTitle(title);
         stage.setScene(scene);
     }
