@@ -15,6 +15,7 @@ import com.example.client.model.InvoiceLineModel;
 import com.example.client.model.RoleModel;
 import com.example.client.model.TeamModel;
 import com.example.client.model.UserModel;
+import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.BackendCommunicationException;
 import com.example.client.service.BackendServiceException;
