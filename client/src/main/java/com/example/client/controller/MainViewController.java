@@ -2184,7 +2184,9 @@ public class MainViewController {
     protected void navigateToLogin(String message, String style) {
         try {
             Stage stage = getCurrentStage();
-            if (stage == null) {
+            Scene currentScene = mainTabPane != null ? mainTabPane.getScene() : null;
+
+            if (stage == null && currentScene == null) {
                 notifyError("Impossibile determinare lo stage corrente per il login");
                 return;
             }
@@ -2198,10 +2200,19 @@ public class MainViewController {
             });
 
             Parent root = loader.load();
+            String themeStylesheet = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setTitle("Gestore Agenti - Login");
+            scene.getStylesheets().add(themeStylesheet);
+
+            if (stage != null) {
+                stage.setScene(scene);
+                stage.setTitle("Gestore Agenti - Login");
+            } else {
+                currentScene.setRoot(root);
+                if (!currentScene.getStylesheets().contains(themeStylesheet)) {
+                    currentScene.getStylesheets().add(themeStylesheet);
+                }
+            }
         } catch (IOException e) {
             notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }
