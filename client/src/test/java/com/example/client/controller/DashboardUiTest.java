@@ -27,6 +27,7 @@ class DashboardUiTest extends ApplicationTest {
 
     private SessionStore sessionStore;
     private AuthSession session;
+    private Stage primaryStage;
 
     @BeforeAll
     static void configureHeadless() {
@@ -35,10 +36,10 @@ class DashboardUiTest extends ApplicationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        sessionStore = UiTestFixtures.newTemporarySessionStore();
+        sessionStore = createSessionStoreWithSession();
         session = UiTestFixtures.demoSession();
-        sessionStore.save(session);
         FxToolkit.registerPrimaryStage();
+        FxToolkit.setupFixture(this::reloadMainView);
     }
 
     @AfterEach
@@ -48,17 +49,8 @@ class DashboardUiTest extends ApplicationTest {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/MainView.fxml"));
-        loader.setControllerFactory(type -> {
-            if (type == MainViewController.class) {
-                return new UiTestFixtures.StubMainViewController(session, sessionStore);
-            }
-            throw new IllegalStateException("Controller non gestito: " + type.getName());
-        });
-
-        Parent root = loader.load();
-        stage.setScene(new Scene(root));
-        stage.show();
+        this.primaryStage = stage;
+        reloadMainView();
     }
 
     @Test
@@ -78,5 +70,59 @@ class DashboardUiTest extends ApplicationTest {
         Labeled statusLabel = lookup("#statusLabel").queryLabeled();
         assertEquals(MainViewController.LOGOUT_STATUS_MESSAGE, statusLabel.getText());
         assertTrue(sessionStore.load().isEmpty());
+    }
+
+    private void reloadMainView() {
+        ensureSessionInitialized();
+
+        if (primaryStage == null) {
+            try {
+                primaryStage = FxToolkit.registerPrimaryStage();
+            } catch (Exception e) {
+                throw new RuntimeException("Impossibile ottenere lo stage di test", e);
+            }
+        }
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/MainView.fxml"));
+        loader.setControllerFactory(type -> {
+            if (type == MainViewController.class) {
+                return new UiTestFixtures.StubMainViewController(session, sessionStore);
+            }
+            throw new IllegalStateException("Controller non gestito: " + type.getName());
+        });
+
+        try {
+            Parent root = loader.load();
+            primaryStage.setScene(new Scene(root));
+            primaryStage.show();
+        } catch (IOException e) {
+            throw new RuntimeException("Impossibile caricare la dashboard di test", e);
+        }
+    }
+
+    private void ensureSessionInitialized() {
+        if (session == null) {
+            session = UiTestFixtures.demoSession();
+        }
+        if (sessionStore == null) {
+            sessionStore = createSessionStoreWithSession();
+        }
+        try {
+            sessionStore.save(session);
+        } catch (IOException e) {
+            throw new RuntimeException("Impossibile salvare la sessione di test", e);
+        }
+    }
+
+    private SessionStore createSessionStoreWithSession() {
+        try {
+            SessionStore store = UiTestFixtures.newTemporarySessionStore();
+            if (session != null) {
+                store.save(session);
+            }
+            return store;
+        } catch (IOException e) {
+            throw new RuntimeException("Impossibile creare un SessionStore temporaneo", e);
+        }
     }
 }

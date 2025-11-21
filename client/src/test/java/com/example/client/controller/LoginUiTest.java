@@ -46,7 +46,7 @@ class LoginUiTest extends ApplicationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        sessionStore = UiTestFixtures.newTemporarySessionStore();
+        sessionStore = createSessionStore();
         session = UiTestFixtures.demoSession();
         availableSessions = new HashMap<>();
         availableSessions.put(session.user().azureId(), session);
@@ -58,6 +58,14 @@ class LoginUiTest extends ApplicationTest {
         mainViewFactory = new UiTestFixtures.StubMainViewFactory();
         tokenProvider = new UiTestFixtures.StubTokenProvider();
         FxToolkit.registerPrimaryStage();
+        FxToolkit.setupFixture(() -> {
+            tokenProvider.reset();
+            try {
+                loadLoginScene();
+            } catch (IOException e) {
+                throw new RuntimeException("Impossibile caricare la schermata di login di test", e);
+            }
+        });
     }
 
     @AfterEach
@@ -68,6 +76,7 @@ class LoginUiTest extends ApplicationTest {
     @Override
     public void start(Stage stage) throws IOException {
         this.primaryStage = stage;
+        ensureDependenciesInitialized();
         loadLoginScene();
     }
 
@@ -119,6 +128,13 @@ class LoginUiTest extends ApplicationTest {
     }
 
     private void loadLoginScene() throws IOException {
+        if (primaryStage == null) {
+            try {
+                primaryStage = FxToolkit.registerPrimaryStage();
+            } catch (Exception e) {
+                throw new RuntimeException("Impossibile ottenere lo stage di test", e);
+            }
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
         loader.setControllerFactory(type -> {
             if (type == LoginController.class) {
@@ -148,5 +164,39 @@ class LoginUiTest extends ApplicationTest {
 
         clickOn("#loginButton");
         WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    private void ensureDependenciesInitialized() {
+        if (sessionStore == null) {
+            sessionStore = createSessionStore();
+        }
+        if (session == null) {
+            session = UiTestFixtures.demoSession();
+        }
+        if (availableSessions == null) {
+            availableSessions = new HashMap<>();
+            availableSessions.put(session.user().azureId(), session);
+        }
+        if (authApiClient == null) {
+            loginInvocations = new AtomicInteger();
+            authApiClient = new UiTestFixtures.StubAuthApiClient(form -> {
+                loginInvocations.incrementAndGet();
+                return availableSessions.get(form.azureId());
+            });
+        }
+        if (mainViewFactory == null) {
+            mainViewFactory = new UiTestFixtures.StubMainViewFactory();
+        }
+        if (tokenProvider == null) {
+            tokenProvider = new UiTestFixtures.StubTokenProvider();
+        }
+    }
+
+    private SessionStore createSessionStore() {
+        try {
+            return UiTestFixtures.newTemporarySessionStore();
+        } catch (IOException e) {
+            throw new RuntimeException("Impossibile creare un SessionStore temporaneo", e);
+        }
     }
 }
