@@ -41,14 +41,7 @@ public class MsalTokenProvider implements TokenProvider {
         this.scopes = Set.copyOf(configuration.scopes());
         this.authority = configuration.authority();
         this.cache = new TokenCache();
-        try {
-            this.application = PublicClientApplication.builder(configuration.clientId())
-                    .authority(configuration.authority())
-                    .setTokenCacheAccessAspect(cache)
-                    .build();
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Configurazione MSAL non valida: " + e.getMessage(), e);
-        }
+        this.application = buildApplication(configuration, cache);
     }
 
     public static TokenProvider fromEnvironment() {
@@ -93,12 +86,23 @@ public class MsalTokenProvider implements TokenProvider {
                     .build();
             lastResult = application.acquireToken(parameters).join();
             return mapResult(lastResult);
-        } catch (MalformedURLException e) {
-            throw new MsalAuthenticationException("Redirect URI MSAL non valido", e);
         } catch (CompletionException ex) {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
+        } catch (MalformedURLException e) {
+            throw new MsalAuthenticationException("Redirect URI MSAL non valido", e);
+        }
+    }
+
+    private PublicClientApplication buildApplication(MsalConfiguration configuration, TokenCache cache) {
+        try {
+            return PublicClientApplication.builder(configuration.clientId())
+                    .authority(configuration.authority())
+                    .setTokenCacheAccessAspect(cache)
+                    .build();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Configurazione MSAL non valida", e);
         }
     }
 
@@ -108,11 +112,7 @@ public class MsalTokenProvider implements TokenProvider {
     }
 
     private IAuthenticationResult acquireTokenSilently(SilentParameters parameters) throws MsalAuthenticationException {
-        try {
-            return application.acquireTokenSilently(parameters).join();
-        } catch (MalformedURLException ex) {
-            throw asAuthenticationException("acquisizione silenziosa", ex);
-        }
+        return application.acquireTokenSilently(parameters).join();
     }
 
     private MsalAuthenticationResult mapResult(IAuthenticationResult result) {
