@@ -103,9 +103,9 @@ import java.nio.file.Path;
 public class MainViewController {
 
     static final String LOGOUT_STATUS_MESSAGE = "Sessione terminata. Effettua nuovamente il login.";
-    private static final String LOGOUT_STATUS_STYLE = "-fx-text-fill: #1565c0; -fx-font-weight: bold;";
+    static final String LOGOUT_STATUS_STYLE = "-fx-text-fill: #1565c0; -fx-font-weight: bold;";
 
-    private final SessionStore sessionStore;
+    protected final SessionStore sessionStore;
     private final DataCacheService dataCacheService;
     private final NotificationService notificationService = new NotificationService();
     private final ObservableList<InvoiceModel> invoiceItems = FXCollections.observableArrayList();
