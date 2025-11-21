@@ -135,8 +135,17 @@ public class MainViewController {
 
     public MainViewController(AuthSession session, SessionStore sessionStore) {
         this.session = session;
-        this.sessionStore = sessionStore;
-        this.dataCacheService = DataCacheService.create(sessionStore);
+        this.sessionStore = sessionStore != null ? sessionStore : new SessionStore();
+
+        if (session != null) {
+            try {
+                this.sessionStore.save(session);
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException("Impossibile salvare la sessione iniziale", e);
+            }
+        }
+
+        this.dataCacheService = DataCacheService.create(this.sessionStore);
         if (session != null) {
             this.dataCacheService.restoreSession();
         }
