@@ -73,6 +73,8 @@ public class MsalTokenProvider implements TokenProvider {
             SilentParameters parameters = SilentParameters.builder(scopes, account).build();
             lastResult = application.acquireTokenSilently(parameters).join();
             return Optional.of(mapResult(lastResult));
+        } catch (MalformedURLException ex) {
+            throw asAuthenticationException("acquisizione silenziosa", ex);
         } catch (CompletionException ex) {
             Throwable root = unwrap(ex);
             if (root instanceof MsalInteractionRequiredException) {
@@ -97,8 +99,6 @@ public class MsalTokenProvider implements TokenProvider {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
-        } catch (MalformedURLException ex) {
-            throw new MsalAuthenticationException("URI di redirect MSAL non valido: " + ex.getMessage(), ex);
         }
     }
 
