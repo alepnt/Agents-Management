@@ -130,25 +130,31 @@ final class UiTestFixtures {
                 Parent root = loader.load();
                 String theme = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
 
-                Stage targetStage = getCurrentStage();
-                if (targetStage == null) {
-                    targetStage = fallbackStage;
+                Stage stage = getCurrentStage();
+                Scene currentScene = stage != null ? stage.getScene() : null;
+                if (currentScene == null && root.getScene() != null) {
+                    currentScene = root.getScene();
                 }
 
-                if (targetStage == null) {
-                    try {
-                        targetStage = FxToolkit.registerPrimaryStage();
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Impossibile determinare lo stage di test per il logout", e);
+                if (stage != null) {
+                    Scene scene = currentScene != null ? currentScene : new Scene(root);
+                    if (scene.getRoot() != root) {
+                        scene.setRoot(root);
                     }
+                    if (!scene.getStylesheets().contains(theme)) {
+                        scene.getStylesheets().add(theme);
+                    }
+                    stage.setScene(scene);
+                    stage.setTitle("Gestore Agenti - Login");
+                    stage.show();
+                } else if (currentScene != null) {
+                    currentScene.setRoot(root);
+                    if (!currentScene.getStylesheets().contains(theme)) {
+                        currentScene.getStylesheets().add(theme);
+                    }
+                } else {
+                    throw new IllegalStateException("Impossibile determinare lo stage o la scena di test per il logout");
                 }
-
-                Scene scene = new Scene(root);
-                scene.getStylesheets().add(theme);
-
-                targetStage.setScene(scene);
-                targetStage.setTitle("Gestore Agenti - Login");
-                targetStage.show();
             } catch (IOException e) {
                 throw new RuntimeException("Impossibile aprire la schermata di login di test", e);
             }
