@@ -87,7 +87,9 @@ public class NotificationSubscriptionService {
         Long requiredId = Objects.requireNonNull(id, "id must not be null");
         return subscriptionRepository.findById(requiredId)
                 .map(existing -> {
-                    subscriptionRepository.delete(existing);
+                    NotificationSubscription nonNullExisting = Objects.requireNonNull(existing,
+                            "subscription must not be null");
+                    subscriptionRepository.delete(nonNullExisting);
                     return true;
                 })
                 .orElse(false);

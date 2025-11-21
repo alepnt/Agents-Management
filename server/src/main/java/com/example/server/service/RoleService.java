@@ -63,7 +63,8 @@ public class RoleService {
         Long requiredId = Objects.requireNonNull(id, "id must not be null");
         return roleRepository.findById(requiredId)
                 .map(existing -> {
-                    roleRepository.delete(existing);
+                    Role nonNullExisting = Objects.requireNonNull(existing, "role must not be null");
+                    roleRepository.delete(nonNullExisting);
                     return true;
                 })
                 .orElse(false);

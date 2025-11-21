@@ -88,13 +88,14 @@ public class NotificationService {
             notification = Objects.requireNonNull(Notification.forUser(user.getId(), requiredRequest.getTitle(),
                     requiredRequest.getMessage(), Instant.now(clock)), "notification must not be null");
         } else {
-            Team team = teamRepository.findById(requiredRequest.getTeamId())
+            Long teamId = Objects.requireNonNull(requiredRequest.getTeamId(), "teamId must not be null");
+            Team team = teamRepository.findById(teamId)
                     .orElseThrow(() -> new IllegalArgumentException("Team non trovato: " + requiredRequest.getTeamId()));
             notification = Objects.requireNonNull(Notification.forTeam(team.getId(), requiredRequest.getTitle(),
                     requiredRequest.getMessage(), Instant.now(clock)), "notification must not be null");
         }
 
-        Notification saved = notificationRepository.save(notification);
+        Notification saved = Objects.requireNonNull(notificationRepository.save(notification), "notification must not be null");
         publisher.publish(saved);
         return toDto(saved);
     }
@@ -113,12 +114,14 @@ public class NotificationService {
                     Assert.hasText(title, "Il titolo è obbligatorio");
                     Assert.hasText(message, "Il messaggio è obbligatorio");
 
-                    Notification updated = existing
+                    Notification updated = Objects.requireNonNull(existing
                             .withTitle(title)
                             .withMessage(message)
-                            .withRead(Optional.ofNullable(requiredRequest.getRead()).orElse(existing.isRead()));
+                            .withRead(Optional.ofNullable(requiredRequest.getRead()).orElse(existing.isRead())),
+                            "notification must not be null");
 
-                    Notification saved = notificationRepository.save(updated);
+                    Notification saved = Objects.requireNonNull(notificationRepository.save(updated),
+                            "notification must not be null");
                     return toDto(saved);
                 });
     }
@@ -141,7 +144,8 @@ public class NotificationService {
         java.util.function.Consumer<Notification> consumer = notification -> {
             if (listener.getAndSet(false)) {
                 NotificationDTO response = toDto(Objects.requireNonNull(notification, "notification must not be null"));
-                requiredDeferredResult.setResult(List.of(response));
+                List<NotificationDTO> result = Objects.requireNonNull(List.of(response), "notification list must not be null");
+                requiredDeferredResult.setResult(result);
             }
         };
 
@@ -153,7 +157,7 @@ public class NotificationService {
         Runnable cancelAction = () -> subscriptions.forEach(NotificationPublisher.Subscription::cancel);
         requiredDeferredResult.onCompletion(cancelAction);
         requiredDeferredResult.onTimeout(() -> {
-            List<NotificationDTO> emptyResult = List.of();
+            List<NotificationDTO> emptyResult = Objects.requireNonNull(List.of(), "result list must not be null");
             requiredDeferredResult.setResult(emptyResult);
             cancelAction.run();
         });
