@@ -1,6 +1,5 @@
 package com.example.client.controller;
 
-import com.example.client.MainApplication;
 import com.example.client.command.CommandMemento;
 import com.example.client.model.AgentModel;
 import com.example.client.model.ArticleModel;
@@ -16,6 +15,7 @@ import com.example.client.model.InvoiceLineModel;
 import com.example.client.model.RoleModel;
 import com.example.client.model.TeamModel;
 import com.example.client.model.UserModel;
+import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.BackendCommunicationException;
 import com.example.client.service.BackendServiceException;
@@ -23,6 +23,8 @@ import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
 import com.example.client.service.SessionExpiredException;
 import com.example.client.session.SessionStore;
+import com.example.client.auth.MsalTokenProvider;
+import com.example.client.auth.TokenProvider;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
@@ -51,6 +53,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
@@ -67,6 +70,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -2175,7 +2180,20 @@ public class MainViewController {
     private void navigateToLogin(String message, String style) {
         try {
             Stage stage = (Stage) mainTabPane.getScene().getWindow();
-            MainApplication.showLoginSelection(stage, sessionStore, message, style);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
+            TokenProvider provider = MsalTokenProvider.disabled("Servizio MSAL non disponibile");
+            loader.setControllerFactory(param -> {
+                if (param == LoginController.class) {
+                    return LoginController.create(sessionStore, new AuthApiClient(), provider, message, style);
+                }
+                throw new IllegalStateException("Controller sconosciuto: " + param.getName());
+            });
+
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
+            stage.setScene(scene);
+            stage.setTitle("Gestore Agenti - Login");
         } catch (IOException e) {
             notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }
