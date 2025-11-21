@@ -134,10 +134,16 @@ final class UiTestFixtures {
                 }
 
                 if (stage != null) {
-                    Scene scene = new Scene(root);
-                    scene.getStylesheets().add(theme);
+                    Scene scene = currentScene != null ? currentScene : new Scene(root);
+                    if (scene.getRoot() != root) {
+                        scene.setRoot(root);
+                    }
+                    if (!scene.getStylesheets().contains(theme)) {
+                        scene.getStylesheets().add(theme);
+                    }
                     stage.setScene(scene);
                     stage.setTitle("Gestore Agenti - Login");
+                    stage.show();
                 } else if (currentScene != null) {
                     currentScene.setRoot(root);
                     if (!currentScene.getStylesheets().contains(theme)) {
