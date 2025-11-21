@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +35,8 @@ public class SqlServerWindowsAuthenticationCustomizer implements BeanPostProcess
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName)
+            throws BeansException {
         if (bean instanceof HikariDataSource dataSource) {
             configureForWindowsAuthenticationIfRequired(dataSource);
         }
