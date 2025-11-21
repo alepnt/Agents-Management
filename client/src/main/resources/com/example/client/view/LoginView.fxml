@@ -16,7 +16,7 @@
                    style="-fx-text-fill: #546e7a;"/>
             <Button fx:id="loginButton" text="Accedi con Microsoft" onAction="#handleLogin"
                     maxWidth="Infinity" prefWidth="280" style="-fx-background-color: #2563eb; -fx-text-fill: white;"/>
-            <Label fx:id="statusLabel" text="Clicca su \"Accedi con Microsoft\" per iniziare" wrapText="true" textAlignment="CENTER"/>
+            <Label fx:id="statusLabel" text="Clicca su &quot;Accedi con Microsoft&quot; per iniziare" wrapText="true" textAlignment="CENTER"/>
             <Hyperlink fx:id="registerLink" text="Registrati" onAction="#openRegister"/>
         </VBox>
     </center>

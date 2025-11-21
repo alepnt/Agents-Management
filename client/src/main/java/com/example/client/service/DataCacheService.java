@@ -89,6 +89,8 @@ public class DataCacheService {
     }
 
     private static BackendGateway buildGateway(SessionStore sessionStore) {
+        java.util.Objects.requireNonNull(sessionStore, "SessionStore non può essere null");
+
         sessionStore.currentToken()
                 .orElseThrow(() -> new SessionExpiredException("Nessuna sessione attiva o token scaduto. Effettua nuovamente il login."));
         return new BackendGateway(sessionStore);
