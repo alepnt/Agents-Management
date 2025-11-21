@@ -63,7 +63,8 @@ public class TeamService {
         Long requiredId = Objects.requireNonNull(id, "id must not be null");
         return teamRepository.findById(requiredId)
                 .map(existing -> {
-                    teamRepository.delete(existing);
+                    Team nonNullExisting = Objects.requireNonNull(existing, "team must not be null");
+                    teamRepository.delete(nonNullExisting);
                     return true;
                 })
                 .orElse(false);

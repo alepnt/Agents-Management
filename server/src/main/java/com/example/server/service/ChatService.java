@@ -105,14 +105,16 @@ public class ChatService {
         subscriptions.add(chatPublisher.subscribe(requiredConversationId, message -> {
             if (pending.getAndSet(false)) {
                 ChatMessageDTO nonNullMessage = Objects.requireNonNull(message, "message must not be null");
-                requiredDeferredResult.setResult(List.of(nonNullMessage));
+                List<ChatMessageDTO> result = Objects.requireNonNull(List.of(nonNullMessage),
+                        "message list must not be null");
+                requiredDeferredResult.setResult(result);
             }
         }));
 
         Runnable cancel = () -> subscriptions.forEach(ChatPublisher.Subscription::cancel);
         requiredDeferredResult.onCompletion(cancel);
         requiredDeferredResult.onTimeout(() -> {
-            List<ChatMessageDTO> emptyResult = List.of();
+            List<ChatMessageDTO> emptyResult = Objects.requireNonNull(List.of(), "result list must not be null");
             requiredDeferredResult.setResult(emptyResult);
             cancel.run();
         });

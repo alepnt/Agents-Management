@@ -56,8 +56,8 @@ public class DocumentHistoryQueryRepository {
             parameters.addValue("offset", query.offset());
             parameters.addValue("limit", query.getSize());
         }
-        List<DocumentHistory> items = jdbcTemplate.query(sql.toString(), parameters,
-                Objects.requireNonNull(ROW_MAPPER, "rowMapper must not be null"));
+        List<DocumentHistory> items = Objects.requireNonNull(jdbcTemplate.query(sql.toString(), parameters,
+                Objects.requireNonNull(ROW_MAPPER, "rowMapper must not be null")), "items must not be null");
         Long totalCount = query.isPaginated()
                 ? Objects.requireNonNull(jdbcTemplate.queryForObject("SELECT COUNT(*) " + fromClause, parameters, Long.class),
                 "totalCount must not be null")

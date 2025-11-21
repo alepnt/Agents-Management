@@ -104,7 +104,7 @@ public class CommissionService {
     public boolean delete(Long id) {
         return commissionRepository.findById(Objects.requireNonNull(id, "id must not be null"))
                 .map(existing -> {
-                    commissionRepository.deleteById(existing.getId());
+                    commissionRepository.deleteById(Objects.requireNonNull(existing.getId(), "commission id must not be null"));
                     return true;
                 })
                 .orElse(false);
@@ -140,7 +140,7 @@ public class CommissionService {
             }
 
             Commission updatedCommission = base.update(totalCommission, paidCommission, pendingCommission, Instant.now(clock));
-            updated.add(commissionRepository.save(updatedCommission));
+            updated.add(Objects.requireNonNull(commissionRepository.save(updatedCommission), "commission must not be null"));
         }
         return updated;
     }
@@ -253,7 +253,8 @@ public class CommissionService {
         if (agent.isEmpty()) {
             return TeamCommissionRule.singleAgent(agentId, MIN_TEAM_RATE);
         }
-        Optional<User> user = userRepository.findById(agent.get().getUserId());
+        Long userId = Objects.requireNonNull(agent.get().getUserId(), "userId must not be null");
+        Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty() || user.get().getTeamId() == null) {
             return TeamCommissionRule.singleAgent(agentId, MIN_TEAM_RATE);
         }

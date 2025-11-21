@@ -78,7 +78,8 @@ public class MessageService {
         Long requiredId = Objects.requireNonNull(id, "id must not be null");
         return messageRepository.findById(requiredId)
                 .map(existing -> {
-                    messageRepository.delete(existing);
+                    Message nonNullExisting = Objects.requireNonNull(existing, "message must not be null");
+                    messageRepository.delete(nonNullExisting);
                     return true;
                 })
                 .orElse(false);

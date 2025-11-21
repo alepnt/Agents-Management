@@ -122,7 +122,8 @@ public class UserService {
     public boolean delete(Long id) {
         return userRepository.findById(Objects.requireNonNull(id, "id must not be null"))
                 .map(existing -> {
-                    userRepository.delete(existing);
+                    User nonNullExisting = Objects.requireNonNull(existing, "user must not be null");
+                    userRepository.delete(nonNullExisting);
                     return true;
                 })
                 .orElse(false);
