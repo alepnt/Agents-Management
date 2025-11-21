@@ -122,18 +122,15 @@ public class LoginController {
         loginButton.setDisable(true);
         updateStatus("Connessione a Microsoft in corso...");
 
+        if (isHeadlessEnvironment()) {
+            runSynchronously();
+            return;
+        }
+
         CompletableFuture
                 .supplyAsync(this::acquireMsalToken)
                 .thenApply(this::authenticateWithBackend)
-                .whenComplete((session, error) -> Platform.runLater(() -> {
-                    loginButton.setDisable(false);
-                    if (error != null) {
-                        handleAuthenticationError(error);
-                    } else if (session != null) {
-                        statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
-                        openMainView(session);
-                    }
-                }));
+                .whenComplete((session, error) -> Platform.runLater(() -> handleAuthenticationResult(session, error)));
     }
 
     @FXML
@@ -241,6 +238,29 @@ public class LoginController {
         } else {
             showValidationError("Errore inatteso durante il login: " + root.getMessage());
         }
+    }
+
+    private void handleAuthenticationResult(AuthSession session, Throwable error) {
+        loginButton.setDisable(false);
+        if (error != null) {
+            handleAuthenticationError(error);
+        } else if (session != null) {
+            statusLabel.setText("Autenticazione riuscita. Bentornato " + session.user().displayName() + "!");
+            openMainView(session);
+        }
+    }
+
+    private void runSynchronously() {
+        try {
+            AuthSession session = authenticateWithBackend(acquireMsalToken());
+            Platform.runLater(() -> handleAuthenticationResult(session, null));
+        } catch (Throwable error) {
+            Platform.runLater(() -> handleAuthenticationResult(null, error));
+        }
+    }
+
+    private boolean isHeadlessEnvironment() {
+        return Boolean.getBoolean("testfx.headless") || Boolean.getBoolean("java.awt.headless");
     }
 
     private Throwable unwrap(Throwable throwable) {
