@@ -64,7 +64,7 @@ final class UiTestFixtures {
         private final java.util.function.Supplier<UserSummary> registerSupplier;
 
         StubAuthApiClient(AuthSession session) {
-            this(form -> session, session::user);
+            this(form -> session, session != null ? session::user : () -> null);
         }
 
         StubAuthApiClient(java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver) {
