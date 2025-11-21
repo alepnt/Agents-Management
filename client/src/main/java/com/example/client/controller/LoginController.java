@@ -183,18 +183,14 @@ public class LoginController {
         }
     }
 
-    private void updateStatus(String message) {
-        statusLabel.setText(message);
-    }
-
     private MsalAuthenticationResult acquireMsalToken() {
         try {
             Optional<MsalAuthenticationResult> cached = tokenProvider.acquireTokenSilently();
             if (cached.isPresent()) {
-                Platform.runLater(() -> updateStatus("Token Microsoft trovato. Sto collegando l'account..."));
+                updateStatus("Token Microsoft trovato. Sto collegando l'account...");
                 return cached.get();
             }
-            Platform.runLater(() -> updateStatus("Autenticazione Microsoft in corso..."));
+            updateStatus("Autenticazione Microsoft in corso...");
             return tokenProvider.acquireTokenInteractive();
         } catch (MsalAuthenticationException e) {
             throw new CompletionException(e);
@@ -204,7 +200,7 @@ public class LoginController {
     private AuthSession authenticateWithBackend(MsalAuthenticationResult msalResult) {
         try {
             LoginForm form = buildLoginForm(msalResult);
-            Platform.runLater(() -> updateStatus("Verifica delle credenziali con il portale Gestore Agenti..."));
+            updateStatus("Verifica delle credenziali con il portale Gestore Agenti...");
             AuthSession session = authApiClient.login(form);
             sessionStore.saveForUser(form.azureId(), session);
             return session;
@@ -269,6 +265,14 @@ public class LoginController {
             current = current.getCause();
         }
         return current;
+    }
+
+    private void updateStatus(String message) {
+        if (Platform.isFxApplicationThread()) {
+            statusLabel.setText(message);
+        } else {
+            Platform.runLater(() -> statusLabel.setText(message));
+        }
     }
 
     private String firstNonBlank(String... values) {
