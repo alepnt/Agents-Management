@@ -1,0 +1,74 @@
+.app-root {
+    -fx-background-color: rgba(249, 255, 208, 0.8);
+    -fx-padding: 10;
+}
+
+.label {
+    -fx-text-fill: #000000;
+}
+
+.label.title {
+    -fx-text-fill: rgba(255, 207, 0, 0.8);
+    -fx-font-weight: bold;
+}
+
+.label.subtitle {
+    -fx-text-fill: #605d54;
+}
+
+.app-toolbar {
+    -fx-background-color: #ffd350;
+    -fx-padding: 8;
+}
+
+.app-toolbar .label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-background-color: rgba(255, 207, 0, 0.8);
+    -fx-text-fill: #000000;
+    -fx-font-weight: bold;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 14 8 14;
+}
+
+.text-field,
+.password-field,
+.combo-box-base,
+.date-picker,
+.text-area {
+    -fx-text-fill: #000000;
+    -fx-prompt-text-fill: rgba(255, 224, 87, 0.62);
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6;
+}
+
+.tab-pane *.tab-header-area {
+    -fx-background-color: #ffd350;
+}
+
+.separator *.line {
+    -fx-background-color: #ffffff;
+}
+
+.table-view,
+.chart {
+    -fx-background-color: #ffffff;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-legend {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+.hyperlink {
+    -fx-text-fill: #605d54;
+}

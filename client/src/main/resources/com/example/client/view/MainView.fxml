@@ -6,16 +6,24 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.client.controller.MainViewController">
+            fx:controller="com.example.client.controller.MainViewController"
+            styleClass="app-root">
     <top>
-        <ToolBar>
-            <Label text="Gestore Agenti" />
+        <ToolBar styleClass="app-toolbar">
+            <Label text="Gestore Agenti" styleClass="title" />
             <Pane HBox.hgrow="ALWAYS" />
             <Button text="Aggiorna" onAction="#refreshData" />
             <Button text="Esci" onAction="#onLogout" />
+            <ImageView fitHeight="36.0" fitWidth="36.0" preserveRatio="true">
+                <image>
+                    <Image url="@/images/app-logo.png" />
+                </image>
+            </ImageView>
         </ToolBar>
     </top>
     <center>
