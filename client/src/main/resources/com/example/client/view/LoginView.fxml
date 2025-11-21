@@ -10,7 +10,10 @@
             fx:controller="com.example.client.controller.LoginController"
             styleClass="app-root">
     <top>
-        <HBox alignment="CENTER_RIGHT" padding="10">
+        <HBox alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
             <ImageView fitHeight="48.0" fitWidth="48.0" preserveRatio="true">
                 <image>
                     <Image url="@/images/app-logo.png" />

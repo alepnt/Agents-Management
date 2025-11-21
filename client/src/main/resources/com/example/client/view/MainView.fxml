@@ -31,7 +31,10 @@
             <Tab text="Fatture" closable="false">
                 <BorderPane>
                     <top>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <GridPane hgap="8" vgap="8">
                                 <columnConstraints>
                                     <ColumnConstraints percentWidth="16" />
@@ -122,7 +125,10 @@
                                         <TableColumn fx:id="invoiceDueDateColumn" text="Scadenza" prefWidth="120" />
                                     </columns>
                                 </TableView>
-                                <VBox spacing="6" padding="10">
+                                <VBox spacing="6">
+                                    <padding>
+                                        <Insets top="10" right="10" bottom="10" left="10" />
+                                    </padding>
                                     <Label text="Storico documento" />
                                     <TableView fx:id="historyTable" prefHeight="200">
                                         <columns>
@@ -136,7 +142,10 @@
                         </SplitPane>
                     </center>
                     <right>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <Label text="Distribuzione stati" />
                             <PieChart fx:id="invoiceStatusChart" prefHeight="240" prefWidth="220" />
                         </VBox>
@@ -146,7 +155,10 @@
             <Tab text="Contratti" closable="false">
                 <BorderPane>
                     <top>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <GridPane hgap="8" vgap="8">
                                 <columnConstraints>
                                     <ColumnConstraints percentWidth="16" />
@@ -191,7 +203,10 @@
                         </TableView>
                     </center>
                     <right>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <Label text="Stato contratti" />
                             <PieChart fx:id="contractStatusChart" prefHeight="240" prefWidth="220" />
                         </VBox>
@@ -201,7 +216,10 @@
             <Tab text="Clienti" closable="false">
                 <BorderPane>
                     <top>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <GridPane hgap="8" vgap="8">
                                 <columnConstraints>
                                     <ColumnConstraints percentWidth="16" />
@@ -246,7 +264,10 @@
             <Tab text="Articoli" closable="false">
                 <BorderPane>
                     <top>
-                        <VBox spacing="8" padding="10">
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10" />
+                            </padding>
                             <GridPane hgap="8" vgap="8">
                                 <columnConstraints>
                                     <ColumnConstraints percentWidth="16" />
@@ -289,7 +310,10 @@
                 </BorderPane>
             </Tab>
             <Tab text="Storico" closable="false">
-                <BorderPane padding="10">
+                <BorderPane>
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10" />
+                    </padding>
                     <top>
                         <VBox spacing="8">
                             <GridPane hgap="8" vgap="8">
@@ -351,7 +375,10 @@
                 </BorderPane>
             </Tab>
             <Tab text="Statistiche" closable="false">
-                <BorderPane padding="10">
+                <BorderPane>
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10" />
+                    </padding>
                     <top>
                         <HBox spacing="10">
                             <Label text="Anno" />
@@ -394,6 +421,10 @@
         </TabPane>
     </center>
     <bottom>
-        <Label fx:id="notificationLabel" text="Pronto" padding="10" />
+        <Label fx:id="notificationLabel" text="Pronto">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+        </Label>
     </bottom>
 </BorderPane>
