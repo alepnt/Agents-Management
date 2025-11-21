@@ -93,6 +93,8 @@ public class MsalTokenProvider implements TokenProvider {
                     .build();
             lastResult = application.acquireToken(parameters).join();
             return mapResult(lastResult);
+        } catch (MalformedURLException e) {
+            throw new MsalAuthenticationException("Redirect URI MSAL non valido", e);
         } catch (CompletionException ex) {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
         } catch (MsalException ex) {
