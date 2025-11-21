@@ -816,7 +816,7 @@ public class MainViewController {
 
     @FXML
     @SuppressWarnings("unused")
-    private void onLogout() {
+    protected void onLogout() {
         try {
             sessionStore.clear();
         } catch (IOException e) {
@@ -826,6 +826,10 @@ public class MainViewController {
         dataCacheService.clearSessionData();
         notificationService.publish(new NotificationMessage("session", "Logout eseguito", Instant.now()));
         shutdown();
+        performLogoutNavigation();
+    }
+
+    protected void performLogoutNavigation() {
         navigateToLogin(LOGOUT_STATUS_MESSAGE, LOGOUT_STATUS_STYLE);
     }
 
@@ -2177,9 +2181,13 @@ public class MainViewController {
         navigateToLogin(reason, "-fx-text-fill: #c62828; -fx-font-weight: bold;");
     }
 
-    private void navigateToLogin(String message, String style) {
+    protected void navigateToLogin(String message, String style) {
         try {
-            Stage stage = (Stage) mainTabPane.getScene().getWindow();
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                notifyError("Impossibile determinare lo stage corrente per il login");
+                return;
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
             TokenProvider provider = MsalTokenProvider.disabled("Servizio MSAL non disponibile");
             loader.setControllerFactory(param -> {
@@ -2197,6 +2205,13 @@ public class MainViewController {
         } catch (IOException e) {
             notifyError("Impossibile aprire la schermata di login: " + e.getMessage());
         }
+    }
+
+    protected Stage getCurrentStage() {
+        if (mainTabPane == null || mainTabPane.getScene() == null) {
+            return null;
+        }
+        return (Stage) mainTabPane.getScene().getWindow();
     }
 
     private Optional<BigDecimal> parseBigDecimal(String value) {
