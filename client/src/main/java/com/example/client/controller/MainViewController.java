@@ -94,12 +94,12 @@ import java.nio.file.Path;
 /**
  * Controller principale della dashboard JavaFX.
  */
+@SuppressWarnings("unused") // alcuni campi/metodi sono utilizzati solo via FXML
 public class MainViewController {
 
     static final String LOGOUT_STATUS_MESSAGE = "Sessione terminata. Effettua nuovamente il login.";
     private static final String LOGOUT_STATUS_STYLE = "-fx-text-fill: #1565c0; -fx-font-weight: bold;";
 
-    private final AuthSession session;
     private final SessionStore sessionStore;
     private final DataCacheService dataCacheService;
     private final NotificationService notificationService = new NotificationService();
@@ -134,7 +134,6 @@ public class MainViewController {
     }
 
     public MainViewController(AuthSession session, SessionStore sessionStore) {
-        this.session = session;
         this.sessionStore = sessionStore != null ? sessionStore : new SessionStore();
 
         if (session != null) {
@@ -811,6 +810,7 @@ public class MainViewController {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onLogout() {
         try {
             sessionStore.clear();
@@ -1474,7 +1474,10 @@ public class MainViewController {
         }
         DocumentHistorySearchCriteria criteria = buildHistoryCriteria();
         historyCurrentCriteria = criteria;
-        int size = historyPageSizeCombo != null && historyPageSizeCombo.getValue() != null ? historyPageSizeCombo.getValue() : 25;
+        int size = Optional.ofNullable(historyPageSizeCombo)
+                .map(ComboBox::getValue)
+                .filter(Objects::nonNull)
+                .orElse(25);
         DocumentHistoryPageDTO page = withSession(() -> dataCacheService.searchDocumentHistory(criteria, historyCurrentPage, size));
         if (page == null || page.getItems() == null) {
             historySearchItems.clear();
