@@ -16,6 +16,7 @@ public class SessionStore {
     private final Path baseDirectory;
     private final Path sessionsDirectory;
     private final Path lastSessionFile;
+    private final java.util.Map<String, AuthSession> memoryCache = new java.util.HashMap<>();
     private AuthSession currentSession;
     private String currentAzureId;
 
@@ -46,6 +47,15 @@ public class SessionStore {
         if (azureId == null || azureId.isBlank()) {
             return Optional.empty();
         }
+        if (memoryCache.containsKey(azureId)) {
+            AuthSession session = memoryCache.get(azureId);
+            if (session != null && !session.isExpired()) {
+                currentSession = session;
+                currentAzureId = azureId;
+                writeLastAzureIdSilently(azureId);
+                return Optional.of(session);
+            }
+        }
         Path sessionFile = sessionFileFor(azureId);
         if (!Files.exists(sessionFile)) {
             return Optional.empty();
@@ -57,6 +67,7 @@ public class SessionStore {
                 clearSilently(azureId);
                 return Optional.empty();
             }
+            memoryCache.put(azureId, session);
             currentSession = session;
             currentAzureId = azureId;
             writeLastAzureId(azureId);
@@ -101,6 +112,7 @@ public class SessionStore {
         Files.createDirectories(sessionsDirectory);
         byte[] payload = mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(session);
         Files.write(sessionFileFor(azureId), payload);
+        memoryCache.put(azureId, session);
         writeLastAzureId(azureId);
         this.currentSession = session;
         this.currentAzureId = azureId;
@@ -122,6 +134,7 @@ public class SessionStore {
             return;
         }
         Files.deleteIfExists(sessionFileFor(azureId));
+        memoryCache.remove(azureId);
         if (azureId.equals(currentAzureId)) {
             currentSession = null;
             currentAzureId = null;
@@ -155,6 +168,14 @@ public class SessionStore {
     private void writeLastAzureId(String azureId) throws IOException {
         Files.createDirectories(baseDirectory);
         Files.writeString(lastSessionFile, azureId, StandardCharsets.UTF_8);
+    }
+
+    private void writeLastAzureIdSilently(String azureId) {
+        try {
+            writeLastAzureId(azureId);
+        } catch (IOException ignored) {
+            // Se non è possibile aggiornare il file, manteniamo comunque la cache in memoria
+        }
     }
 
     private void clearSilently() {

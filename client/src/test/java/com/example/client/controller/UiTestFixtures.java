@@ -28,6 +28,9 @@ final class UiTestFixtures {
         System.setProperty("glass.platform", "Monocle");
         System.setProperty("monocle.platform", "Headless");
         System.setProperty("java.awt.headless", "true");
+        System.setProperty("monocle.screen.width", "1280");
+        System.setProperty("monocle.screen.height", "720");
+        System.setProperty("quantum.multithreaded", "false");
     }
 
     static SessionStore newTemporarySessionStore() throws IOException {
