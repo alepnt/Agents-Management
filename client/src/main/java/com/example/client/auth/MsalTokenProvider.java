@@ -71,10 +71,8 @@ public class MsalTokenProvider implements TokenProvider {
             }
             IAccount account = accounts.iterator().next();
             SilentParameters parameters = SilentParameters.builder(scopes, account).build();
-            lastResult = application.acquireTokenSilently(parameters).join();
+            lastResult = acquireTokenSilently(parameters);
             return Optional.of(mapResult(lastResult));
-        } catch (MalformedURLException ex) {
-            throw asAuthenticationException("acquisizione silenziosa", ex);
         } catch (CompletionException ex) {
             Throwable root = unwrap(ex);
             if (root instanceof MsalInteractionRequiredException) {
@@ -105,6 +103,14 @@ public class MsalTokenProvider implements TokenProvider {
     private boolean isExpired(IAuthenticationResult result) {
         return result == null || result.expiresOnDate() == null
                 || result.expiresOnDate().toInstant().isBefore(Instant.now());
+    }
+
+    private IAuthenticationResult acquireTokenSilently(SilentParameters parameters) throws MsalAuthenticationException {
+        try {
+            return application.acquireTokenSilently(parameters).join();
+        } catch (MalformedURLException ex) {
+            throw asAuthenticationException("acquisizione silenziosa", ex);
+        }
     }
 
     private MsalAuthenticationResult mapResult(IAuthenticationResult result) {
