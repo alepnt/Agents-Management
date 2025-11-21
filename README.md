@@ -45,6 +45,18 @@ Il modulo server può essere impacchettato come JAR eseguibile con:
 mvn -pl server -am clean package
 ```
 
+### Report di coverage
+
+I test del modulo **server** sono strumentati con JaCoCo. Per generare e visualizzare il report di coverage:
+
+1. Esegui i test con la fase `verify` (oppure `test` seguito da `jacoco:report`):
+
+   ```bash
+   mvn -pl server verify
+   ```
+
+2. Apri il report HTML generato in `server/target/site/jacoco/index.html` con il tuo browser.
+
 ### Note di rete
 
 L'ambiente richiede l'uso del proxy interno `proxy:8080` per scaricare le dipendenze Maven. Il file `.mvn/settings.xml` è stato aggiornato per utilizzare questo proxy; se `mvn clean install` restituisce `403 Forbidden` è necessario consentire l'accesso a `https://repo.maven.apache.org` o configurare un mirror raggiungibile.
