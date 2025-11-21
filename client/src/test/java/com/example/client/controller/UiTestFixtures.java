@@ -97,8 +97,11 @@ final class UiTestFixtures {
     }
 
     static class StubMainViewController extends MainViewController {
-        StubMainViewController(AuthSession session, SessionStore sessionStore) {
+        private final Stage fallbackStage;
+
+        StubMainViewController(AuthSession session, SessionStore sessionStore, Stage fallbackStage) {
             super(session, sessionStore);
+            this.fallbackStage = fallbackStage;
         }
 
         @Override
@@ -159,9 +162,23 @@ final class UiTestFixtures {
     }
 
     static class StubMainViewFactory implements LoginController.MainViewFactory {
+        private Stage fallbackStage;
+
+        StubMainViewFactory() {
+            this(null);
+        }
+
+        StubMainViewFactory(Stage fallbackStage) {
+            this.fallbackStage = fallbackStage;
+        }
+
+        void setFallbackStage(Stage fallbackStage) {
+            this.fallbackStage = fallbackStage;
+        }
+
         @Override
         public MainViewController create(AuthSession session, SessionStore sessionStore) {
-            return new StubMainViewController(session, sessionStore);
+            return new StubMainViewController(session, sessionStore, fallbackStage);
         }
     }
 
