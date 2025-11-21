@@ -92,6 +92,8 @@ public class MsalTokenProvider implements TokenProvider {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
+        } catch (MalformedURLException e) {
+            throw new MsalAuthenticationException("Redirect URI MSAL non valido", e);
         }
     }
 
