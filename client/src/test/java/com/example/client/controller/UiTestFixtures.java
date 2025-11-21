@@ -109,11 +109,6 @@ final class UiTestFixtures {
         @Override
         protected void performLogoutNavigation() {
             try {
-                Stage stage = getCurrentStage();
-                if (stage == null) {
-                    throw new IllegalStateException("Stage di test non disponibile per il logout");
-                }
-
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
                 StubTokenProvider tokenProvider = new StubTokenProvider();
                 loader.setControllerFactory(param -> {
@@ -130,10 +125,27 @@ final class UiTestFixtures {
                 });
 
                 Parent root = loader.load();
-                Scene scene = new Scene(root);
-                scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
-                stage.setScene(scene);
-                stage.setTitle("Gestore Agenti - Login");
+                String theme = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
+
+                Stage stage = getCurrentStage();
+                Scene currentScene = stage != null ? stage.getScene() : null;
+                if (currentScene == null && root.getScene() != null) {
+                    currentScene = root.getScene();
+                }
+
+                if (stage != null) {
+                    Scene scene = new Scene(root);
+                    scene.getStylesheets().add(theme);
+                    stage.setScene(scene);
+                    stage.setTitle("Gestore Agenti - Login");
+                } else if (currentScene != null) {
+                    currentScene.setRoot(root);
+                    if (!currentScene.getStylesheets().contains(theme)) {
+                        currentScene.getStylesheets().add(theme);
+                    }
+                } else {
+                    throw new IllegalStateException("Impossibile determinare lo stage o la scena di test per il logout");
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Impossibile aprire la schermata di login di test", e);
             }
