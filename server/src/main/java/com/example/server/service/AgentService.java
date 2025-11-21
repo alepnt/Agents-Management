@@ -66,8 +66,8 @@ public class AgentService {
     }
 
     public Agent require(Long id) {
-        return Objects.requireNonNull(agentRepository.findById(Objects.requireNonNull(id, "id must not be null"))
-                .orElseThrow(() -> new IllegalArgumentException("Agente non trovato")), "agent must not be null");
+        return agentRepository.findById(Objects.requireNonNull(id, "id must not be null"))
+                .orElseThrow(() -> new IllegalArgumentException("Agente non trovato"));
     }
 
     private void validate(AgentDTO dto) {
