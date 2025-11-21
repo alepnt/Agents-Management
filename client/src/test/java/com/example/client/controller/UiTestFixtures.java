@@ -8,6 +8,10 @@ import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.UserSummary;
 import com.example.client.session.SessionStore;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.testfx.api.FxToolkit;
 
 import java.io.IOException;
@@ -100,6 +104,39 @@ final class UiTestFixtures {
         @Override
         public void refreshData() {
             // Evita chiamate al backend durante i test UI.
+        }
+
+        @Override
+        protected void performLogoutNavigation() {
+            try {
+                Stage stage = getCurrentStage();
+                if (stage == null) {
+                    throw new IllegalStateException("Stage di test non disponibile per il logout");
+                }
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
+                StubTokenProvider tokenProvider = new StubTokenProvider();
+                loader.setControllerFactory(param -> {
+                    if (param == LoginController.class) {
+                        return LoginController.create(
+                                sessionStore,
+                                new StubAuthApiClient(sessionStore.load().orElse(null)),
+                                tokenProvider,
+                                MainViewController.LOGOUT_STATUS_MESSAGE,
+                                MainViewController.LOGOUT_STATUS_STYLE
+                        );
+                    }
+                    throw new IllegalStateException("Controller non gestito: " + param.getName());
+                });
+
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
+                stage.setScene(scene);
+                stage.setTitle("Gestore Agenti - Login");
+            } catch (IOException e) {
+                throw new RuntimeException("Impossibile aprire la schermata di login di test", e);
+            }
         }
     }
 
