@@ -130,7 +130,7 @@ public class LoginController {
         CompletableFuture
                 .supplyAsync(this::acquireMsalToken)
                 .thenApply(this::authenticateWithBackend)
-                .whenComplete(this::dispatchResult);
+                .whenComplete((session, error) -> Platform.runLater(() -> handleAuthenticationResult(session, error)));
     }
 
     @FXML
@@ -248,24 +248,15 @@ public class LoginController {
 
     private void runSynchronously() {
         try {
-            MsalAuthenticationResult msal = acquireMsalToken();
-            AuthSession session = authenticateWithBackend(msal);
-            dispatchResult(session, null);
-        } catch (CompletionException error) {
-            dispatchResult(null, unwrap(error));
+            AuthSession session = authenticateWithBackend(acquireMsalToken());
+            Platform.runLater(() -> handleAuthenticationResult(session, null));
+        } catch (Throwable error) {
+            Platform.runLater(() -> handleAuthenticationResult(null, error));
         }
     }
 
     private boolean isHeadlessEnvironment() {
         return Boolean.getBoolean("testfx.headless") || Boolean.getBoolean("java.awt.headless");
-    }
-
-    private void dispatchResult(AuthSession session, Throwable error) {
-        if (Platform.isFxApplicationThread()) {
-            handleAuthenticationResult(session, error);
-        } else {
-            Platform.runLater(() -> handleAuthenticationResult(session, error));
-        }
     }
 
     private Throwable unwrap(Throwable throwable) {
