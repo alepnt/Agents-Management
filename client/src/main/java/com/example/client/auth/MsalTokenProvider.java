@@ -106,7 +106,11 @@ public class MsalTokenProvider implements TokenProvider {
     }
 
     private IAuthenticationResult acquireTokenSilently(SilentParameters parameters) throws MsalAuthenticationException {
-        return application.acquireTokenSilently(parameters).join();
+        try {
+            return application.acquireTokenSilently(parameters).join();
+        } catch (MalformedURLException ex) {
+            throw asAuthenticationException("acquisizione silenziosa", ex);
+        }
     }
 
     private MsalAuthenticationResult mapResult(IAuthenticationResult result) {
