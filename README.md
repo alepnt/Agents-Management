@@ -39,11 +39,45 @@ Per compilare l'intero progetto e lanciare tutti i test (unitari e di integrazio
 mvn clean verify
 ```
 
-Il modulo server può essere impacchettato come JAR eseguibile con:
+Il modulo server può essere impacchettato come JAR eseguibile (Spring Boot riaggiunge il manifest principale durante la fase di
+ `repackage`) con:
 
 ```bash
 mvn -pl server -am clean package
 ```
+
+Se durante l'esecuzione ottieni l'errore `nessun attributo manifest principale`, esegui prima un `mvn -pl server -am clean pack
+age` per forzare la rigenerazione del JAR "fat" con il manifest corretto. In alternativa puoi usare `mvn -pl server -am -Dskip
+Tests clean package` se non hai Docker disponibile per i test di integrazione.
+
+### Avvio su Windows (PowerShell) o da Visual Studio Code
+
+Per lavorare su Windows puoi usare la console **PowerShell** o il terminale integrato di **Visual Studio Code**.
+
+1. Apri PowerShell (o il terminale di VS Code) nella cartella del progetto.
+2. Esporta le variabili d'ambiente necessarie al database:
+
+   ```powershell
+   $Env:DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=gestoreagenti;encrypt=true;trustServerCertificate=true"
+   $Env:DB_USERNAME = "sa"
+   $Env:DB_PASSWORD = "ChangeMe!"
+   $Env:DB_MAX_POOL_SIZE = "10"
+   $Env:DB_MIN_IDLE = "5"
+   ```
+
+3. Compila e crea il JAR del server:
+
+   ```powershell
+   mvn -pl server -am clean package
+   ```
+
+4. Avvia l'applicazione:
+
+   ```powershell
+   java -jar server/target/gestore-agenti-server-0.0.1-SNAPSHOT.jar
+   ```
+
+Se utilizzi VS Code, gli stessi comandi funzionano nel terminale integrato. Puoi anche definire un file `.env` con le variabili e usare estensioni come *Env Files* per caricarle prima di eseguire i comandi Maven o `java -jar`.
 
 ### Report di coverage
 
