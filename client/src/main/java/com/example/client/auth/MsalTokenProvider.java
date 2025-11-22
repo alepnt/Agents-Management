@@ -15,7 +15,6 @@ import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.SilentParameters;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Base64;
@@ -41,14 +40,10 @@ public class MsalTokenProvider implements TokenProvider {
         this.scopes = Set.copyOf(configuration.scopes());
         this.authority = configuration.authority();
         this.cache = new TokenCache();
-        try {
-            this.application = PublicClientApplication.builder(configuration.clientId())
-                    .authority(configuration.authority())
-                    .setTokenCacheAccessAspect(cache)
-                    .build();
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("URL MSAL non valido: " + configuration.authority(), e);
-        }
+        this.application = PublicClientApplication.builder(configuration.clientId())
+                .authority(configuration.authority())
+                .setTokenCacheAccessAspect(cache)
+                .build();
     }
 
     public static TokenProvider fromEnvironment() {
@@ -97,8 +92,6 @@ public class MsalTokenProvider implements TokenProvider {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
-        } catch (MalformedURLException e) {
-            throw new MsalAuthenticationException("Redirect URI MSAL non valido", e);
         }
     }
 
