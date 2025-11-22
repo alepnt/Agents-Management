@@ -109,15 +109,6 @@ Il file risultante sarà disponibile in `server/target/gestore-agenti-server-0.0
    mvn -pl client -am -U javafx:run
    ```
 
-   Il file `.mvn/settings.xml` include già `<pluginGroup>org.openjfx</pluginGroup>` per permettere la risoluzione del prefisso `javafx`; se usi un IDE/CI che ignora la cartella `.mvn`, aggiungi lo stesso `pluginGroup` al tuo `~/.m2/settings.xml` oppure passa `-s .mvn/settings.xml` alla CLI.
-
-   Se ricevi `The parameters 'mainClass' ... are missing or invalid`, aggiorna alla versione corrente del `pom.xml` (il plugin JavaFX 0.0.8 è già configurato per essere ignorato dal modulo root) oppure lancia il goal dal sottoprogetto:
-
-   ```bash
-   cd client
-   mvn javafx:run
-   ```
-
 ## Test di integrazione
 
 I test di integrazione utilizzano Testcontainers per avviare automaticamente un container Microsoft SQL Server. Assicurarsi che Docker sia in esecuzione prima di lanciare i test.
