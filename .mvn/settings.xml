@@ -1,10 +1,16 @@
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <!--
+      I proxy sono disabilitati di default per evitare errori di risoluzione
+      (es. "Host sconosciuto (proxy)") in ambienti senza proxy aziendale.
+      Per abilitarli, impostare <active>true</active> oppure configurare
+      host/porta corretti in questa sezione o nel file ~/.m2/settings.xml.
+    -->
     <proxies>
         <proxy>
             <id>http-proxy</id>
-            <active>true</active>
+            <active>false</active>
             <protocol>http</protocol>
             <host>proxy</host>
             <port>8080</port>
@@ -12,11 +18,17 @@
         </proxy>
         <proxy>
             <id>https-proxy</id>
-            <active>true</active>
+            <active>false</active>
             <protocol>https</protocol>
             <host>proxy</host>
             <port>8080</port>
             <nonProxyHosts>localhost|127.0.0.1|::1</nonProxyHosts>
         </proxy>
     </proxies>
+
+    <!-- Abilita la risoluzione dei goal con prefisso "javafx" senza dover
+         dichiarare manualmente il plugin group nella CLI. -->
+    <pluginGroups>
+        <pluginGroup>org.openjfx</pluginGroup>
+    </pluginGroups>
 </settings>
