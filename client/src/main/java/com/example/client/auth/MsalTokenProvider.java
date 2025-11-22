@@ -15,6 +15,7 @@ import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.SilentParameters;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Base64;
@@ -40,10 +41,14 @@ public class MsalTokenProvider implements TokenProvider {
         this.scopes = Set.copyOf(configuration.scopes());
         this.authority = configuration.authority();
         this.cache = new TokenCache();
-        this.application = PublicClientApplication.builder(configuration.clientId())
-                .authority(configuration.authority())
-                .setTokenCacheAccessAspect(cache)
-                .build();
+        try {
+            this.application = PublicClientApplication.builder(configuration.clientId())
+                    .authority(configuration.authority())
+                    .setTokenCacheAccessAspect(cache)
+                    .build();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("URL MSAL non valido: " + configuration.authority(), e);
+        }
     }
 
     public static TokenProvider fromEnvironment() {

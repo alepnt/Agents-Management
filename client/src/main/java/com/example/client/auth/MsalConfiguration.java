@@ -16,6 +16,8 @@ public record MsalConfiguration(
         Objects.requireNonNull(clientId, "clientId");
         Objects.requireNonNull(authority, "authority");
         Objects.requireNonNull(redirectUri, "redirectUri");
+        validateAuthority(authority);
+        validateRedirectUri(redirectUri);
         if (scopes == null || scopes.isEmpty()) {
             throw new IllegalArgumentException("Almeno uno scope MSAL è richiesto");
         }
@@ -53,5 +55,22 @@ public record MsalConfiguration(
             }
         }
         return null;
+    }
+
+    private static void validateAuthority(String authority) {
+        try {
+            URI authorityUri = URI.create(authority);
+            if (!authorityUri.isAbsolute() || authorityUri.getScheme() == null || authorityUri.getHost() == null) {
+                throw new IllegalArgumentException("L'authority MSAL deve essere un URL assoluto valido");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Authority MSAL non valida: " + authority, e);
+        }
+    }
+
+    private static void validateRedirectUri(URI redirectUri) {
+        if (!redirectUri.isAbsolute() || redirectUri.getScheme() == null) {
+            throw new IllegalArgumentException("Il redirect URI MSAL deve essere un URI assoluto con schema");
+        }
     }
 }
