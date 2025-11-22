@@ -45,7 +45,7 @@
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-database-sqlserver</artifactId>
+                <artifactId>flyway-sqlserver</artifactId>
                 <version>${flyway.version}</version>
             </dependency>
         </dependencies>
