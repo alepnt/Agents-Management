@@ -39,7 +39,8 @@ Per compilare l'intero progetto e lanciare tutti i test (unitari e di integrazio
 mvn clean verify
 ```
 
-Il modulo server può essere impacchettato come JAR eseguibile con:
+Il modulo server può essere impacchettato come JAR eseguibile (Spring Boot riaggiunge il manifest principale durante la fase di
+ `repackage`) con:
 
 ```bash
 mvn -pl server -am clean package
