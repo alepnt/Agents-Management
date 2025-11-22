@@ -89,9 +89,34 @@ I test del modulo **server** sono strumentati con JaCoCo. Per generare e visuali
 
 ### Note di rete
 
-L'ambiente richiede l'uso del proxy interno `proxy:8080` per scaricare le dipendenze Maven. Il file `.mvn/settings.xml` è stato aggiornato per utilizzare questo proxy; se `mvn clean install` restituisce `403 Forbidden` è necessario consentire l'accesso a `https://repo.maven.apache.org` o configurare un mirror raggiungibile.
+Per impostazione predefinita il proxy Maven è disattivato in `.mvn/settings.xml` per evitare errori come `Host sconosciuto (proxy)` su macchine senza proxy aziendale. Se lavori dietro un proxy abilitalo impostando `<active>true</active>` (o configurando host/porta corretti) nel file `.mvn/settings.xml` oppure nel tuo `~/.m2/settings.xml`. Senza proxy Maven utilizzerà l'accesso diretto a `https://repo.maven.apache.org`.
 
 Il file risultante sarà disponibile in `server/target/gestore-agenti-server-0.0.1-SNAPSHOT.jar`.
+
+### Avvio del client JavaFX
+
+1. Verifica che il backend sia in esecuzione su `http://localhost:8080`.
+2. Avvia il client dalla root del progetto:
+
+   ```bash
+   mvn -pl client -am javafx:run
+   ```
+
+   Su Windows puoi forzare il classifier corretto di JavaFX aggiungendo `-Djavafx.platform=win`.
+3. Se Maven segnala `No plugin found for prefix 'javafx'`, controlla che il proxy non blocchi l'accesso a Maven Central (vedi sezione precedente) e rilancia il comando con `-U` per forzare l'aggiornamento delle dipendenze:
+
+   ```bash
+   mvn -pl client -am -U javafx:run
+   ```
+
+   Il file `.mvn/settings.xml` include già `<pluginGroup>org.openjfx</pluginGroup>` per permettere la risoluzione del prefisso `javafx`; se usi un IDE/CI che ignora la cartella `.mvn`, aggiungi lo stesso `pluginGroup` al tuo `~/.m2/settings.xml` oppure passa `-s .mvn/settings.xml` alla CLI.
+
+   Se ricevi `The parameters 'mainClass' ... are missing or invalid`, aggiorna alla versione corrente del `pom.xml` (il plugin JavaFX 0.0.8 è già configurato per essere ignorato dal modulo root) oppure lancia il goal dal sottoprogetto:
+
+   ```bash
+   cd client
+   mvn javafx:run
+   ```
 
 ## Test di integrazione
 
