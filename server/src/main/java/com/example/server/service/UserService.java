@@ -19,6 +19,7 @@ import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.MsalException;
 import com.microsoft.aad.msal4j.OnBehalfOfParameters;
 import com.microsoft.aad.msal4j.UserAssertion;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,7 @@ public class UserService {
     private final Clock clock;
     private final Set<String> scopes;
 
+    @Autowired
     public UserService(MsalClientProvider msalClientProvider,
                        UserRepository userRepository,
                        AgentRepository agentRepository,
