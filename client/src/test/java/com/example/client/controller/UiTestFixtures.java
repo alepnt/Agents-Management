@@ -131,6 +131,10 @@ final class UiTestFixtures {
                 String theme = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
 
                 Stage stage = getCurrentStage();
+                if (stage == null) {
+                    stage = fallbackStage;
+                }
+
                 Scene currentScene = stage != null ? stage.getScene() : null;
                 if (currentScene == null && root.getScene() != null) {
                     currentScene = root.getScene();
@@ -152,6 +156,12 @@ final class UiTestFixtures {
                     if (!currentScene.getStylesheets().contains(theme)) {
                         currentScene.getStylesheets().add(theme);
                     }
+                } else if (fallbackStage != null) {
+                    Scene scene = new Scene(root);
+                    scene.getStylesheets().add(theme);
+                    fallbackStage.setScene(scene);
+                    fallbackStage.setTitle("Gestore Agenti - Login");
+                    fallbackStage.show();
                 } else {
                     throw new IllegalStateException("Impossibile determinare lo stage o la scena di test per il logout");
                 }
