@@ -45,6 +45,35 @@ Il modulo server può essere impacchettato come JAR eseguibile con:
 mvn -pl server -am clean package
 ```
 
+### Avvio su Windows (PowerShell) o da Visual Studio Code
+
+Per lavorare su Windows puoi usare la console **PowerShell** o il terminale integrato di **Visual Studio Code**.
+
+1. Apri PowerShell (o il terminale di VS Code) nella cartella del progetto.
+2. Esporta le variabili d'ambiente necessarie al database:
+
+   ```powershell
+   $Env:DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=gestoreagenti;encrypt=true;trustServerCertificate=true"
+   $Env:DB_USERNAME = "sa"
+   $Env:DB_PASSWORD = "ChangeMe!"
+   $Env:DB_MAX_POOL_SIZE = "10"
+   $Env:DB_MIN_IDLE = "5"
+   ```
+
+3. Compila e crea il JAR del server:
+
+   ```powershell
+   mvn -pl server -am clean package
+   ```
+
+4. Avvia l'applicazione:
+
+   ```powershell
+   java -jar server/target/gestore-agenti-server-0.0.1-SNAPSHOT.jar
+   ```
+
+Se utilizzi VS Code, gli stessi comandi funzionano nel terminale integrato. Puoi anche definire un file `.env` con le variabili e usare estensioni come *Env Files* per caricarle prima di eseguire i comandi Maven o `java -jar`.
+
 ### Report di coverage
 
 I test del modulo **server** sono strumentati con JaCoCo. Per generare e visualizzare il report di coverage:
