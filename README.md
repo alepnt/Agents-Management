@@ -46,10 +46,6 @@ Il modulo server può essere impacchettato come JAR eseguibile (Spring Boot riag
 mvn -pl server -am clean package
 ```
 
-Se durante l'esecuzione ottieni l'errore `nessun attributo manifest principale`, esegui prima un `mvn -pl server -am clean pack
-age` per forzare la rigenerazione del JAR "fat" con il manifest corretto. In alternativa puoi usare `mvn -pl server -am -Dskip
-Tests clean package` se non hai Docker disponibile per i test di integrazione.
-
 ### Avvio su Windows (PowerShell) o da Visual Studio Code
 
 Per lavorare su Windows puoi usare la console **PowerShell** o il terminale integrato di **Visual Studio Code**.
