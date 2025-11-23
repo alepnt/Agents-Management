@@ -19,9 +19,10 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <javafx.version>21.0.3</javafx.version>
+        <javafx.version>21.0.4</javafx.version>
         <javafx.platform>win</javafx.platform>
         <javafx.main.class>com.example.client.MainApplication</javafx.main.class>
+        <openjfx.monocle.version>jdk-21+26</openjfx.monocle.version>
     </properties>
 
     <profiles>
@@ -134,7 +135,8 @@
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>openjfx-monocle</artifactId>
-            <version>${javafx.version}</version>
+            <version>${openjfx.monocle.version}</version>
+            <classifier>${javafx.platform}</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
