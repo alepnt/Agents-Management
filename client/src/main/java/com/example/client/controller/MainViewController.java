@@ -2186,10 +2186,6 @@ public class MainViewController {
             Stage stage = getCurrentStage();
             Scene currentScene = mainTabPane != null ? mainTabPane.getScene() : null;
 
-            if (stage == null && currentScene == null) {
-                notifyError("Impossibile determinare lo stage corrente per il login");
-                return;
-            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
             TokenProvider provider = MsalTokenProvider.disabled("Servizio MSAL non disponibile");
             loader.setControllerFactory(param -> {
@@ -2201,13 +2197,17 @@ public class MainViewController {
 
             Parent root = loader.load();
             String themeStylesheet = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(themeStylesheet);
 
             if (stage != null) {
+                Scene scene = new Scene(root);
+                scene.getStylesheets().add(themeStylesheet);
                 stage.setScene(scene);
                 stage.setTitle("Gestore Agenti - Login");
             } else {
+                if (currentScene == null) {
+                    notifyError("Impossibile determinare lo stage corrente per il login");
+                    return;
+                }
                 currentScene.setRoot(root);
                 if (!currentScene.getStylesheets().contains(themeStylesheet)) {
                     currentScene.getStylesheets().add(themeStylesheet);
