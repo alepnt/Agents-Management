@@ -22,6 +22,7 @@
         <javafx.version>21.0.3</javafx.version>
         <javafx.platform>win</javafx.platform>
         <javafx.main.class>com.example.client.MainApplication</javafx.main.class>
+        <openjfx.monocle.version>jdk-17.0.2+1</openjfx.monocle.version>
     </properties>
 
     <profiles>
@@ -134,7 +135,8 @@
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>openjfx-monocle</artifactId>
-            <version>${javafx.version}</version>
+            <version>${openjfx.monocle.version}</version>
+            <classifier>${javafx.platform}</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
