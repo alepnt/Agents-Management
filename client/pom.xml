@@ -19,8 +19,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <javafx.version>21.0.4</javafx.version>
-        <javafx.platform>${os.detected.name}-${os.detected.arch}</javafx.platform>
+        <javafx.version>21.0.2</javafx.version>
+        <javafx.platform>${os.detected.jfxname}</javafx.platform>
         <javafx.main.class>com.example.client.MainApplication</javafx.main.class>
     </properties>
 
