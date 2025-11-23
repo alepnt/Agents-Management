@@ -19,10 +19,10 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <javafx.version>21.0.4</javafx.version>
+        <javafx.version>21.0.2</javafx.version>
         <javafx.platform>win</javafx.platform>
         <javafx.main.class>com.example.client.MainApplication</javafx.main.class>
-        <openjfx.monocle.version>jdk-21+26</openjfx.monocle.version>
+        <openjfx.monocle.version>jdk-17.0.2+1</openjfx.monocle.version>
     </properties>
 
     <profiles>
