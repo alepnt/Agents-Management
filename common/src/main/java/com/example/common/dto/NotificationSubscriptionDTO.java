@@ -11,18 +11,18 @@ public class NotificationSubscriptionDTO {
     private Long id;
     private Long userId;
     private @NonNull String channel;
-    private @NonNull Instant createdAt;
+    private @Nullable Instant createdAt;
 
     public NotificationSubscriptionDTO() {
         this.channel = "";
-        this.createdAt = Instant.now();
+        this.createdAt = null;
     }
 
     public NotificationSubscriptionDTO(Long id, Long userId, String channel, Instant createdAt) {
         this.id = id;
         this.userId = userId;
         this.channel = Objects.requireNonNull(channel, "channel");
-        this.createdAt = Objects.requireNonNullElseGet(createdAt, Instant::now);
+        this.createdAt = createdAt;
     }
 
     @Nullable
@@ -52,13 +52,13 @@ public class NotificationSubscriptionDTO {
         this.channel = Objects.requireNonNull(channel, "channel");
     }
 
-    @NonNull
+    @Nullable
     public Instant getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(@Nullable Instant createdAt) {
-        this.createdAt = Objects.requireNonNullElseGet(createdAt, Instant::now);
+        this.createdAt = createdAt;
     }
 
     @Override
