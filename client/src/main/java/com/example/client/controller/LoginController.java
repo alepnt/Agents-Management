@@ -20,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -154,7 +155,11 @@ public class LoginController {
 
     private void navigate(String fxmlPath, ControllerFactory factory, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
+            }
+            FXMLLoader loader = new FXMLLoader(resource);
             loader.setControllerFactory(factory::create);
             Parent root = loader.load();
             Stage stage = (Stage) loginButton.getScene().getWindow();

@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class MainApplication extends Application {
 
@@ -78,23 +79,39 @@ public class MainApplication extends Application {
     }
 
     private static void loadLoginScene(Stage stage, javafx.util.Callback<Class<?>, Object> controllerFactory) throws IOException {
-        FXMLLoader loader = new FXMLLoader(MainApplication.class.getResource("/com/example/client/view/LoginView.fxml"));
+        URL loginView = MainApplication.class.getResource("/com/example/client/view/LoginView.fxml");
+        if (loginView == null) {
+            throw new IllegalStateException("Risorsa FXML non trovata: /com/example/client/view/LoginView.fxml");
+        }
+        FXMLLoader loader = new FXMLLoader(loginView);
         loader.setControllerFactory(controllerFactory);
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(MainApplication.class.getResource("/com/example/client/style/theme.css").toExternalForm());
+        URL theme = MainApplication.class.getResource("/com/example/client/style/theme.css");
+        if (theme == null) {
+            throw new IllegalStateException("Foglio di stile non trovato: /com/example/client/style/theme.css");
+        }
+        scene.getStylesheets().add(theme.toExternalForm());
         stage.setTitle("Gestore Agenti - Login");
         stage.setScene(scene);
     }
 
     private void loadScene(Stage stage, String fxmlPath, javafx.util.Callback<Class<?>, Object> controllerFactory, String title) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        URL resource = getClass().getResource(fxmlPath);
+        if (resource == null) {
+            throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
+        }
+        FXMLLoader loader = new FXMLLoader(resource);
         loader.setControllerFactory(controllerFactory);
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/com/example/client/style/theme.css").toExternalForm());
+        URL theme = getClass().getResource("/com/example/client/style/theme.css");
+        if (theme == null) {
+            throw new IllegalStateException("Foglio di stile non trovato: /com/example/client/style/theme.css");
+        }
+        scene.getStylesheets().add(theme.toExternalForm());
         stage.setTitle(title);
         stage.setScene(scene);
     }
