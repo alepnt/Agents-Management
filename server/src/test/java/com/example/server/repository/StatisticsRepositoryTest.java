@@ -31,9 +31,9 @@ class StatisticsRepositoryTest {
 
         assertThat(totals)
                 .hasSize(3)
-                .extracting(StatisticsRepository.MonthlyAggregate::getYear,
-                        StatisticsRepository.MonthlyAggregate::getMonth,
-                        StatisticsRepository.MonthlyAggregate::getTotalAmount)
+                .extracting(StatisticsRepository.MonthlyAggregate::paymentYear,
+                        StatisticsRepository.MonthlyAggregate::paymentMonth,
+                        StatisticsRepository.MonthlyAggregate::totalAmount)
                 .containsExactly(
                         tuple(2024, 1, new BigDecimal("100.00")),
                         tuple(2024, 2, new BigDecimal("250.00")),
@@ -46,11 +46,11 @@ class StatisticsRepositoryTest {
         List<StatisticsRepository.AgentAggregate> totals = statisticsRepository.findAgentTotals(2024, "PAID");
 
         assertThat(totals)
-                .extracting(StatisticsRepository.AgentAggregate::getAgentId,
-                        StatisticsRepository.AgentAggregate::getAgentName,
-                        StatisticsRepository.AgentAggregate::getTeamId,
-                        StatisticsRepository.AgentAggregate::getTeamName,
-                        StatisticsRepository.AgentAggregate::getTotalAmount)
+                .extracting(StatisticsRepository.AgentAggregate::agentId,
+                        StatisticsRepository.AgentAggregate::agentName,
+                        StatisticsRepository.AgentAggregate::teamId,
+                        StatisticsRepository.AgentAggregate::teamName,
+                        StatisticsRepository.AgentAggregate::totalAmount)
                 .containsExactly(
                         tuple(1L, "Alice Agent", 1L, "Sales", new BigDecimal("350.00")),
                         tuple(2L, "Bob Agent", 2L, "Support", new BigDecimal("300.00"))
@@ -62,9 +62,9 @@ class StatisticsRepositoryTest {
         List<StatisticsRepository.TeamAggregate> totals = statisticsRepository.findTeamTotals(2024, "PAID");
 
         assertThat(totals)
-                .extracting(StatisticsRepository.TeamAggregate::getTeamId,
-                        StatisticsRepository.TeamAggregate::getTeamName,
-                        StatisticsRepository.TeamAggregate::getTotalAmount)
+                .extracting(StatisticsRepository.TeamAggregate::teamId,
+                        StatisticsRepository.TeamAggregate::teamName,
+                        StatisticsRepository.TeamAggregate::totalAmount)
                 .containsExactly(
                         tuple(1L, "Sales", new BigDecimal("350.00")),
                         tuple(2L, "Support", new BigDecimal("300.00"))
