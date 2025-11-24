@@ -120,7 +120,7 @@ class ChatServiceTest {
         AtomicReference<Consumer<ChatMessageDTO>> listener = new AtomicReference<>();
         when(chatPublisher.subscribe(eq("team:5"), any())).thenAnswer(invocation -> {
             listener.set(invocation.getArgument(1));
-            return () -> { };
+            return (ChatPublisher.Subscription) () -> { };
         });
         DeferredResult<List<ChatMessageDTO>> deferredResult = new DeferredResult<>();
 
