@@ -86,6 +86,32 @@ class DocumentHistoryQueryTest {
     }
 
     @Test
+    void shouldCreateBuilderFromExistingQuery() {
+        DocumentHistoryQuery original = DocumentHistoryQuery.builder()
+                .documentType(DocumentType.CONTRACT)
+                .documentId(21L)
+                .actions(List.of(DocumentAction.CREATED, DocumentAction.UPDATED))
+                .from(Instant.parse("2024-03-01T00:00:00Z"))
+                .to(Instant.parse("2024-04-01T00:00:00Z"))
+                .page(3)
+                .size(15)
+                .build();
+
+        DocumentHistoryQuery copy = DocumentHistoryQuery.from(original)
+                .page(0)
+                .size(50)
+                .build();
+
+        assertEquals(original.getDocumentType(), copy.getDocumentType());
+        assertEquals(original.getDocumentId(), copy.getDocumentId());
+        assertEquals(original.getActions(), copy.getActions());
+        assertEquals(original.getFrom(), copy.getFrom());
+        assertEquals(original.getTo(), copy.getTo());
+        assertEquals(0, copy.getPage());
+        assertEquals(50, copy.getSize());
+    }
+
+    @Test
     void shouldClampPageSizeToMaxWhenNormalizing() {
         DocumentHistoryQuery oversizedQuery = DocumentHistoryQuery.builder()
                 .page(1)
