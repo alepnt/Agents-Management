@@ -40,6 +40,15 @@ public class DocumentHistoryPageDTO {
         this.totalElements = totalElements;
     }
 
+    /**
+     * Convenience accessor aligned with record-style naming used in tests.
+     *
+     * @return total number of elements available across all pages
+     */
+    public long totalElements() {
+        return totalElements;
+    }
+
     public int getPage() {
         return page;
     }

@@ -100,8 +100,8 @@ class InvoiceServiceTest {
 
         when(customerService.require(3L)).thenReturn(new com.example.server.domain.Customer(3L, "Cliente", null, null,
                 null, null, null, null, null));
-        when(articleService.require(7L)).thenReturn(new Article(7L, "ART-7", "Articolo", new BigDecimal("12.50"),
-                new BigDecimal("0.22"), true));
+        when(articleService.require(7L)).thenReturn(new Article(7L, "ART-7", "Articolo", "Descrizione",
+                new BigDecimal("12.50"), new BigDecimal("0.22"), "pz", null, null));
         when(invoiceRepository.save(any())).thenAnswer(invocation -> {
             Invoice saved = invocation.getArgument(0);
             return saved.withId(11L);
