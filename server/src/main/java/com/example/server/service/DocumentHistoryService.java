@@ -114,7 +114,7 @@ public class DocumentHistoryService { // Gestisce lo storico dei documenti e le 
 
     private String escape(String value) { // Escapa i campi testuali per il CSV.
         if (value == null) { // Controlla se la stringa è null.
-            return ""; // Restituisce vuoto in caso di null.
+            return "\"\""; // Restituisce una stringa vuota racchiusa tra apici per rispettare il formato CSV.
         }
         String escaped = value.replace("\"", "\"\""); // Raddoppia gli apici doppi per il CSV.
         return '"' + escaped + '"'; // Racchiude il testo tra apici doppi.
