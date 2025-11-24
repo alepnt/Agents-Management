@@ -14,11 +14,6 @@
     <name>gestore-agenti-client</name>
     <packaging>jar</packaging>
 
-    <properties>
-        <java.version>21</java.version>
-        <javafx.version>${project.parent.properties.javafx.version}</javafx.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
