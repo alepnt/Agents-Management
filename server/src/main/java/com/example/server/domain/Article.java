@@ -1,5 +1,8 @@
 package com.example.server.domain; // Definisce il package della classe
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.annotation.Id; // Importa l'annotazione per identificare la chiave primaria
 import org.springframework.data.annotation.LastModifiedDate; // Importa l'annotazione per tracciare l'ultimo aggiornamento
 import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
@@ -15,19 +18,26 @@ public class Article { // Definisce l'entità Article
     @Id // Identifica il campo come chiave primaria
     private Long id; // Identificativo univoco dell'articolo
 
+    @NotBlank(message = "Il codice articolo è obbligatorio")
     private String code; // Codice articolo
 
+    @NotBlank(message = "Il nome articolo è obbligatorio")
     private String name; // Nome dell'articolo
 
     private String description; // Descrizione dell'articolo
 
     @Column("unit_price") // Mappa il campo alla colonna unit_price
+    @NotNull(message = "Il prezzo unitario è obbligatorio")
+    @PositiveOrZero(message = "Il prezzo unitario deve essere positivo")
     private BigDecimal unitPrice; // Prezzo unitario
 
     @Column("vat_rate") // Mappa il campo alla colonna vat_rate
+    @NotNull(message = "L'aliquota IVA è obbligatoria")
+    @PositiveOrZero(message = "L'aliquota IVA deve essere positiva")
     private BigDecimal vatRate; // Aliquota IVA
 
     @Column("unit_of_measure") // Mappa il campo alla colonna unit_of_measure
+    @NotBlank(message = "L'unità di misura è obbligatoria")
     private String unitOfMeasure; // Unità di misura dell'articolo
 
     @Column("created_at") // Mappa il campo alla colonna created_at
@@ -133,5 +143,17 @@ public class Article { // Definisce l'entità Article
     @Override // Indica che si sta sovrascrivendo un metodo della superclasse
     public int hashCode() { // Calcola l'hash dell'articolo
         return Objects.hash(id); // Usa l'id per calcolare l'hash
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", unitPrice=" + unitPrice +
+                ", vatRate=" + vatRate +
+                ", unitOfMeasure='" + unitOfMeasure + '\'' +
+                '}';
     }
 } // Chiude la definizione della classe

@@ -1,5 +1,7 @@
 package com.example.server.domain; // Definisce il package della classe
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
 import org.springframework.data.annotation.LastModifiedDate; // Importa l'annotazione per il tracciamento dell'ultimo aggiornamento
 import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
@@ -14,6 +16,7 @@ public class Customer { // Definisce l'entità Customer
     @Id // Identifica il campo come chiave primaria
     private Long id; // Identificativo univoco del cliente
 
+    @NotBlank(message = "Il nome del cliente è obbligatorio")
     private String name; // Nome del cliente
 
     @Column("vat_number") // Mappa il campo alla colonna vat_number
@@ -22,6 +25,7 @@ public class Customer { // Definisce l'entità Customer
     @Column("tax_code") // Mappa il campo alla colonna tax_code
     private String taxCode; // Codice fiscale del cliente
 
+    @Email(message = "Email non valida")
     private String email; // Email del cliente
 
     private String phone; // Numero di telefono del cliente
@@ -131,5 +135,18 @@ public class Customer { // Definisce l'entità Customer
     @Override // Indica che si sta sovrascrivendo un metodo della superclasse
     public int hashCode() { // Calcola l'hash del cliente
         return Objects.hash(id); // Usa l'id per calcolare l'hash
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", vatNumber='" + vatNumber + '\'' +
+                ", taxCode='" + taxCode + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 } // Chiude la definizione della classe
