@@ -1,116 +1,116 @@
-package com.example.server.service;
+package com.example.server.service; // Package for service layer components
 
-import com.example.common.dto.NotificationSubscriptionDTO;
-import com.example.server.domain.NotificationSubscription;
-import com.example.server.domain.User;
-import com.example.server.repository.NotificationSubscriptionRepository;
-import com.example.server.repository.UserRepository;
-import com.example.server.service.mapper.NotificationSubscriptionMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import com.example.common.dto.NotificationSubscriptionDTO; // DTO representing a notification subscription
+import com.example.server.domain.NotificationSubscription; // Domain entity for notification subscriptions
+import com.example.server.domain.User; // Domain entity for users
+import com.example.server.repository.NotificationSubscriptionRepository; // Repository for subscriptions
+import com.example.server.repository.UserRepository; // Repository for users
+import com.example.server.service.mapper.NotificationSubscriptionMapper; // Mapper between entity and DTO
+import org.springframework.stereotype.Service; // Annotation marking a service
+import org.springframework.transaction.annotation.Transactional; // Annotation for transactional behavior
+import org.springframework.util.StringUtils; // Utility for string checks
 
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.time.Clock; // Clock abstraction
+import java.time.Instant; // Instant timestamp
+import java.util.Comparator; // Comparator utility
+import java.util.List; // List interface
+import java.util.Objects; // Utility for null checks
+import java.util.Optional; // Optional wrapper
+import java.util.stream.Stream; // Stream API
+import java.util.stream.StreamSupport; // Support for streams from Iterable
 
-@Service
-public class NotificationSubscriptionService {
+@Service // Marks the class as a Spring service
+public class NotificationSubscriptionService { // Service managing notification subscriptions
 
-    private final NotificationSubscriptionRepository subscriptionRepository;
-    private final UserRepository userRepository;
-    private final Clock clock;
+    private final NotificationSubscriptionRepository subscriptionRepository; // Repository dependency
+    private final UserRepository userRepository; // Repository for users
+    private final Clock clock; // Clock used for timestamps
 
-    public NotificationSubscriptionService(NotificationSubscriptionRepository subscriptionRepository,
-                                           UserRepository userRepository,
-                                           Clock clock) {
-        this.subscriptionRepository = subscriptionRepository;
-        this.userRepository = userRepository;
-        this.clock = clock;
-    }
+    public NotificationSubscriptionService(NotificationSubscriptionRepository subscriptionRepository, // Constructor injecting repository
+                                           UserRepository userRepository, // Constructor injecting user repository
+                                           Clock clock) { // Constructor injecting clock
+        this.subscriptionRepository = subscriptionRepository; // Assign subscription repository
+        this.userRepository = userRepository; // Assign user repository
+        this.clock = clock; // Assign clock
+    } // End constructor
 
-    public List<NotificationSubscriptionDTO> list(Long userId) {
-        Stream<NotificationSubscription> stream = Optional.ofNullable(userId)
-                .map(this::requireUser)
-                .map(user -> subscriptionRepository.findByUserId(user.getId()).stream())
-                .orElseGet(() -> StreamSupport.stream(subscriptionRepository.findAll().spliterator(), false));
+    public List<NotificationSubscriptionDTO> list(Long userId) { // List subscriptions optionally filtered by user
+        Stream<NotificationSubscription> stream = Optional.ofNullable(userId) // Optional user filter
+                .map(this::requireUser) // Ensure user exists
+                .map(user -> subscriptionRepository.findByUserId(user.getId()).stream()) // Stream user subscriptions
+                .orElseGet(() -> StreamSupport.stream(subscriptionRepository.findAll().spliterator(), false)); // Otherwise stream all subscriptions
 
-        return stream
-                .sorted(Comparator.comparing(NotificationSubscription::getCreatedAt))
-                .map(NotificationSubscriptionMapper::toDto)
-                .toList();
-    }
+        return stream // Stream of subscriptions
+                .sorted(Comparator.comparing(NotificationSubscription::getCreatedAt)) // Sort by creation time
+                .map(NotificationSubscriptionMapper::toDto) // Map to DTOs
+                .toList(); // Collect to list
+    } // End list
 
-    public Optional<NotificationSubscriptionDTO> findById(Long id) {
-        return subscriptionRepository.findById(Objects.requireNonNull(id, "id must not be null"))
-                .map(NotificationSubscriptionMapper::toDto);
-    }
+    public Optional<NotificationSubscriptionDTO> findById(Long id) { // Find subscription by id
+        return subscriptionRepository.findById(Objects.requireNonNull(id, "id must not be null")) // Lookup by id
+                .map(NotificationSubscriptionMapper::toDto); // Map to DTO
+    } // End findById
 
-    @Transactional
-    public NotificationSubscriptionDTO create(NotificationSubscriptionDTO subscription) {
-        NotificationSubscriptionDTO validated = Objects.requireNonNull(subscription, "subscription must not be null");
-        validate(validated);
-        Long userId = requireUser(validated.getUserId()).getId();
-        NotificationSubscription toSave = Objects.requireNonNull(
-                NotificationSubscription.create(userId,
-                        normalize(validated.getChannel()),
-                        Optional.ofNullable(validated.getCreatedAt()).orElseGet(() -> Instant.now(clock))),
-                "subscription must not be null");
-        NotificationSubscription saved = subscriptionRepository.save(toSave);
-        return NotificationSubscriptionMapper.toDto(saved);
-    }
+    @Transactional // Execute within transaction
+    public NotificationSubscriptionDTO create(NotificationSubscriptionDTO subscription) { // Create a new subscription
+        NotificationSubscriptionDTO validated = Objects.requireNonNull(subscription, "subscription must not be null"); // Validate DTO
+        validate(validated); // Validate fields
+        Long userId = requireUser(validated.getUserId()).getId(); // Ensure user exists and get id
+        NotificationSubscription toSave = Objects.requireNonNull( // Build subscription entity
+                NotificationSubscription.create(userId, // Target user id
+                        normalize(validated.getChannel()), // Normalized channel
+                        Optional.ofNullable(validated.getCreatedAt()).orElseGet(() -> Instant.now(clock))), // Creation timestamp
+                "subscription must not be null"); // Ensure entity not null
+        NotificationSubscription saved = subscriptionRepository.save(toSave); // Persist subscription
+        return NotificationSubscriptionMapper.toDto(saved); // Return DTO
+    } // End create
 
-    @Transactional
-    public Optional<NotificationSubscriptionDTO> update(Long id, NotificationSubscriptionDTO subscription) {
-        NotificationSubscriptionDTO validated = Objects.requireNonNull(subscription, "subscription must not be null");
-        validate(validated);
-        Long requiredId = Objects.requireNonNull(id, "id must not be null");
-        return subscriptionRepository.findById(requiredId)
-                .map(existing -> {
-                    Instant createdAt = Optional.ofNullable(validated.getCreatedAt()).orElse(existing.getCreatedAt());
-                    NotificationSubscription toSave = new NotificationSubscription(existing.getId(),
-                            requireUser(validated.getUserId()).getId(),
-                            normalize(validated.getChannel()),
-                            createdAt);
-                    NotificationSubscription saved = subscriptionRepository.save(toSave);
-                    return NotificationSubscriptionMapper.toDto(saved);
-                });
-    }
+    @Transactional // Execute within transaction
+    public Optional<NotificationSubscriptionDTO> update(Long id, NotificationSubscriptionDTO subscription) { // Update subscription
+        NotificationSubscriptionDTO validated = Objects.requireNonNull(subscription, "subscription must not be null"); // Validate DTO
+        validate(validated); // Validate fields
+        Long requiredId = Objects.requireNonNull(id, "id must not be null"); // Validate id
+        return subscriptionRepository.findById(requiredId) // Find existing subscription
+                .map(existing -> { // Map when found
+                    Instant createdAt = Optional.ofNullable(validated.getCreatedAt()).orElse(existing.getCreatedAt()); // Determine creation time
+                    NotificationSubscription toSave = new NotificationSubscription(existing.getId(), // Preserve id
+                            requireUser(validated.getUserId()).getId(), // Validate and set user id
+                            normalize(validated.getChannel()), // Normalize channel
+                            createdAt); // Set creation time
+                    NotificationSubscription saved = subscriptionRepository.save(toSave); // Persist changes
+                    return NotificationSubscriptionMapper.toDto(saved); // Return DTO
+                }); // End mapping
+    } // End update
 
-    @Transactional
-    public boolean delete(Long id) {
-        Long requiredId = Objects.requireNonNull(id, "id must not be null");
-        return subscriptionRepository.findById(requiredId)
-                .map(existing -> {
-                    NotificationSubscription nonNullExisting = Objects.requireNonNull(existing,
-                            "subscription must not be null");
-                    subscriptionRepository.delete(nonNullExisting);
-                    return true;
-                })
-                .orElse(false);
-    }
+    @Transactional // Execute within transaction
+    public boolean delete(Long id) { // Delete subscription by id
+        Long requiredId = Objects.requireNonNull(id, "id must not be null"); // Validate id
+        return subscriptionRepository.findById(requiredId) // Find subscription
+                .map(existing -> { // If found
+                    NotificationSubscription nonNullExisting = Objects.requireNonNull(existing, // Ensure entity not null
+                            "subscription must not be null"); // Error message
+                    subscriptionRepository.delete(nonNullExisting); // Delete entity
+                    return true; // Indicate success
+                }) // End map
+                .orElse(false); // Return false if not found
+    } // End delete
 
-    private void validate(NotificationSubscriptionDTO dto) {
-        if (dto.getUserId() == null) {
-            throw new IllegalArgumentException("L'utente è obbligatorio");
-        }
-        if (!StringUtils.hasText(dto.getChannel())) {
-            throw new IllegalArgumentException("Il canale è obbligatorio");
-        }
-    }
+    private void validate(NotificationSubscriptionDTO dto) { // Validate subscription DTO
+        if (dto.getUserId() == null) { // User required
+            throw new IllegalArgumentException("L'utente è obbligatorio"); // Throw error
+        } // End user check
+        if (!StringUtils.hasText(dto.getChannel())) { // Channel required
+            throw new IllegalArgumentException("Il canale è obbligatorio"); // Throw error
+        } // End channel check
+    } // End validate
 
-    private User requireUser(Long userId) {
-        Long requiredUserId = Objects.requireNonNull(userId, "userId must not be null");
-        return userRepository.findById(requiredUserId)
-                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato: " + requiredUserId));
-    }
+    private User requireUser(Long userId) { // Ensure user exists
+        Long requiredUserId = Objects.requireNonNull(userId, "userId must not be null"); // Validate id
+        return userRepository.findById(requiredUserId) // Find user
+                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato: " + requiredUserId)); // Throw if missing
+    } // End requireUser
 
-    private String normalize(String value) {
-        return value != null ? value.trim() : null;
-    }
-}
+    private String normalize(String value) { // Normalize strings
+        return value != null ? value.trim() : null; // Trim or return null
+    } // End normalize
+} // End NotificationSubscriptionService class
