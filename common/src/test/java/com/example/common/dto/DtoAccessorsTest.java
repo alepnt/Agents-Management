@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DtoAccessorsTest {
 
     private static final Instant SAMPLE_INSTANT = Instant.parse("2024-01-01T00:00:00Z");
+    private static final LocalDate SAMPLE_LOCAL_DATE = LocalDate.parse("2024-01-01");
     private static final LocalDateTime SAMPLE_LOCAL_DATE_TIME = LocalDateTime.parse("2024-01-01T00:00:00");
     private static final BigDecimal SAMPLE_AMOUNT = new BigDecimal("10.50");
 
@@ -33,6 +35,7 @@ class DtoAccessorsTest {
             Map.entry(String.class, () -> "sample"),
             Map.entry(Boolean.class, () -> Boolean.TRUE),
             Map.entry(Instant.class, () -> SAMPLE_INSTANT),
+            Map.entry(LocalDate.class, () -> SAMPLE_LOCAL_DATE),
             Map.entry(LocalDateTime.class, () -> SAMPLE_LOCAL_DATE_TIME),
             Map.entry(BigDecimal.class, () -> SAMPLE_AMOUNT),
             Map.entry(DocumentType.class, () -> DocumentType.CONTRACT),
