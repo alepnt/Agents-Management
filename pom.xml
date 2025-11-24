@@ -166,6 +166,9 @@
                     <version>3.11.0</version>
                     <configuration>
                         <release>${maven.compiler.release}</release>
+                        <compilerArgs>
+                            <arg>-Xlint:null</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
             </plugins>

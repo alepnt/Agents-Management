@@ -85,6 +85,9 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>${java.version}</release>
+                    <compilerArgs>
+                        <arg>-Xlint:null</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
