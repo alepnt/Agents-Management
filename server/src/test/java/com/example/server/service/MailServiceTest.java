@@ -5,6 +5,7 @@ import com.example.common.dto.MailRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -40,12 +41,12 @@ class MailServiceTest {
     @Test
     void shouldSendMailSuccessfully() throws Exception {
         when(response.statusCode()).thenReturn(202);
-        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+        when(httpClient.send(any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<Void>>any())).thenReturn(response);
         MailRequest request = new MailRequest("subject", "body", List.of("to@test.it"), List.of(), List.of(), List.of());
 
         service.sendMail("token", request);
 
-        verify(httpClient).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
+        verify(httpClient).send(any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<Void>>any());
     }
 
     @Test
@@ -60,7 +61,7 @@ class MailServiceTest {
     @Test
     void shouldReportHttpErrorStatus() throws Exception {
         when(response.statusCode()).thenReturn(500);
-        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+        when(httpClient.send(any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<Void>>any())).thenReturn(response);
         MailRequest request = new MailRequest("subject", "body", List.of("to@test.it"), List.of(), List.of(),
                 List.of(new MailAttachmentDTO("f", "c", "d")));
 
@@ -71,7 +72,7 @@ class MailServiceTest {
 
     @Test
     void shouldWrapIoExceptions() throws Exception {
-        when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+        when(httpClient.send(any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<Void>>any()))
                 .thenThrow(new IOException("boom"));
         MailRequest request = new MailRequest("subject", "body", List.of("to@test.it"), List.of(), List.of(), List.of());
 
