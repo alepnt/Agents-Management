@@ -103,9 +103,53 @@ public class StatisticsRepository {
         return jdbcTemplate.query(sql, params, mapper);
     }
 
-    public record MonthlyAggregate(Integer paymentYear, Integer paymentMonth, BigDecimal totalAmount) { }
+    public record MonthlyAggregate(Integer paymentYear, Integer paymentMonth, BigDecimal totalAmount) {
+        public Integer getYear() {
+            return paymentYear;
+        }
 
-    public record AgentAggregate(Long agentId, String agentName, Long teamId, String teamName, BigDecimal totalAmount) { }
+        public Integer getMonth() {
+            return paymentMonth;
+        }
 
-    public record TeamAggregate(Long teamId, String teamName, BigDecimal totalAmount) { }
+        public BigDecimal getTotalAmount() {
+            return totalAmount;
+        }
+    }
+
+    public record AgentAggregate(Long agentId, String agentName, Long teamId, String teamName, BigDecimal totalAmount) {
+        public Long getAgentId() {
+            return agentId;
+        }
+
+        public String getAgentName() {
+            return agentName;
+        }
+
+        public Long getTeamId() {
+            return teamId;
+        }
+
+        public String getTeamName() {
+            return teamName;
+        }
+
+        public BigDecimal getTotalAmount() {
+            return totalAmount;
+        }
+    }
+
+    public record TeamAggregate(Long teamId, String teamName, BigDecimal totalAmount) {
+        public Long getTeamId() {
+            return teamId;
+        }
+
+        public String getTeamName() {
+            return teamName;
+        }
+
+        public BigDecimal getTotalAmount() {
+            return totalAmount;
+        }
+    }
 }

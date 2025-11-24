@@ -56,11 +56,11 @@ class StatisticsServiceTest {
     void shouldCacheAgentStatisticsWhenYearsUnchanged() {
         when(statisticsRepository.findAvailableYears("PAID")).thenReturn(List.of(2022, 2023));
         when(statisticsRepository.findMonthlyTotals(2023, "PAID")).thenReturn(List.of(
-                new MonthlyAggregateStub(2023, 5, new BigDecimal("10")),
-                new MonthlyAggregateStub(2023, 4, new BigDecimal("5"))
+                new StatisticsRepository.MonthlyAggregate(2023, 5, new BigDecimal("10")),
+                new StatisticsRepository.MonthlyAggregate(2023, 4, new BigDecimal("5"))
         ));
         when(statisticsRepository.findAgentTotals(2023, "PAID")).thenReturn(List.of(
-                new AgentAggregateStub(1L, "Mario", 7L, "Team", new BigDecimal("100"))
+                new StatisticsRepository.AgentAggregate(1L, "Mario", 7L, "Team", new BigDecimal("100"))
         ));
         when(commissionService.applyDefaultCommissionRate(any())).thenReturn(BigDecimal.ONE);
         when(commissionService.calculateAgentCommission(eq(7L), eq(1L), any())).thenReturn(BigDecimal.TEN);
@@ -81,7 +81,7 @@ class StatisticsServiceTest {
     void shouldBuildTeamStatisticsForRequestedYearWhenAvailable() {
         when(statisticsRepository.findAvailableYears("PAID")).thenReturn(List.of(2021, 2022));
         when(statisticsRepository.findTeamTotals(2021, "PAID")).thenReturn(List.of(
-                new TeamAggregateStub(3L, "North", new BigDecimal("50"))
+                new StatisticsRepository.TeamAggregate(3L, "North", new BigDecimal("50"))
         ));
         when(commissionService.calculateTeamCommission(3L, new BigDecimal("50"))).thenReturn(new BigDecimal("5"));
 
@@ -92,67 +92,4 @@ class StatisticsServiceTest {
         assertThat(stats.teamTotals().getFirst().commission()).isEqualTo(new BigDecimal("5"));
     }
 
-    private record MonthlyAggregateStub(Integer year, Integer month, BigDecimal totalAmount)
-            implements StatisticsRepository.MonthlyAggregate {
-        @Override
-        public Integer getYear() {
-            return year;
-        }
-
-        @Override
-        public Integer getMonth() {
-            return month;
-        }
-
-        @Override
-        public BigDecimal getTotalAmount() {
-            return totalAmount;
-        }
-    }
-
-    private record AgentAggregateStub(Long agentId, String agentName, Long teamId, String teamName, BigDecimal totalAmount)
-            implements StatisticsRepository.AgentAggregate {
-        @Override
-        public Long getAgentId() {
-            return agentId;
-        }
-
-        @Override
-        public String getAgentName() {
-            return agentName;
-        }
-
-        @Override
-        public Long getTeamId() {
-            return teamId;
-        }
-
-        @Override
-        public String getTeamName() {
-            return teamName;
-        }
-
-        @Override
-        public BigDecimal getTotalAmount() {
-            return totalAmount;
-        }
-    }
-
-    private record TeamAggregateStub(Long teamId, String teamName, BigDecimal totalAmount)
-            implements StatisticsRepository.TeamAggregate {
-        @Override
-        public Long getTeamId() {
-            return teamId;
-        }
-
-        @Override
-        public String getTeamName() {
-            return teamName;
-        }
-
-        @Override
-        public BigDecimal getTotalAmount() {
-            return totalAmount;
-        }
-    }
 }
