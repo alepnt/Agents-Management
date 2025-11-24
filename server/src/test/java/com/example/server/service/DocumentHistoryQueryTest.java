@@ -2,12 +2,17 @@ package com.example.server.service;
 
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
+import com.example.server.repository.DocumentHistoryQueryRepository;
+import com.example.server.repository.DocumentHistoryRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class DocumentHistoryQueryTest {
 
@@ -78,6 +83,25 @@ class DocumentHistoryQueryTest {
         assertEquals(0, withoutPagination.getPage());
         assertEquals(0, withoutPagination.getSize());
         assertFalse(withoutPagination.isPaginated());
+    }
+
+    @Test
+    void shouldClampPageSizeToMaxWhenNormalizing() {
+        DocumentHistoryQuery oversizedQuery = DocumentHistoryQuery.builder()
+                .page(1)
+                .size(500)
+                .build();
+
+        DocumentHistoryRepository repository = mock(DocumentHistoryRepository.class);
+        DocumentHistoryQueryRepository queryRepository = mock(DocumentHistoryQueryRepository.class);
+        when(queryRepository.find(any())).thenReturn(new DocumentHistoryQueryRepository.ResultPage(List.of(), 0));
+
+        DocumentHistoryService service = new DocumentHistoryService(repository, queryRepository, Clock.systemUTC());
+        service.search(oversizedQuery);
+
+        ArgumentCaptor<DocumentHistoryQuery> normalizedQuery = ArgumentCaptor.forClass(DocumentHistoryQuery.class);
+        verify(queryRepository).find(normalizedQuery.capture());
+        assertEquals(200, normalizedQuery.getValue().getSize());
     }
 }
 
