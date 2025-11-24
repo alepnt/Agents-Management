@@ -2,6 +2,7 @@ INSERT INTO roles (id, name) VALUES (1, 'Agent');
 
 INSERT INTO teams (id, name) VALUES (1, 'Sales');
 INSERT INTO teams (id, name) VALUES (2, 'Support');
+INSERT INTO teams (id, name) VALUES (3, 'Vendite');
 
 INSERT INTO users (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
 VALUES (1, 'azure-1', 'alice@example.com', 'Alice Agent', NULL, 1, 1, TRUE, TIMESTAMP '2023-01-01T00:00:00');
