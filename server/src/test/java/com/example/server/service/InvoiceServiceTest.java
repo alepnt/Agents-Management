@@ -62,7 +62,7 @@ class InvoiceServiceTest {
         Long invoiceId = 5L;
         Invoice existing = new Invoice(invoiceId, 10L, "INV-5", 1L, "Cliente",
                 new BigDecimal("120.50"), LocalDate.parse("2024-01-10"), LocalDate.parse("2024-02-10"),
-                InvoiceStatus.ISSUED, null, null, null, null);
+                InvoiceStatus.SENT, null, null, null, null);
 
         when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(existing));
         when(invoiceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
