@@ -43,7 +43,7 @@ class InvoiceMapperTest {
                             .map(line -> tuple(line.getId(), line.getInvoiceId(), line.getArticleId(), line.getArticleCode(),
                                     line.getDescription(), line.getQuantity(), line.getUnitPrice(), line.getVatRate(),
                                     line.getTotal()))
-                            .toArray(Object[]::new));
+                            .toArray(org.assertj.core.groups.Tuple[]::new));
         }
     }
 

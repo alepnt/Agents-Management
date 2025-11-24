@@ -48,8 +48,8 @@ class InvoiceControllerTest {
     @Test
     @DisplayName("Create invoice returns persisted payload")
     void createInvoice() throws Exception {
-        InvoiceDTO request = new InvoiceDTO(null, "INV-1", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.CREATED, null, null, List.of());
-        InvoiceDTO saved = new InvoiceDTO(5L, "INV-1", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.CREATED, null, null, List.of());
+        InvoiceDTO request = new InvoiceDTO(null, "INV-1", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.DRAFT, null, null, List.of());
+        InvoiceDTO saved = new InvoiceDTO(5L, "INV-1", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.DRAFT, null, null, List.of());
         when(invoiceService.create(any(InvoiceDTO.class))).thenReturn(saved);
 
         mockMvc.perform(post("/api/invoices")
@@ -65,7 +65,7 @@ class InvoiceControllerTest {
     void updateInvoiceNotFound() throws Exception {
         when(invoiceService.update(eq(9L), any(InvoiceDTO.class))).thenReturn(Optional.empty());
 
-        InvoiceDTO request = new InvoiceDTO(null, "INV-9", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.CREATED, null, null, List.of());
+        InvoiceDTO request = new InvoiceDTO(null, "INV-9", 1L, 2L, "Customer", BigDecimal.TEN, LocalDate.now(), LocalDate.now().plusDays(30), InvoiceStatus.DRAFT, null, null, List.of());
 
         mockMvc.perform(put("/api/invoices/9")
                         .contentType(APPLICATION_JSON)

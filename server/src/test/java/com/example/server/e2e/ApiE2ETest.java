@@ -231,7 +231,7 @@ class ApiE2ETest {
         InvoiceDTO created = restTemplate.postForObject(url("/api/invoices"), payload, InvoiceDTO.class);
         assertThat(created).isNotNull();
 
-        InvoicePaymentRequest payment = new InvoicePaymentRequest(new BigDecimal("1500.00"), LocalDate.of(2024, 3, 20));
+        InvoicePaymentRequest payment = new InvoicePaymentRequest(LocalDate.of(2024, 3, 20), new BigDecimal("1500.00"));
         InvoiceDTO paid = restTemplate.postForObject(
                 url("/api/invoices/" + created.getId() + "/payments"),
                 payment,
