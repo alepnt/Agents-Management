@@ -15,7 +15,7 @@ class DocumentHistoryPageDTOTest {
         DocumentHistoryPageDTO page = new DocumentHistoryPageDTO(List.of(history), 3, 0, 2);
 
         assertThat(page.getItems()).containsExactly(history);
-        assertThat(page.totalElements()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(3);
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.hasNext()).isTrue();
         assertThat(page.hasPrevious()).isFalse();

@@ -79,7 +79,7 @@ class DocumentHistoryServiceTest {
         ArgumentCaptor<DocumentHistoryQuery> normalized = ArgumentCaptor.forClass(DocumentHistoryQuery.class);
         verify(queryRepository).find(normalized.capture());
         assertThat(normalized.getValue().getSize()).isEqualTo(200);
-        assertThat(page.totalElements()).isZero();
+        assertThat(page.getTotalElements()).isZero();
     }
 
     @Test
