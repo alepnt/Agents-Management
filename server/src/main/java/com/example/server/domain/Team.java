@@ -1,40 +1,40 @@
-package com.example.server.domain;
+package com.example.server.domain; // Definisce il package della classe
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
+import org.springframework.data.relational.core.mapping.Table; // Importa l'annotazione per la tabella
 
-import java.util.Objects;
+import java.util.Objects; // Importa utility per equals e hashCode
 
-@Table("teams")
-public class Team {
+@Table("teams") // Mappa la classe sulla tabella teams
+public class Team { // Rappresenta un team aziendale
 
-    @Id
-    private Long id;
+    @Id // Indica la chiave primaria
+    private Long id; // Identificativo del team
 
-    private String name;
+    private String name; // Nome del team
 
-    public Team(Long id, String name) {
-        this.id = id;
-        this.name = name;
+    public Team(Long id, String name) { // Costruttore completo
+        this.id = id; // Assegna l'id
+        this.name = name; // Assegna il nome del team
     }
 
-    public Long getId() {
-        return id;
+    public Long getId() { // Restituisce l'id del team
+        return id; // Ritorna l'identificativo
     }
 
-    public String getName() {
-        return name;
+    public String getName() { // Restituisce il nome del team
+        return name; // Ritorna il nome
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Team team)) return false;
-        return Objects.equals(id, team.id);
+    @Override // Override del confronto di uguaglianza
+    public boolean equals(Object o) { // Confronta due team
+        if (this == o) return true; // Se è lo stesso oggetto sono uguali
+        if (!(o instanceof Team team)) return false; // Se il tipo è diverso non sono uguali
+        return Objects.equals(id, team.id); // Sono uguali se l'id coincide
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    @Override // Override del calcolo hash
+    public int hashCode() { // Calcola l'hash basato sull'id
+        return Objects.hash(id); // Usa l'id per l'hash
     }
 }
