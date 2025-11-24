@@ -39,6 +39,13 @@ Per compilare l'intero progetto e lanciare tutti i test (unitari e di integrazio
 mvn clean verify
 ```
 
+Per verificare localmente i check di compilazione con i warning di null-safety abilitati (gli warning vengono trattati come err
+ori):
+
+```bash
+mvn -ntp -DskipTests compile
+```
+
 Il modulo server può essere impacchettato come JAR eseguibile (Spring Boot riaggiunge il manifest principale durante la fase di
  `repackage`) con:
 

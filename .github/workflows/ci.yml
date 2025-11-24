@@ -20,5 +20,8 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Compile all modules with null-safety checks
+        run: mvn -B -ntp -DskipTests compile
+
       - name: Run server module tests
         run: mvn -B -ntp -pl server -am test
