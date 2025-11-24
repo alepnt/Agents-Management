@@ -1,5 +1,7 @@
 package com.example.common.command;
 
+import org.springframework.lang.NonNull;
+
 import java.util.Objects;
 
 /**
@@ -9,11 +11,12 @@ public class CommandBus {
 
     private final CommandContext context;
 
-    public CommandBus(CommandContext context) {
+    public CommandBus(@NonNull CommandContext context) {
         this.context = Objects.requireNonNull(context, "context");
     }
 
-    public <R> R dispatch(Command<R> command) {
-        return command.execute(context);
+    public <R> @NonNull R dispatch(@NonNull Command<R> command) {
+        Objects.requireNonNull(command, "command");
+        return Objects.requireNonNull(command.execute(context), "command result");
     }
 }

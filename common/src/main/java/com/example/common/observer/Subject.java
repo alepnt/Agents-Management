@@ -1,5 +1,7 @@
 package com.example.common.observer;
 
+import org.springframework.lang.NonNull;
+
 import java.util.Collection;
 
 /**
@@ -7,11 +9,12 @@ import java.util.Collection;
  */
 public interface Subject<T> {
 
-    void registerObserver(Observer<T> observer);
+    void registerObserver(@NonNull Observer<T> observer);
 
-    void removeObserver(Observer<T> observer);
+    void removeObserver(@NonNull Observer<T> observer);
 
-    void notifyObservers(T event);
+    void notifyObservers(@NonNull T event);
 
+    @NonNull
     Collection<Observer<T>> getObservers();
 }
