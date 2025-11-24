@@ -244,11 +244,11 @@ public class InvoiceService { // Service handling invoice operations
         if (lines == null || lines.isEmpty()) { // If no lines to save
             return; // Exit method
         } // End empty check
-        for (InvoiceLine line : lines) { // Iterate over lines
-            InvoiceLine toSave = Objects.requireNonNull(line, "invoice line must not be null") // Validate line
-                    .withInvoice(requiredInvoiceId); // Attach invoice id
-            invoiceLineRepository.save(Objects.requireNonNull(toSave, "invoice line must not be null")); // Save line
-        } // End loop
+        List<InvoiceLine> toSave = lines.stream() // Prepara le righe da salvare in un'unica operazione
+                .map(line -> Objects.requireNonNull(line, "invoice line must not be null")) // Valida ciascuna riga
+                .map(line -> Objects.requireNonNull(line.withInvoice(requiredInvoiceId), "invoice line must not be null")) // Aggiunge l'id fattura
+                .toList(); // Colleziona le righe aggiornate
+        invoiceLineRepository.saveAll(toSave); // Salva tutte le righe con una sola chiamata al repository
     } // End replaceInvoiceLines
 
     private BigDecimal calculateTotal(BigDecimal quantity, BigDecimal unitPrice, BigDecimal vatRate) { // Calculate total line amount

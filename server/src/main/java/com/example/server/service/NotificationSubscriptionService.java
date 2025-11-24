@@ -43,6 +43,7 @@ public class NotificationSubscriptionService { // Service managing notification 
         return stream // Stream of subscriptions
                 .sorted(Comparator.comparing(NotificationSubscription::getCreatedAt)) // Sort by creation time
                 .map(NotificationSubscriptionMapper::toDto) // Map to DTOs
+                .map(this::normalizeChannel) // Normalize channel value
                 .toList(); // Collect to list
     } // End list
 
@@ -113,4 +114,12 @@ public class NotificationSubscriptionService { // Service managing notification 
     private String normalize(String value) { // Normalize strings
         return value != null ? value.trim() : null; // Trim or return null
     } // End normalize
+
+    private NotificationSubscriptionDTO normalizeChannel(NotificationSubscriptionDTO dto) { // Normalize channel on DTO
+        if (dto == null) { // Handle null DTO
+            return null; // Preserve null
+        } // End null check
+        dto.setChannel(normalize(dto.getChannel())); // Trim channel value
+        return dto; // Return normalized DTO
+    } // End normalizeChannel
 } // End NotificationSubscriptionService class
