@@ -15,7 +15,7 @@ public class CommandBus {
         this.context = Objects.requireNonNull(context, "context");
     }
 
-    public <R> @NonNull R dispatch(@NonNull Command<R> command) {
+    public @NonNull <R> R dispatch(@NonNull Command<R> command) {
         Objects.requireNonNull(command, "command");
         return Objects.requireNonNull(command.execute(context), "command result");
     }
