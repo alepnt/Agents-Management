@@ -1,137 +1,137 @@
-package com.example.server.domain;
+package com.example.server.domain; // Definisce il package della classe
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.annotation.Id; // Importa l'annotazione per identificare la chiave primaria
+import org.springframework.data.annotation.LastModifiedDate; // Importa l'annotazione per tracciare l'ultimo aggiornamento
+import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
+import org.springframework.data.relational.core.mapping.Table; // Importa l'annotazione per mappare la tabella
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Objects;
+import java.math.BigDecimal; // Importa il tipo per gestire valori monetari
+import java.time.Instant; // Importa il tipo per gestire timestamp
+import java.util.Objects; // Importa utilità per confronti e hash
 
-@Table("articles")
-public class Article {
+@Table("articles") // Associa la classe alla tabella "articles"
+public class Article { // Definisce l'entità Article
 
-    @Id
-    private Long id;
+    @Id // Identifica il campo come chiave primaria
+    private Long id; // Identificativo univoco dell'articolo
 
-    private String code;
+    private String code; // Codice articolo
 
-    private String name;
+    private String name; // Nome dell'articolo
 
-    private String description;
+    private String description; // Descrizione dell'articolo
 
-    @Column("unit_price")
-    private BigDecimal unitPrice;
+    @Column("unit_price") // Mappa il campo alla colonna unit_price
+    private BigDecimal unitPrice; // Prezzo unitario
 
-    @Column("vat_rate")
-    private BigDecimal vatRate;
+    @Column("vat_rate") // Mappa il campo alla colonna vat_rate
+    private BigDecimal vatRate; // Aliquota IVA
 
-    @Column("unit_of_measure")
-    private String unitOfMeasure;
+    @Column("unit_of_measure") // Mappa il campo alla colonna unit_of_measure
+    private String unitOfMeasure; // Unità di misura dell'articolo
 
-    @Column("created_at")
-    private Instant createdAt;
+    @Column("created_at") // Mappa il campo alla colonna created_at
+    private Instant createdAt; // Timestamp di creazione
 
-    @LastModifiedDate
-    @Column("updated_at")
-    private Instant updatedAt;
+    @LastModifiedDate // Indica che il campo viene aggiornato automaticamente all'ultimo salvataggio
+    @Column("updated_at") // Mappa il campo alla colonna updated_at
+    private Instant updatedAt; // Timestamp di ultimo aggiornamento
 
-    public Article(Long id,
-                   String code,
-                   String name,
-                   String description,
-                   BigDecimal unitPrice,
-                   BigDecimal vatRate,
-                   String unitOfMeasure,
-                   Instant createdAt,
-                   Instant updatedAt) {
-        this.id = id;
-        this.code = code;
-        this.name = name;
-        this.description = description;
-        this.unitPrice = unitPrice;
-        this.vatRate = vatRate;
-        this.unitOfMeasure = unitOfMeasure;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+    public Article(Long id, // Costruttore completo con tutti i campi
+                   String code, // Codice articolo
+                   String name, // Nome dell'articolo
+                   String description, // Descrizione dell'articolo
+                   BigDecimal unitPrice, // Prezzo unitario
+                   BigDecimal vatRate, // Aliquota IVA
+                   String unitOfMeasure, // Unità di misura
+                   Instant createdAt, // Data di creazione
+                   Instant updatedAt) { // Data di ultimo aggiornamento
+        this.id = id; // Imposta l'id
+        this.code = code; // Imposta il codice
+        this.name = name; // Imposta il nome
+        this.description = description; // Imposta la descrizione
+        this.unitPrice = unitPrice; // Imposta il prezzo unitario
+        this.vatRate = vatRate; // Imposta l'aliquota IVA
+        this.unitOfMeasure = unitOfMeasure; // Imposta l'unità di misura
+        this.createdAt = createdAt; // Imposta la data di creazione
+        this.updatedAt = updatedAt; // Imposta la data di ultimo aggiornamento
     }
 
-    public static Article create(String code,
-                                 String name,
-                                 String description,
-                                 BigDecimal unitPrice,
-                                 BigDecimal vatRate,
-                                 String unitOfMeasure) {
-        return new Article(null, code, name, description, unitPrice, vatRate, unitOfMeasure, null, null);
+    public static Article create(String code, // Factory method per creare un nuovo articolo senza id
+                                 String name, // Nome dell'articolo
+                                 String description, // Descrizione dell'articolo
+                                 BigDecimal unitPrice, // Prezzo unitario
+                                 BigDecimal vatRate, // Aliquota IVA
+                                 String unitOfMeasure) { // Unità di misura
+        return new Article(null, code, name, description, unitPrice, vatRate, unitOfMeasure, null, null); // Crea un nuovo articolo con campi temporali null
     }
 
-    public Article withId(Long id) {
-        return new Article(id, code, name, description, unitPrice, vatRate, unitOfMeasure, createdAt, updatedAt);
+    public Article withId(Long id) { // Restituisce una copia dell'articolo con un id specificato
+        return new Article(id, code, name, description, unitPrice, vatRate, unitOfMeasure, createdAt, updatedAt); // Crea una nuova istanza con l'id passato
     }
 
-    public Article updateFrom(Article source) {
-        return new Article(id,
-                source.code,
-                source.name,
-                source.description,
-                source.unitPrice,
-                source.vatRate,
-                source.unitOfMeasure,
-                createdAt,
-                updatedAt);
+    public Article updateFrom(Article source) { // Restituisce una copia aggiornata dai dati di un altro articolo
+        return new Article(id, // Mantiene lo stesso id
+                source.code, // Usa il nuovo codice
+                source.name, // Usa il nuovo nome
+                source.description, // Usa la nuova descrizione
+                source.unitPrice, // Usa il nuovo prezzo unitario
+                source.vatRate, // Usa la nuova aliquota IVA
+                source.unitOfMeasure, // Usa la nuova unità di misura
+                createdAt, // Mantiene la data di creazione originale
+                updatedAt); // Mantiene la data di ultimo aggiornamento corrente
     }
 
-    public Long getId() {
-        return id;
+    public Long getId() { // Restituisce l'id dell'articolo
+        return id; // Ritorna il valore di id
     }
 
-    public String getCode() {
-        return code;
+    public String getCode() { // Restituisce il codice articolo
+        return code; // Ritorna il valore di code
     }
 
-    public String getName() {
-        return name;
+    public String getName() { // Restituisce il nome dell'articolo
+        return name; // Ritorna il valore di name
     }
 
-    public String getDescription() {
-        return description;
+    public String getDescription() { // Restituisce la descrizione
+        return description; // Ritorna il valore di description
     }
 
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
+    public BigDecimal getUnitPrice() { // Restituisce il prezzo unitario
+        return unitPrice; // Ritorna il valore di unitPrice
     }
 
-    public BigDecimal getVatRate() {
-        return vatRate;
+    public BigDecimal getVatRate() { // Restituisce l'aliquota IVA
+        return vatRate; // Ritorna il valore di vatRate
     }
 
-    public String getUnitOfMeasure() {
-        return unitOfMeasure;
+    public String getUnitOfMeasure() { // Restituisce l'unità di misura
+        return unitOfMeasure; // Ritorna il valore di unitOfMeasure
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    public Instant getCreatedAt() { // Restituisce la data di creazione
+        return createdAt; // Ritorna il valore di createdAt
     }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    public Instant getUpdatedAt() { // Restituisce la data di ultimo aggiornamento
+        return updatedAt; // Ritorna il valore di updatedAt
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    @Override // Indica che si sta sovrascrivendo un metodo della superclasse
+    public boolean equals(Object o) { // Confronta due articoli per uguaglianza
+        if (this == o) { // Se i riferimenti coincidono, sono uguali
+            return true; // Restituisce vero
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+        if (o == null || getClass() != o.getClass()) { // Se l'oggetto è nullo o di classe diversa
+            return false; // Restituisce falso
         }
-        Article article = (Article) o;
-        return Objects.equals(id, article.id);
+        Article article = (Article) o; // Effettua il cast a Article
+        return Objects.equals(id, article.id); // Confronta gli id per stabilire l'uguaglianza
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    @Override // Indica che si sta sovrascrivendo un metodo della superclasse
+    public int hashCode() { // Calcola l'hash dell'articolo
+        return Objects.hash(id); // Usa l'id per calcolare l'hash
     }
-}
+} // Chiude la definizione della classe
