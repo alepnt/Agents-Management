@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class NotificationCenter<T> implements Subject<T> {
 
-    private final Set<Observer<T>> observers = new CopyOnWriteArraySet<>();
+    private final @NonNull Set<Observer<T>> observers = new CopyOnWriteArraySet<>();
 
     @Override
     public void registerObserver(@NonNull Observer<T> observer) {

@@ -4,6 +4,8 @@ import com.example.common.dto.ContractDTO;
 
 import java.util.Objects;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Comando per la creazione di un contratto.
  */
@@ -16,7 +18,7 @@ public class CreateContractCommand implements Command<ContractDTO> {
     }
 
     @Override
-    public ContractDTO execute(CommandContext context) {
+    public @NonNull ContractDTO execute(@NonNull CommandContext context) {
         if (contract.getId() == null) {
             contract.setId(context.nextContractId());
         }

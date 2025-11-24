@@ -5,6 +5,8 @@ import com.example.common.dto.ContractDTO;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Aggiorna un contratto esistente.
  */
@@ -19,7 +21,7 @@ public class UpdateContractCommand implements Command<Optional<ContractDTO>> {
     }
 
     @Override
-    public Optional<ContractDTO> execute(CommandContext context) {
+    public @NonNull Optional<ContractDTO> execute(@NonNull CommandContext context) {
         return Optional.ofNullable(context.getContracts().computeIfPresent(id, (key, existing) -> {
             contract.setId(id);
             return contract;

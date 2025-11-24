@@ -5,6 +5,8 @@ import com.example.common.dto.InvoiceDTO;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Aggiorna una fattura esistente.
  */
@@ -19,7 +21,7 @@ public class UpdateInvoiceCommand implements Command<Optional<InvoiceDTO>> {
     }
 
     @Override
-    public Optional<InvoiceDTO> execute(CommandContext context) {
+    public @NonNull Optional<InvoiceDTO> execute(@NonNull CommandContext context) {
         return Optional.ofNullable(context.getInvoices().computeIfPresent(id, (key, existing) -> {
             invoice.setId(id);
             return invoice;

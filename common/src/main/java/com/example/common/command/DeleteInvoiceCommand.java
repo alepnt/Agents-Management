@@ -4,6 +4,8 @@ import com.example.common.dto.InvoiceDTO;
 
 import java.util.Optional;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Cancella una fattura esistente dal contesto.
  */
@@ -16,7 +18,7 @@ public class DeleteInvoiceCommand implements Command<Optional<InvoiceDTO>> {
     }
 
     @Override
-    public Optional<InvoiceDTO> execute(CommandContext context) {
+    public @NonNull Optional<InvoiceDTO> execute(@NonNull CommandContext context) {
         return Optional.ofNullable(context.getInvoices().remove(id));
     }
 }

@@ -10,8 +10,8 @@ public class NotificationSubscriptionDTO {
 
     private Long id;
     private Long userId;
-    private String channel;
-    private Instant createdAt;
+    private @NonNull String channel;
+    private @NonNull Instant createdAt;
 
     public NotificationSubscriptionDTO() {
         this.channel = "";

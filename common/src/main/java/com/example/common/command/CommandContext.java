@@ -15,8 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class CommandContext {
 
-    private final Map<Long, InvoiceDTO> invoices = new ConcurrentHashMap<>();
-    private final Map<Long, ContractDTO> contracts = new ConcurrentHashMap<>();
+    private final @NonNull Map<Long, InvoiceDTO> invoices = new ConcurrentHashMap<>();
+    private final @NonNull Map<Long, ContractDTO> contracts = new ConcurrentHashMap<>();
     private final AtomicLong invoiceSequence = new AtomicLong();
     private final AtomicLong contractSequence = new AtomicLong();
 
