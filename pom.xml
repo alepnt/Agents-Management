@@ -13,6 +13,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <javafx.version>21.0.2</javafx.version>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+        <javafx.main.class>com.example.client.MainApplication</javafx.main.class>
         <spring.boot.version>3.2.4</spring.boot.version>
         <spring.framework.version>6.1.5</spring.framework.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
@@ -200,6 +201,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx.maven.plugin.version}</version>
                 <configuration>
+                    <mainClass>${javafx.main.class}</mainClass>
                     <skip>true</skip>
                 </configuration>
             </plugin>
