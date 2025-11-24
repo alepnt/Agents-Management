@@ -129,7 +129,7 @@
                     <release>${java.version}</release>
                     <failOnWarning>true</failOnWarning>
                     <compilerArgs>
-                        <arg>-Xlint:null</arg>
+                        <arg>-Xlint:all</arg>
                         <arg>-Werror</arg>
                         <arg>-parameters</arg>
                     </compilerArgs>
