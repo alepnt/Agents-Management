@@ -25,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,7 +118,7 @@ class InvoiceServiceTest {
         assertThat(created.getNumber()).startsWith("INV-");
         assertThat(created.getAmount()).isEqualByComparingTo(new BigDecimal("40.50"));
         verify(invoiceLineRepository).deleteByInvoiceId(11L);
-        verify(invoiceLineRepository).save(any(InvoiceLine.class));
+        verify(invoiceLineRepository).saveAll(anyList());
         verify(documentHistoryService).log(eq(DocumentType.INVOICE), eq(11L), eq(DocumentAction.CREATED), any());
         verify(statisticsService).clearCache();
     }
