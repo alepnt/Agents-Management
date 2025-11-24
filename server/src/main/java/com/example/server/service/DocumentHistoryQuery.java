@@ -39,6 +39,11 @@ public final class DocumentHistoryQuery { // Definisce una classe immutabile per
         return new Builder(); // Restituisce un builder vuoto.
     }
 
+    public static Builder from(DocumentHistoryQuery query) { // Factory method per creare un builder popolato da una query esistente.
+        Objects.requireNonNull(query, "query"); // Garantisce che la query di origine non sia nulla.
+        return new Builder(query); // Restituisce un builder con i valori copiati.
+    }
+
     public DocumentType getDocumentType() { // Restituisce il tipo di documento filtrato.
         return documentType; // Ritorna il valore immutabile.
     }
@@ -219,8 +224,5 @@ public final class DocumentHistoryQuery { // Definisce una classe immutabile per
             return new DocumentHistoryQuery(this); // Crea l'istanza immutabile con i valori del builder.
         }
 
-        public Builder copyOf(DocumentHistoryQuery query) { // Crea una copia del builder da una query esistente.
-            return new Builder(query); // Restituisce un nuovo builder popolato.
-        }
     }
 }
