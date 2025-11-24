@@ -19,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 
 public class RegisterController {
@@ -147,7 +148,11 @@ public class RegisterController {
 
     private void navigate(String fxmlPath, ControllerFactory factory, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
+            }
+            FXMLLoader loader = new FXMLLoader(resource);
             loader.setControllerFactory(factory::create);
             Parent root = loader.load();
             Stage stage = (Stage) registerButton.getScene().getWindow();

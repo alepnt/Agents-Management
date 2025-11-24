@@ -78,6 +78,7 @@ import javafx.util.StringConverter;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -2186,7 +2187,12 @@ public class MainViewController {
             Stage stage = getCurrentStage();
             Scene currentScene = mainTabPane != null ? mainTabPane.getScene() : null;
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/client/view/LoginView.fxml"));
+            URL loginView = getClass().getResource("/com/example/client/view/LoginView.fxml");
+            if (loginView == null) {
+                notifyError("Risorsa FXML non trovata per il login");
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(loginView);
             TokenProvider provider = MsalTokenProvider.disabled("Servizio MSAL non disponibile");
             loader.setControllerFactory(param -> {
                 if (param == LoginController.class) {
@@ -2196,7 +2202,12 @@ public class MainViewController {
             });
 
             Parent root = loader.load();
-            String themeStylesheet = getClass().getResource("/com/example/client/style/theme.css").toExternalForm();
+            URL themeResource = getClass().getResource("/com/example/client/style/theme.css");
+            if (themeResource == null) {
+                notifyError("Foglio di stile non trovato per il login");
+                return;
+            }
+            String themeStylesheet = themeResource.toExternalForm();
 
             if (stage != null) {
                 Scene scene = new Scene(root);
