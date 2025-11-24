@@ -1,63 +1,63 @@
-package com.example.server.controller;
+package com.example.server.controller; // Package del controller
 
-import com.example.common.api.CommissionApiContract;
-import com.example.common.dto.CommissionDTO;
-import com.example.server.service.CommissionService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.example.common.api.CommissionApiContract; // Import delle dipendenze necessarie
+import com.example.common.dto.CommissionDTO; // Import delle dipendenze necessarie
+import com.example.server.service.CommissionService; // Import delle dipendenze necessarie
+import org.springframework.http.HttpStatus; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.DeleteMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.GetMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PathVariable; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PostMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PutMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RequestBody; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RequestMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RestController; // Import delle dipendenze necessarie
+import org.springframework.web.server.ResponseStatusException; // Import delle dipendenze necessarie
 
-import java.util.List;
-import java.util.Optional;
+import java.util.List; // Import delle dipendenze necessarie
+import java.util.Optional; // Import delle dipendenze necessarie
 
-@RestController
-@RequestMapping("/api/commissions")
-public class CommissionController implements CommissionApiContract {
+@RestController // Contrassegna la classe come controller REST
+@RequestMapping("/api/commissions") // Imposta il percorso base degli endpoint
+public class CommissionController implements CommissionApiContract { // Dichiarazione della classe controller
 
-    private final CommissionService commissionService;
+    private final CommissionService commissionService; // Definizione di una dipendenza iniettata
 
-    public CommissionController(CommissionService commissionService) {
-        this.commissionService = commissionService;
-    }
+    public CommissionController(CommissionService commissionService) { // Inizio di un metodo esposto dal controller
+        this.commissionService = commissionService; // Inizializza il campo del controller
+    } // Istruzione di gestione del controller
 
-    @Override
-    @GetMapping
-    public List<CommissionDTO> listCommissions() {
-        return commissionService.findAll();
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @GetMapping // Mapping per una richiesta GET
+    public List<CommissionDTO> listCommissions() { // Inizio di un metodo esposto dal controller
+        return commissionService.findAll(); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @GetMapping("/{id}")
-    public Optional<CommissionDTO> findById(@PathVariable Long id) {
-        return commissionService.findById(id);
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @GetMapping("/{id}") // Mapping per una richiesta GET
+    public Optional<CommissionDTO> findById(@PathVariable Long id) { // Inizio di un metodo esposto dal controller
+        return commissionService.findById(id); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @PostMapping
-    public CommissionDTO create(@RequestBody CommissionDTO commissionDTO) {
-        return commissionService.create(commissionDTO);
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @PostMapping // Mapping per una richiesta POST
+    public CommissionDTO create(@RequestBody CommissionDTO commissionDTO) { // Inizio di un metodo esposto dal controller
+        return commissionService.create(commissionDTO); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @PutMapping("/{id}")
-    public CommissionDTO update(@PathVariable Long id, @RequestBody CommissionDTO commissionDTO) {
-        return commissionService.update(id, commissionDTO)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Commissione non trovata"));
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @PutMapping("/{id}") // Mapping per una richiesta PUT
+    public CommissionDTO update(@PathVariable Long id, @RequestBody CommissionDTO commissionDTO) { // Inizio di un metodo esposto dal controller
+        return commissionService.update(id, commissionDTO) // Restituisce il risultato dell operazione
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Commissione non trovata")); // Istruzione di gestione del controller
+    } // Istruzione di gestione del controller
 
-    @Override
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        boolean deleted = commissionService.delete(id);
-        if (!deleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Commissione non trovata");
-        }
-    }
-}
+    @Override // Sovrascrive un metodo dell interfaccia
+    @DeleteMapping("/{id}") // Mapping per una richiesta DELETE
+    public void delete(@PathVariable Long id) { // Inizio di un metodo esposto dal controller
+        boolean deleted = commissionService.delete(id); // Gestione booleana dell esito dell operazione
+        if (!deleted) { // Controllo condizionale
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Commissione non trovata"); // Genera un eccezione HTTP
+        } // Istruzione di gestione del controller
+    } // Istruzione di gestione del controller
+} // Istruzione di gestione del controller

@@ -1,63 +1,63 @@
-package com.example.server.controller;
+package com.example.server.controller; // Package del controller
 
-import com.example.common.api.ArticleApiContract;
-import com.example.common.dto.ArticleDTO;
-import com.example.server.service.ArticleService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.example.common.api.ArticleApiContract; // Import delle dipendenze necessarie
+import com.example.common.dto.ArticleDTO; // Import delle dipendenze necessarie
+import com.example.server.service.ArticleService; // Import delle dipendenze necessarie
+import org.springframework.http.HttpStatus; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.DeleteMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.GetMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PathVariable; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PostMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.PutMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RequestBody; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RequestMapping; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.RestController; // Import delle dipendenze necessarie
+import org.springframework.web.server.ResponseStatusException; // Import delle dipendenze necessarie
 
-import java.util.List;
-import java.util.Optional;
+import java.util.List; // Import delle dipendenze necessarie
+import java.util.Optional; // Import delle dipendenze necessarie
 
-@RestController
-@RequestMapping("/api/articles")
-public class ArticleController implements ArticleApiContract {
+@RestController // Contrassegna la classe come controller REST
+@RequestMapping("/api/articles") // Imposta il percorso base degli endpoint
+public class ArticleController implements ArticleApiContract { // Dichiarazione della classe controller
 
-    private final ArticleService articleService;
+    private final ArticleService articleService; // Definizione di una dipendenza iniettata
 
-    public ArticleController(ArticleService articleService) {
-        this.articleService = articleService;
-    }
+    public ArticleController(ArticleService articleService) { // Inizio di un metodo esposto dal controller
+        this.articleService = articleService; // Inizializza il campo del controller
+    } // Istruzione di gestione del controller
 
-    @Override
-    @GetMapping
-    public List<ArticleDTO> listArticles() {
-        return articleService.findAll();
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @GetMapping // Mapping per una richiesta GET
+    public List<ArticleDTO> listArticles() { // Inizio di un metodo esposto dal controller
+        return articleService.findAll(); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @GetMapping("/{id}")
-    public Optional<ArticleDTO> findById(@PathVariable Long id) {
-        return articleService.findById(id);
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @GetMapping("/{id}") // Mapping per una richiesta GET
+    public Optional<ArticleDTO> findById(@PathVariable Long id) { // Inizio di un metodo esposto dal controller
+        return articleService.findById(id); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @PostMapping
-    public ArticleDTO create(@RequestBody ArticleDTO article) {
-        return articleService.create(article);
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @PostMapping // Mapping per una richiesta POST
+    public ArticleDTO create(@RequestBody ArticleDTO article) { // Inizio di un metodo esposto dal controller
+        return articleService.create(article); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
 
-    @Override
-    @PutMapping("/{id}")
-    public ArticleDTO update(@PathVariable Long id, @RequestBody ArticleDTO article) {
-        return articleService.update(id, article)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Articolo non trovato"));
-    }
+    @Override // Sovrascrive un metodo dell interfaccia
+    @PutMapping("/{id}") // Mapping per una richiesta PUT
+    public ArticleDTO update(@PathVariable Long id, @RequestBody ArticleDTO article) { // Inizio di un metodo esposto dal controller
+        return articleService.update(id, article) // Restituisce il risultato dell operazione
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Articolo non trovato")); // Istruzione di gestione del controller
+    } // Istruzione di gestione del controller
 
-    @Override
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        boolean deleted = articleService.delete(id);
-        if (!deleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Articolo non trovato");
-        }
-    }
-}
+    @Override // Sovrascrive un metodo dell interfaccia
+    @DeleteMapping("/{id}") // Mapping per una richiesta DELETE
+    public void delete(@PathVariable Long id) { // Inizio di un metodo esposto dal controller
+        boolean deleted = articleService.delete(id); // Gestione booleana dell esito dell operazione
+        if (!deleted) { // Controllo condizionale
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Articolo non trovato"); // Genera un eccezione HTTP
+        } // Istruzione di gestione del controller
+    } // Istruzione di gestione del controller
+} // Istruzione di gestione del controller
