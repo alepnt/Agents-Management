@@ -3,10 +3,17 @@ package com.example.server.domain;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Set;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomerTest {
+
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     void shouldCreateNewCustomerWithNullIdAndTimestamps() {
@@ -75,5 +82,24 @@ class CustomerTest {
         assertThat(first).isEqualTo(second);
         assertThat(first).hasSameHashCodeAs(second);
         assertThat(first).isNotEqualTo(third);
+    }
+
+    @Test
+    void shouldValidateMandatoryNameAndEmailFormat() {
+        Customer invalid = Customer.create(" ", "VAT", "TAX", "not-an-email", "123", "Addr");
+
+        Set<ConstraintViolation<Customer>> violations = validator.validate(invalid);
+
+        assertThat(violations).extracting("message")
+                .containsExactlyInAnyOrder("Il nome del cliente è obbligatorio", "Email non valida");
+    }
+
+    @Test
+    void shouldExposeReadableToString() {
+        Customer customer = Customer.create("Alpha", "IT123", "TAX", "alpha@test.it", "000", "Addr").withId(9L);
+
+        String result = customer.toString();
+
+        assertThat(result).contains("Customer{", "id=9", "name='Alpha'", "vatNumber='IT123'");
     }
 }

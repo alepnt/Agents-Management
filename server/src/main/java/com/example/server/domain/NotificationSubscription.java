@@ -1,5 +1,7 @@
 package com.example.server.domain; // Definisce il package per la classe di dominio
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
 import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
 import org.springframework.data.relational.core.mapping.Table; // Importa l'annotazione per mappare la tabella
@@ -14,8 +16,10 @@ public class NotificationSubscription { // Rappresenta un'iscrizione alle notifi
     private Long id; // Identificativo dell'iscrizione
 
     @Column("user_id") // Colonna che collega l'utente
+    @NotNull(message = "L'utente è obbligatorio")
     private Long userId; // Identificativo dell'utente collegato
 
+    @NotBlank(message = "Il canale di notifica è obbligatorio")
     private String channel; // Canale di notifica (es. email, push)
 
     @Column("created_at") // Colonna con la data di creazione
@@ -62,5 +66,14 @@ public class NotificationSubscription { // Rappresenta un'iscrizione alle notifi
     @Override // Override del calcolo hash
     public int hashCode() { // Calcola l'hash basato sull'id
         return Objects.hash(id); // Usa l'id come base per l'hash
+    }
+
+    @Override
+    public String toString() {
+        return "NotificationSubscription{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", channel='" + channel + '\'' +
+                '}';
     }
 }
