@@ -1,0 +1,73 @@
+package com.example.server.repository;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+@DataJdbcTest
+@ActiveProfiles("test")
+class StatisticsRepositoryTest {
+
+    @Autowired
+    private StatisticsRepository statisticsRepository;
+
+    @Test
+    void findAvailableYearsShouldReturnDistinctPaidYearsOrdered() {
+        List<Integer> years = statisticsRepository.findAvailableYears("PAID");
+
+        assertThat(years).containsExactly(2022, 2024);
+    }
+
+    @Test
+    void findMonthlyTotalsShouldGroupResultsByMonthForTargetYear() {
+        List<StatisticsRepository.MonthlyAggregate> totals = statisticsRepository.findMonthlyTotals(2024, "PAID");
+
+        assertThat(totals)
+                .hasSize(3)
+                .extracting(StatisticsRepository.MonthlyAggregate::getYear,
+                        StatisticsRepository.MonthlyAggregate::getMonth,
+                        StatisticsRepository.MonthlyAggregate::getTotalAmount)
+                .containsExactly(
+                        tuple(2024, 1, new BigDecimal("100.00")),
+                        tuple(2024, 2, new BigDecimal("250.00")),
+                        tuple(2024, 3, new BigDecimal("300.00"))
+                );
+    }
+
+    @Test
+    void findAgentTotalsShouldReturnAggregatedTotalsOrderedByAmount() {
+        List<StatisticsRepository.AgentAggregate> totals = statisticsRepository.findAgentTotals(2024, "PAID");
+
+        assertThat(totals)
+                .extracting(StatisticsRepository.AgentAggregate::getAgentId,
+                        StatisticsRepository.AgentAggregate::getAgentName,
+                        StatisticsRepository.AgentAggregate::getTeamId,
+                        StatisticsRepository.AgentAggregate::getTeamName,
+                        StatisticsRepository.AgentAggregate::getTotalAmount)
+                .containsExactly(
+                        tuple(1L, "Alice Agent", 1L, "Sales", new BigDecimal("350.00")),
+                        tuple(2L, "Bob Agent", 2L, "Support", new BigDecimal("300.00"))
+                );
+    }
+
+    @Test
+    void findTeamTotalsShouldAggregateInvoicesByTeam() {
+        List<StatisticsRepository.TeamAggregate> totals = statisticsRepository.findTeamTotals(2024, "PAID");
+
+        assertThat(totals)
+                .extracting(StatisticsRepository.TeamAggregate::getTeamId,
+                        StatisticsRepository.TeamAggregate::getTeamName,
+                        StatisticsRepository.TeamAggregate::getTotalAmount)
+                .containsExactly(
+                        tuple(1L, "Sales", new BigDecimal("350.00")),
+                        tuple(2L, "Support", new BigDecimal("300.00"))
+                );
+    }
+}
