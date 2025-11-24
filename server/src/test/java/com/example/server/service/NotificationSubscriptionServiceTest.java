@@ -17,11 +17,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,5 +77,49 @@ class NotificationSubscriptionServiceTest {
         assertThatThrownBy(() -> service.create(payload))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("L'utente è obbligatorio");
+    }
+
+    @Test
+    void shouldListSubscriptionsForUserSortedByCreationDate() {
+        when(userRepository.findById(7L)).thenReturn(Optional.of(new User(7L, "azure", "user@example.com",
+                "User", null, 1L, 2L, Boolean.TRUE, LocalDateTime.now())));
+        NotificationSubscription first = new NotificationSubscription(1L, 7L, " email ", FIXED_INSTANT.minusSeconds(10));
+        NotificationSubscription second = new NotificationSubscription(2L, 7L, "email", FIXED_INSTANT);
+        when(subscriptionRepository.findByUserId(7L)).thenReturn(List.of(second, first));
+
+        var results = service.list(7L);
+
+        assertThat(results).extracting(NotificationSubscriptionDTO::getId).containsExactly(1L, 2L);
+        assertThat(results).allMatch(dto -> "email".equals(dto.getChannel()));
+    }
+
+    @Test
+    void shouldUpdateExistingSubscriptionAndPreserveCreatedAtWhenMissing() {
+        NotificationSubscription existing = new NotificationSubscription(3L, 9L, "webhook", FIXED_INSTANT);
+        NotificationSubscriptionDTO update = new NotificationSubscriptionDTO();
+        update.setUserId(9L);
+        update.setChannel("   webhook-updated   ");
+
+        when(subscriptionRepository.findById(3L)).thenReturn(Optional.of(existing));
+        when(userRepository.findById(9L)).thenReturn(Optional.of(new User(9L, "azure", "mail@example.com",
+                "User", null, 1L, 2L, Boolean.TRUE, LocalDateTime.now())));
+        when(subscriptionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Optional<NotificationSubscriptionDTO> result = service.update(3L, update);
+
+        assertThat(result).isPresent();
+        NotificationSubscriptionDTO dto = result.orElseThrow();
+        assertThat(dto.getChannel()).isEqualTo("webhook-updated");
+        assertThat(dto.getCreatedAt()).isEqualTo(FIXED_INSTANT);
+    }
+
+    @Test
+    void shouldReturnFalseWhenDeletingMissingSubscription() {
+        when(subscriptionRepository.findById(44L)).thenReturn(Optional.empty());
+
+        boolean deleted = service.delete(44L);
+
+        assertThat(deleted).isFalse();
+        verify(subscriptionRepository, never()).delete(any());
     }
 }
