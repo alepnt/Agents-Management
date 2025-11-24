@@ -75,6 +75,12 @@
             <version>4.0.18</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <version>${javafx.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
