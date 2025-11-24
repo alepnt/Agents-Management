@@ -1,31 +1,31 @@
-package com.example.server.service; // Commento automatico: package com.example.server.service;
-// Spazio commentato per leggibilità
-import com.example.common.dto.ChatMessageDTO; // Commento automatico: import com.example.common.dto.ChatMessageDTO;
-import org.springframework.stereotype.Component; // Commento automatico: import org.springframework.stereotype.Component;
-// Spazio commentato per leggibilità
-import java.util.List; // Commento automatico: import java.util.List;
-import java.util.Map; // Commento automatico: import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap; // Commento automatico: import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList; // Commento automatico: import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer; // Commento automatico: import java.util.function.Consumer;
-// Spazio commentato per leggibilità
-@Component // Commento automatico: @Component
-public class ChatPublisher { // Commento automatico: public class ChatPublisher {
-// Spazio commentato per leggibilità
-    private final Map<String, List<Consumer<ChatMessageDTO>>> listeners = new ConcurrentHashMap<>(); // Commento automatico: private final Map<String, List<Consumer<ChatMessageDTO>>> listeners = new ConcurrentHashMap<>();
-// Spazio commentato per leggibilità
-    public Subscription subscribe(String conversationId, Consumer<ChatMessageDTO> listener) { // Commento automatico: public Subscription subscribe(String conversationId, Consumer<ChatMessageDTO> listener) {
-        listeners.computeIfAbsent(conversationId, key -> new CopyOnWriteArrayList<>()).add(listener); // Commento automatico: listeners.computeIfAbsent(conversationId, key -> new CopyOnWriteArrayList<>()).add(listener);
-        return () -> listeners.getOrDefault(conversationId, List.of()).remove(listener); // Commento automatico: return () -> listeners.getOrDefault(conversationId, List.of()).remove(listener);
-    } // Commento automatico: }
-// Spazio commentato per leggibilità
-    public void publish(ChatMessageDTO message) { // Commento automatico: public void publish(ChatMessageDTO message) {
-        listeners.getOrDefault(message.conversationId(), List.of()) // Commento automatico: listeners.getOrDefault(message.conversationId(), List.of())
-                .forEach(listener -> listener.accept(message)); // Commento automatico: .forEach(listener -> listener.accept(message));
-    } // Commento automatico: }
-// Spazio commentato per leggibilità
-    @FunctionalInterface // Commento automatico: @FunctionalInterface
-    public interface Subscription { // Commento automatico: public interface Subscription {
-        void cancel(); // Commento automatico: void cancel();
-    } // Commento automatico: }
-} // Commento automatico: }
+package com.example.server.service; // Definisce il package del gestore di pubblicazione chat
+
+import com.example.common.dto.ChatMessageDTO; // Importa il DTO utilizzato per i messaggi di chat
+import org.springframework.stereotype.Component; // Importa l'annotazione per registrare il componente Spring
+
+import java.util.List; // Importa la lista per memorizzare i listener
+import java.util.Map; // Importa la mappa che associa le conversazioni ai listener
+import java.util.concurrent.ConcurrentHashMap; // Importa una mappa concorrente per l'accesso thread-safe
+import java.util.concurrent.CopyOnWriteArrayList; // Importa una lista thread-safe per i listener
+import java.util.function.Consumer; // Importa l'interfaccia Consumer per processare i messaggi
+
+@Component // Indica che la classe è un componente Spring gestito dal contenitore
+public class ChatPublisher { // Gestisce la pubblicazione degli eventi di chat ai sottoscrittori
+
+    private final Map<String, List<Consumer<ChatMessageDTO>>> listeners = new ConcurrentHashMap<>(); // Mappa dei listener organizzati per conversazione
+
+    public Subscription subscribe(String conversationId, Consumer<ChatMessageDTO> listener) { // Registra un nuovo listener per una conversazione
+        listeners.computeIfAbsent(conversationId, key -> new CopyOnWriteArrayList<>()).add(listener); // Crea la lista se manca e aggiunge il listener
+        return () -> listeners.getOrDefault(conversationId, List.of()).remove(listener); // Restituisce una subscription che permette di annullare l'iscrizione
+    }
+
+    public void publish(ChatMessageDTO message) { // Pubblica un messaggio a tutti i listener della conversazione
+        listeners.getOrDefault(message.conversationId(), List.of()) // Recupera i listener registrati per la conversazione
+                .forEach(listener -> listener.accept(message)); // Notifica ogni listener passando il messaggio
+    }
+
+    @FunctionalInterface // Specifica che l'interfaccia ha un unico metodo astratto
+    public interface Subscription { // Rappresenta la gestione della sottoscrizione
+        void cancel(); // Metodo per annullare la sottoscrizione
+    }
+}
