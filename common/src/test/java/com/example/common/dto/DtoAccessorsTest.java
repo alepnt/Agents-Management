@@ -27,18 +27,18 @@ class DtoAccessorsTest {
     private static final LocalDateTime SAMPLE_LOCAL_DATE_TIME = LocalDateTime.parse("2024-01-01T00:00:00");
     private static final BigDecimal SAMPLE_AMOUNT = new BigDecimal("10.50");
 
-    private static final Map<Class<?>, Supplier<?>> SAMPLE_VALUES = Map.of(
-            Long.class, () -> 1L,
-            Integer.class, () -> 2,
-            String.class, () -> "sample",
-            Boolean.class, () -> Boolean.TRUE,
-            Instant.class, () -> SAMPLE_INSTANT,
-            LocalDateTime.class, () -> SAMPLE_LOCAL_DATE_TIME,
-            BigDecimal.class, () -> SAMPLE_AMOUNT,
-            DocumentType.class, () -> DocumentType.CONTRACT,
-            DocumentAction.class, () -> DocumentAction.CREATED,
-            InvoiceStatus.class, () -> InvoiceStatus.PAID,
-            ContractStatus.class, () -> ContractStatus.ACTIVE
+    private static final Map<Class<?>, Supplier<?>> SAMPLE_VALUES = Map.ofEntries(
+            Map.entry(Long.class, () -> 1L),
+            Map.entry(Integer.class, () -> 2),
+            Map.entry(String.class, () -> "sample"),
+            Map.entry(Boolean.class, () -> Boolean.TRUE),
+            Map.entry(Instant.class, () -> SAMPLE_INSTANT),
+            Map.entry(LocalDateTime.class, () -> SAMPLE_LOCAL_DATE_TIME),
+            Map.entry(BigDecimal.class, () -> SAMPLE_AMOUNT),
+            Map.entry(DocumentType.class, () -> DocumentType.CONTRACT),
+            Map.entry(DocumentAction.class, () -> DocumentAction.CREATED),
+            Map.entry(InvoiceStatus.class, () -> InvoiceStatus.PAID),
+            Map.entry(ContractStatus.class, () -> ContractStatus.ACTIVE)
     );
 
     private static final List<Class<?>> ID_BASED_DTOS = List.of(
