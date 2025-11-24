@@ -95,14 +95,64 @@ class StatisticsServiceTest {
     private record MonthlyAggregateStub(Integer year, Integer month, BigDecimal totalAmount)
             implements StatisticsRepository.MonthlyAggregate {
         @Override
+        public Integer getYear() {
+            return year;
+        }
+
+        @Override
+        public Integer getMonth() {
+            return month;
+        }
+
+        @Override
         public BigDecimal getTotalAmount() {
             return totalAmount;
         }
     }
 
     private record AgentAggregateStub(Long agentId, String agentName, Long teamId, String teamName, BigDecimal totalAmount)
-            implements StatisticsRepository.AgentAggregate { }
+            implements StatisticsRepository.AgentAggregate {
+        @Override
+        public Long getAgentId() {
+            return agentId;
+        }
+
+        @Override
+        public String getAgentName() {
+            return agentName;
+        }
+
+        @Override
+        public Long getTeamId() {
+            return teamId;
+        }
+
+        @Override
+        public String getTeamName() {
+            return teamName;
+        }
+
+        @Override
+        public BigDecimal getTotalAmount() {
+            return totalAmount;
+        }
+    }
 
     private record TeamAggregateStub(Long teamId, String teamName, BigDecimal totalAmount)
-            implements StatisticsRepository.TeamAggregate { }
+            implements StatisticsRepository.TeamAggregate {
+        @Override
+        public Long getTeamId() {
+            return teamId;
+        }
+
+        @Override
+        public String getTeamName() {
+            return teamName;
+        }
+
+        @Override
+        public BigDecimal getTotalAmount() {
+            return totalAmount;
+        }
+    }
 }

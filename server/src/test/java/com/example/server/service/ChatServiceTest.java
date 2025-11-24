@@ -66,7 +66,7 @@ class ChatServiceTest {
         var conversations = service.listConversations(7L);
 
         assertThat(conversations)
-                .extracting(ChatConversationDTO::conversationId, ChatConversationDTO::preview)
+                .extracting(ChatConversationDTO::conversationId, ChatConversationDTO::lastMessagePreview)
                 .containsExactly(
                         org.assertj.core.api.Assertions.tuple("team:1", "Hello team"),
                         org.assertj.core.api.Assertions.tuple("direct:4", "newer")
@@ -94,7 +94,7 @@ class ChatServiceTest {
         Message saved = new Message(10L, "conv", 8L, null, "payload", NOW);
         when(messageRepository.save(any())).thenReturn(saved);
 
-        ChatMessageDTO response = service.sendMessage(new ChatMessageRequest("conv", 8L, "payload"));
+        ChatMessageDTO response = service.sendMessage(new ChatMessageRequest(8L, "conv", "payload"));
 
         ArgumentCaptor<Message> persisted = ArgumentCaptor.forClass(Message.class);
         verify(messageRepository).save(persisted.capture());
