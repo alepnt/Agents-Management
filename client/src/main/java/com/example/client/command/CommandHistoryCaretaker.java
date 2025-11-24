@@ -3,6 +3,8 @@ package com.example.client.command;
 import com.example.common.observer.NotificationCenter;
 import com.example.common.observer.Observer;
 
+import org.springframework.lang.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,20 +17,20 @@ public class CommandHistoryCaretaker {
     private final List<CommandMemento> history = new ArrayList<>();
     private final NotificationCenter<CommandMemento> notificationCenter = new NotificationCenter<>();
 
-    public void addMemento(CommandMemento memento) {
+    public void addMemento(@NonNull CommandMemento memento) {
         history.add(memento);
         notificationCenter.notifyObservers(memento);
     }
 
-    public List<CommandMemento> history() {
+    public @NonNull List<CommandMemento> history() {
         return Collections.unmodifiableList(history);
     }
 
-    public void subscribe(Observer<CommandMemento> observer) {
+    public void subscribe(@NonNull Observer<CommandMemento> observer) {
         notificationCenter.registerObserver(observer);
     }
 
-    public void unsubscribe(Observer<CommandMemento> observer) {
+    public void unsubscribe(@NonNull Observer<CommandMemento> observer) {
         notificationCenter.removeObserver(observer);
     }
 

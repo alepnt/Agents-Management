@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody; // Import delle dipe
 import org.springframework.web.bind.annotation.RequestMapping; // Import delle dipendenze necessarie
 import org.springframework.web.bind.annotation.RestController; // Import delle dipendenze necessarie
 import org.springframework.web.server.ResponseStatusException; // Import delle dipendenze necessarie
+import org.springframework.lang.NonNull; // Annotazione per parametri non null
 
 import java.util.List; // Import delle dipendenze necessarie
 import java.util.Optional; // Import delle dipendenze necessarie
@@ -29,25 +30,25 @@ public class MessageController implements MessageApiContract { // Dichiarazione 
 
     @Override // Sovrascrive un metodo dell interfaccia
     @GetMapping // Mapping per una richiesta GET
-    public List<MessageDTO> listMessages() { // Inizio di un metodo esposto dal controller
+    public @NonNull List<MessageDTO> listMessages() { // Inizio di un metodo esposto dal controller
         return messageService.findAll(); // Restituisce il risultato dell operazione
     } // Istruzione di gestione del controller
 
     @Override // Sovrascrive un metodo dell interfaccia
     @GetMapping("/{id}") // Mapping per una richiesta GET
-    public Optional<MessageDTO> findById(@PathVariable Long id) { // Inizio di un metodo esposto dal controller
+    public @NonNull Optional<MessageDTO> findById(@PathVariable @NonNull Long id) { // Inizio di un metodo esposto dal controller
         return messageService.findById(id); // Restituisce il risultato dell operazione
     } // Istruzione di gestione del controller
 
     @Override // Sovrascrive un metodo dell interfaccia
     @PostMapping // Mapping per una richiesta POST
-    public MessageDTO create(@RequestBody MessageDTO message) { // Inizio di un metodo esposto dal controller
+    public @NonNull MessageDTO create(@RequestBody @NonNull MessageDTO message) { // Inizio di un metodo esposto dal controller
         return messageService.create(message); // Restituisce il risultato dell operazione
     } // Istruzione di gestione del controller
 
     @Override // Sovrascrive un metodo dell interfaccia
     @PutMapping("/{id}") // Mapping per una richiesta PUT
-    public MessageDTO update(@PathVariable Long id, @RequestBody MessageDTO message) { // Inizio di un metodo esposto dal controller
+    public @NonNull MessageDTO update(@PathVariable @NonNull Long id, @RequestBody @NonNull MessageDTO message) { // Inizio di un metodo esposto dal controller
         return messageService.update(id, message) // Restituisce il risultato dell operazione
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Messaggio non trovato")); // Istruzione di gestione del controller
     } // Istruzione di gestione del controller

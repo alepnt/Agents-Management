@@ -19,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.NonNull;
+
 public class NotificationTabView extends Tab implements Observer<NotificationMessage>, AutoCloseable {
 
     private final BackendGateway backendGateway;
@@ -88,7 +90,7 @@ public class NotificationTabView extends Tab implements Observer<NotificationMes
     }
 
     @Override
-    public void update(NotificationMessage event) {
+    public void update(@NonNull NotificationMessage event) {
         Platform.runLater(() -> items.add(0, String.format("[%s] %s", event.getTimestamp(), event.getPayload())));
     }
 

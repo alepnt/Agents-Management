@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 public class CommandBus {
 
-    private final CommandContext context;
+    private final @NonNull CommandContext context;
 
     public CommandBus(@NonNull CommandContext context) {
         this.context = Objects.requireNonNull(context, "context");

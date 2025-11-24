@@ -15,13 +15,13 @@ public class NotificationDTO {
     private Long teamId;
 
     @NotBlank
-    private String title;
+    private @NonNull String title;
 
     @NotBlank
-    private String message;
+    private @NonNull String message;
 
-    private Boolean read;
-    private Instant createdAt;
+    private @NonNull Boolean read;
+    private @NonNull Instant createdAt;
 
     public NotificationDTO() {
         this.title = "";

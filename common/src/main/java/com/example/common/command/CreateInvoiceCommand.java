@@ -4,6 +4,8 @@ import com.example.common.dto.InvoiceDTO;
 
 import java.util.Objects;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Comando per la creazione di una fattura.
  */
@@ -16,7 +18,7 @@ public class CreateInvoiceCommand implements Command<InvoiceDTO> {
     }
 
     @Override
-    public InvoiceDTO execute(CommandContext context) {
+    public @NonNull InvoiceDTO execute(@NonNull CommandContext context) {
         if (invoice.getId() == null) {
             invoice.setId(context.nextInvoiceId());
         }

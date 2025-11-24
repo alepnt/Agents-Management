@@ -4,6 +4,8 @@ import com.example.common.dto.ContractDTO;
 
 import java.util.Optional;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Cancella un contratto esistente dal contesto.
  */
@@ -16,7 +18,7 @@ public class DeleteContractCommand implements Command<Optional<ContractDTO>> {
     }
 
     @Override
-    public Optional<ContractDTO> execute(CommandContext context) {
+    public @NonNull Optional<ContractDTO> execute(@NonNull CommandContext context) {
         return Optional.ofNullable(context.getContracts().remove(id));
     }
 }

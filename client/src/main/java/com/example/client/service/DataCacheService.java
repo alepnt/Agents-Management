@@ -42,6 +42,8 @@ import com.example.common.dto.UserDTO;
 import com.example.common.observer.NotificationCenter;
 import com.example.common.observer.Observer;
 
+import org.springframework.lang.NonNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -415,15 +417,15 @@ public class DataCacheService {
         historyCache.clear();
     }
 
-    public void subscribeDataChanges(Observer<DataChangeEvent> observer) {
+    public void subscribeDataChanges(@NonNull Observer<DataChangeEvent> observer) {
         dataChangeCenter.registerObserver(observer);
     }
 
-    public void unsubscribeDataChanges(Observer<DataChangeEvent> observer) {
+    public void unsubscribeDataChanges(@NonNull Observer<DataChangeEvent> observer) {
         dataChangeCenter.removeObserver(observer);
     }
 
-    private void publishChange(DataChangeType type) {
+    private void publishChange(@NonNull DataChangeType type) {
         dataChangeCenter.notifyObservers(new DataChangeEvent(type, java.time.Instant.now()));
     }
 
