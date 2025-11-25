@@ -1,3 +1,11 @@
+DELETE FROM "document_history";
+DELETE FROM "invoices";
+DELETE FROM "contracts";
+DELETE FROM "agents";
+DELETE FROM "users";
+DELETE FROM "teams";
+DELETE FROM "roles";
+
 INSERT INTO "roles" (name) VALUES ('Agent');
 
 INSERT INTO "teams" (name) VALUES ('Sales');
@@ -128,12 +136,42 @@ VALUES (
 );
 
 INSERT INTO "document_history" (document_type, document_id, action, description, created_at)
-VALUES ('INVOICE', 10, 'CREATED', 'Invoice created', TIMESTAMP '2024-01-01T10:00:00');
+VALUES (
+    'INVOICE',
+    (SELECT id FROM "invoices" WHERE invoice_number = 'INV-001'),
+    'CREATED',
+    'Invoice created',
+    TIMESTAMP '2024-01-01T10:00:00'
+);
 INSERT INTO "document_history" (document_type, document_id, action, description, created_at)
-VALUES ('INVOICE', 10, 'UPDATED', 'Invoice updated', TIMESTAMP '2024-01-02T10:00:00');
+VALUES (
+    'INVOICE',
+    (SELECT id FROM "invoices" WHERE invoice_number = 'INV-001'),
+    'UPDATED',
+    'Invoice updated',
+    TIMESTAMP '2024-01-02T10:00:00'
+);
 INSERT INTO "document_history" (document_type, document_id, action, description, created_at)
-VALUES ('CONTRACT', 20, 'CREATED', 'Contract created', TIMESTAMP '2024-01-03T10:00:00');
+VALUES (
+    'CONTRACT',
+    (SELECT id FROM "contracts" WHERE customer_name = 'Customer A'),
+    'CREATED',
+    'Contract created',
+    TIMESTAMP '2024-01-03T10:00:00'
+);
 INSERT INTO "document_history" (document_type, document_id, action, description, created_at)
-VALUES ('INVOICE', 11, 'PAYMENT_REGISTERED', 'Payment registered for invoice', TIMESTAMP '2024-02-01T10:00:00');
+VALUES (
+    'INVOICE',
+    (SELECT id FROM "invoices" WHERE invoice_number = 'INV-002'),
+    'PAYMENT_REGISTERED',
+    'Payment registered for invoice',
+    TIMESTAMP '2024-02-01T10:00:00'
+);
 INSERT INTO "document_history" (document_type, document_id, action, description, created_at)
-VALUES ('INVOICE', 10, 'DELETED', 'Invoice deleted permanently', TIMESTAMP '2024-03-01T10:00:00');
+VALUES (
+    'INVOICE',
+    (SELECT id FROM "invoices" WHERE invoice_number = 'INV-001'),
+    'DELETED',
+    'Invoice deleted permanently',
+    TIMESTAMP '2024-03-01T10:00:00'
+);
