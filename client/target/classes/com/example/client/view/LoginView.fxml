@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.client.controller.LoginController"
+            styleClass="app-root">
+    <top>
+        <HBox alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <ImageView fitHeight="48.0" fitWidth="48.0" preserveRatio="true">
+                <image>
+                    <Image url="@/images/app-logo.png" />
+                </image>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox alignment="CENTER" spacing="18" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
+            <Label text="Gestore Agenti" styleClass="title" />
+            <Label text="Accedi con il tuo account Microsoft per continuare" wrapText="true" textAlignment="CENTER"
+                   styleClass="subtitle"/>
+            <Button fx:id="loginButton" text="Accedi con Microsoft" onAction="#handleLogin"
+                    maxWidth="Infinity" prefWidth="280" styleClass="primary-button"/>
+            <Label fx:id="statusLabel" text="Clicca su &quot;Accedi con Microsoft&quot; per iniziare" wrapText="true" textAlignment="CENTER"/>
+            <Hyperlink fx:id="registerLink" text="Registrati" onAction="#openRegister"/>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,4 @@
+com\example\common\dto\DtoAccessorsTest.class
+com\example\common\dto\DocumentHistoryPageDTOTest.class
+com\example\common\dto\RecordDtoTest.class
+com\example\common\dto\NotificationMessageTest.class
