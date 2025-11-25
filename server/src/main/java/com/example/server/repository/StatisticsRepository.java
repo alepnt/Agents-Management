@@ -19,9 +19,9 @@ public class StatisticsRepository {
 
     public List<Integer> findAvailableYears(String paidStatus) {
         String sql = """
-                SELECT DISTINCT EXTRACT(YEAR FROM i.payment_date) AS payment_year
-                FROM invoices i
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL
+                SELECT DISTINCT EXTRACT(YEAR FROM i."payment_date") AS payment_year
+                FROM "invoices" i
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL
                 ORDER BY payment_year
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource("paidStatus", paidStatus);
@@ -30,12 +30,12 @@ public class StatisticsRepository {
 
     public List<MonthlyAggregate> findMonthlyTotals(int year, String paidStatus) {
         String sql = """
-                SELECT EXTRACT(YEAR FROM i.payment_date) AS payment_year,
-                       EXTRACT(MONTH FROM i.payment_date) AS payment_month,
-                       SUM(i.amount) AS total_amount
-                FROM invoices i
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
-                GROUP BY EXTRACT(YEAR FROM i.payment_date), EXTRACT(MONTH FROM i.payment_date)
+                SELECT EXTRACT(YEAR FROM i."payment_date") AS payment_year,
+                       EXTRACT(MONTH FROM i."payment_date") AS payment_month,
+                       SUM(i."amount") AS total_amount
+                FROM "invoices" i
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
+                GROUP BY EXTRACT(YEAR FROM i."payment_date"), EXTRACT(MONTH FROM i."payment_date")
                 ORDER BY payment_month
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -51,18 +51,18 @@ public class StatisticsRepository {
 
     public List<AgentAggregate> findAgentTotals(int year, String paidStatus) {
         String sql = """
-                SELECT a.id AS agent_id,
-                       u.display_name AS agent_name,
-                       t.id AS team_id,
-                       t.name AS team_name,
-                       SUM(i.amount) AS total_amount
-                FROM invoices i
-                         JOIN contracts c ON i.contract_id = c.id
-                         JOIN agents a ON c.agent_id = a.id
-                         JOIN users u ON a.user_id = u.id
-                         JOIN teams t ON u.team_id = t.id
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
-                GROUP BY a.id, u.display_name, t.id, t.name
+                SELECT a."id" AS agent_id,
+                       u."display_name" AS agent_name,
+                       t."id" AS team_id,
+                       t."name" AS team_name,
+                       SUM(i."amount") AS total_amount
+                FROM "invoices" i
+                         JOIN "contracts" c ON i."contract_id" = c."id"
+                         JOIN "agents" a ON c."agent_id" = a."id"
+                         JOIN "users" u ON a."user_id" = u."id"
+                         JOIN "teams" t ON u."team_id" = t."id"
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
+                GROUP BY a."id", u."display_name", t."id", t."name"
                 ORDER BY total_amount DESC
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -80,16 +80,16 @@ public class StatisticsRepository {
 
     public List<TeamAggregate> findTeamTotals(int year, String paidStatus) {
         String sql = """
-                SELECT t.id AS team_id,
-                       t.name AS team_name,
-                       SUM(i.amount) AS total_amount
-                FROM invoices i
-                         JOIN contracts c ON i.contract_id = c.id
-                         JOIN agents a ON c.agent_id = a.id
-                         JOIN users u ON a.user_id = u.id
-                         JOIN teams t ON u.team_id = t.id
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
-                GROUP BY t.id, t.name
+                SELECT t."id" AS team_id,
+                       t."name" AS team_name,
+                       SUM(i."amount") AS total_amount
+                FROM "invoices" i
+                         JOIN "contracts" c ON i."contract_id" = c."id"
+                         JOIN "agents" a ON c."agent_id" = a."id"
+                         JOIN "users" u ON a."user_id" = u."id"
+                         JOIN "teams" t ON u."team_id" = t."id"
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
+                GROUP BY t."id", t."name"
                 ORDER BY total_amount DESC
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
