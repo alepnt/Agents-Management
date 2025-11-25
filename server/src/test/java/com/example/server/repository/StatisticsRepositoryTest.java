@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.tuple;
 @DataJdbcTest
 @ActiveProfiles("test")
 @Import(StatisticsRepository.class)
+@Sql(scripts = "/data.sql")
 class StatisticsRepositoryTest {
 
     @Autowired
