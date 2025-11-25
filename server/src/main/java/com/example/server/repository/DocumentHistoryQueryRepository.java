@@ -48,9 +48,9 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
         QueryParts parts = buildQuery(query); // Costruisce dinamicamente la clausola FROM/WHERE e i parametri.
         String fromClause = Objects.requireNonNull(parts.fromClause(), "fromClause must not be null"); // Verifica che la clausola SQL sia presente.
         MapSqlParameterSource parameters = Objects.requireNonNull(parts.parameters(), "parameters must not be null"); // Recupera i parametri sicuri.
-        StringBuilder sql = new StringBuilder("SELECT id, document_type, document_id, action, description, created_at ") // Avvia la query di selezione.
+        StringBuilder sql = new StringBuilder("SELECT \"id\", \"document_type\", \"document_id\", \"action\", \"description\", \"created_at\" ") // Avvia la query di selezione.
                 .append(fromClause) // Aggiunge il blocco FROM e i filtri.
-                .append(" ORDER BY created_at DESC"); // Ordina i risultati dalla voce più recente.
+                .append(" ORDER BY \"created_at\" DESC"); // Ordina i risultati dalla voce più recente.
         if (query.isPaginated()) { // Applica la paginazione solo se richiesta.
             sql.append(" OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY"); // Aggiunge clausola di offset/limit compatibile con il database.
             parameters.addValue("offset", query.offset()); // Imposta l'offset calcolato dalla query.
@@ -70,39 +70,39 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
         QueryParts parts = buildQuery(query.withoutPagination()); // Rimuove la paginazione e costruisce la clausola di ricerca.
         String fromClause = Objects.requireNonNull(parts.fromClause(), "fromClause must not be null"); // Garantisce la presenza del blocco FROM.
         MapSqlParameterSource parameters = Objects.requireNonNull(parts.parameters(), "parameters must not be null"); // Ottiene i parametri impostati.
-        String sql = "SELECT id, document_type, document_id, action, description, created_at " // Stringa base della SELECT.
+        String sql = "SELECT \"id\", \"document_type\", \"document_id\", \"action\", \"description\", \"created_at\" " // Stringa base della SELECT.
                 + fromClause // Aggiunge la clausola dinamica costruita.
-                + " ORDER BY created_at DESC"; // Ordina per data di creazione decrescente.
+                + " ORDER BY \"created_at\" DESC"; // Ordina per data di creazione decrescente.
         return jdbcTemplate.query(sql, parameters, Objects.requireNonNull(ROW_MAPPER, "rowMapper must not be null")); // Esegue la query e mappa i risultati.
     }
 
     private QueryParts buildQuery(DocumentHistoryQuery query) { // Compone dinamicamente la clausola FROM/WHERE in base ai filtri.
-        StringBuilder fromClause = new StringBuilder("FROM document_history WHERE 1 = 1"); // Base della query che consente di aggiungere filtri con AND.
+        StringBuilder fromClause = new StringBuilder("FROM \"document_history\" WHERE 1 = 1"); // Base della query che consente di aggiungere filtri con AND.
         MapSqlParameterSource parameters = new MapSqlParameterSource(); // Contenitore per i parametri nominati.
         if (query.getDocumentType() != null) { // Filtra per tipo di documento se valorizzato.
-            fromClause.append(" AND document_type = :documentType"); // Aggiunge la condizione sul tipo.
+            fromClause.append(" AND \"document_type\" = :documentType"); // Aggiunge la condizione sul tipo.
             parameters.addValue("documentType", query.getDocumentType().name()); // Imposta il parametro del tipo.
         }
         if (query.getDocumentId() != null) { // Filtra per ID documento se fornito.
-            fromClause.append(" AND document_id = :documentId"); // Aggiunge condizione sull'ID documento.
+            fromClause.append(" AND \"document_id\" = :documentId"); // Aggiunge condizione sull'ID documento.
             parameters.addValue("documentId", query.getDocumentId()); // Imposta il parametro dell'ID documento.
         }
         if (!query.getActions().isEmpty()) { // Applica filtro per una lista di azioni se presente.
-            fromClause.append(" AND action IN (:actions)"); // Costruisce condizione con clausola IN.
+            fromClause.append(" AND \"action\" IN (:actions)"); // Costruisce condizione con clausola IN.
             parameters.addValue("actions", query.getActions().stream().map(Enum::name).toList()); // Converte le azioni in stringhe enum e le passa come parametro.
         }
         if (query.getFrom() != null) { // Filtra a partire da una data/ora specifica se definita.
-            fromClause.append(" AND created_at >= :from"); // Aggiunge limite inferiore sulla data di creazione.
+            fromClause.append(" AND \"created_at\" >= :from"); // Aggiunge limite inferiore sulla data di creazione.
             parameters.addValue("from", query.getFrom()); // Imposta il parametro di inizio intervallo.
         }
         if (query.getTo() != null) { // Filtra fino a una data/ora specifica se definita.
-            fromClause.append(" AND created_at <= :to"); // Aggiunge limite superiore sulla data di creazione.
+            fromClause.append(" AND \"created_at\" <= :to"); // Aggiunge limite superiore sulla data di creazione.
             parameters.addValue("to", query.getTo()); // Imposta il parametro di fine intervallo.
         }
         String searchText = query.getSearchText(); // Recupera il testo libero da cercare nella descrizione.
         if (StringUtils.hasText(searchText)) { // Verifica che il testo di ricerca contenga caratteri significativi.
             String normalizedSearch = searchText.trim(); // Normalizza la stringa eliminando spazi superflui.
-            fromClause.append(" AND LOWER(description) LIKE :search"); // Aggiunge condizione LIKE sulla descrizione in minuscolo.
+            fromClause.append(" AND LOWER(\"description\") LIKE :search"); // Aggiunge condizione LIKE sulla descrizione in minuscolo.
             parameters.addValue("search", "%" + normalizedSearch.toLowerCase() + "%"); // Imposta il parametro di ricerca con wildcard.
         }
         return new QueryParts(fromClause.toString(), parameters); // Restituisce le parti della query da usare nella SELECT principale.
