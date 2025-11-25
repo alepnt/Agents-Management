@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.example.server.repository.StatisticsRepositoryTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 1.121 s <<< FAILURE! -- in com.example.server.repository.StatisticsRepositoryTest
-com.example.server.repository.StatisticsRepositoryTest.findAgentTotalsShouldReturnAggregatedTotalsOrderedByAmount -- Time elapsed: 0.001 s <<< ERROR!
+Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 1.431 s <<< FAILURE! -- in com.example.server.repository.StatisticsRepositoryTest
+com.example.server.repository.StatisticsRepositoryTest.findAgentTotalsShouldReturnAggregatedTotalsOrderedByAmount -- Time elapsed: 0.002 s <<< ERROR!
 org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'com.example.server.repository.StatisticsRepositoryTest': Unsatisfied dependency expressed through field 'statisticsRepository': No qualifying bean of type 'com.example.server.repository.StatisticsRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:787)
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:767)
@@ -33,7 +33,7 @@ Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No q
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:784)
 	... 21 more
 
-com.example.server.repository.StatisticsRepositoryTest.findTeamTotalsShouldAggregateInvoicesByTeam -- Time elapsed: 0.001 s <<< ERROR!
+com.example.server.repository.StatisticsRepositoryTest.findTeamTotalsShouldAggregateInvoicesByTeam -- Time elapsed: 0.002 s <<< ERROR!
 org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'com.example.server.repository.StatisticsRepositoryTest': Unsatisfied dependency expressed through field 'statisticsRepository': No qualifying bean of type 'com.example.server.repository.StatisticsRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:787)
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:767)
@@ -95,7 +95,7 @@ Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No q
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:784)
 	... 21 more
 
-com.example.server.repository.StatisticsRepositoryTest.findAvailableYearsShouldReturnDistinctPaidYearsOrdered -- Time elapsed: 0.002 s <<< ERROR!
+com.example.server.repository.StatisticsRepositoryTest.findAvailableYearsShouldReturnDistinctPaidYearsOrdered -- Time elapsed: 0.001 s <<< ERROR!
 org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'com.example.server.repository.StatisticsRepositoryTest': Unsatisfied dependency expressed through field 'statisticsRepository': No qualifying bean of type 'com.example.server.repository.StatisticsRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:787)
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:767)

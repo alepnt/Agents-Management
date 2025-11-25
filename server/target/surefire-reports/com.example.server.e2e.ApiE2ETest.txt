@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.example.server.e2e.ApiE2ETest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 1, Errors: 3, Skipped: 0, Time elapsed: 12.81 s <<< FAILURE! -- in com.example.server.e2e.ApiE2ETest
-com.example.server.e2e.ApiE2ETest.invoiceEndpointsSupportLifecycle -- Time elapsed: 1.040 s <<< ERROR!
+Tests run: 4, Failures: 1, Errors: 3, Skipped: 0, Time elapsed: 12.48 s <<< FAILURE! -- in com.example.server.e2e.ApiE2ETest
+com.example.server.e2e.ApiE2ETest.invoiceEndpointsSupportLifecycle -- Time elapsed: 0.822 s <<< ERROR!
 org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ?]
 	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
 	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
@@ -44,28 +44,20 @@ org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad 
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "roles" not found (candidates are: "ROLES"); SQL statement:
-SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42103-224]
+Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "roles.ID" not found; SQL statement:
+SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42122-224]
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8067)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8035)
-	at org.h2.command.Parser.readTableOrView(Parser.java:8024)
-	at org.h2.command.Parser.readTablePrimary(Parser.java:1788)
-	at org.h2.command.Parser.readTableReference(Parser.java:2268)
-	at org.h2.command.Parser.parseSelectFromPart(Parser.java:2718)
-	at org.h2.command.Parser.parseSelect(Parser.java:2824)
-	at org.h2.command.Parser.parseQueryPrimary(Parser.java:2708)
-	at org.h2.command.Parser.parseQueryTerm(Parser.java:2564)
-	at org.h2.command.Parser.parseQueryExpressionBody(Parser.java:2543)
-	at org.h2.command.Parser.parseQueryExpressionBodyAndEndOfQuery(Parser.java:2536)
-	at org.h2.command.Parser.parseQueryExpression(Parser.java:2529)
-	at org.h2.command.Parser.parseQuery(Parser.java:2498)
-	at org.h2.command.Parser.parsePrepared(Parser.java:627)
-	at org.h2.command.Parser.parse(Parser.java:592)
-	at org.h2.command.Parser.parse(Parser.java:564)
-	at org.h2.command.Parser.prepareCommand(Parser.java:483)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.ExpressionColumn.getColumnException(ExpressionColumn.java:244)
+	at org.h2.expression.ExpressionColumn.optimizeOther(ExpressionColumn.java:226)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:213)
+	at org.h2.expression.Alias.optimize(Alias.java:52)
+	at org.h2.command.query.Select.optimizeExpressionsAndPreserveAliases(Select.java:1285)
+	at org.h2.command.query.Select.prepareExpressions(Select.java:1167)
+	at org.h2.command.query.Query.prepare(Query.java:218)
+	at org.h2.command.Parser.prepareCommand(Parser.java:489)
 	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:639)
 	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:559)
 	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1166)
@@ -77,7 +69,7 @@ SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"
 	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:656)
 	... 36 more
 
-com.example.server.e2e.ApiE2ETest.agentEndpointsExposeCrudLifecycle -- Time elapsed: 0.017 s <<< ERROR!
+com.example.server.e2e.ApiE2ETest.agentEndpointsExposeCrudLifecycle -- Time elapsed: 0.022 s <<< ERROR!
 org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ?]
 	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
 	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
@@ -118,28 +110,20 @@ org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad 
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "roles" not found (candidates are: "ROLES"); SQL statement:
-SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42103-224]
+Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "roles.ID" not found; SQL statement:
+SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42122-224]
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8067)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8035)
-	at org.h2.command.Parser.readTableOrView(Parser.java:8024)
-	at org.h2.command.Parser.readTablePrimary(Parser.java:1788)
-	at org.h2.command.Parser.readTableReference(Parser.java:2268)
-	at org.h2.command.Parser.parseSelectFromPart(Parser.java:2718)
-	at org.h2.command.Parser.parseSelect(Parser.java:2824)
-	at org.h2.command.Parser.parseQueryPrimary(Parser.java:2708)
-	at org.h2.command.Parser.parseQueryTerm(Parser.java:2564)
-	at org.h2.command.Parser.parseQueryExpressionBody(Parser.java:2543)
-	at org.h2.command.Parser.parseQueryExpressionBodyAndEndOfQuery(Parser.java:2536)
-	at org.h2.command.Parser.parseQueryExpression(Parser.java:2529)
-	at org.h2.command.Parser.parseQuery(Parser.java:2498)
-	at org.h2.command.Parser.parsePrepared(Parser.java:627)
-	at org.h2.command.Parser.parse(Parser.java:592)
-	at org.h2.command.Parser.parse(Parser.java:564)
-	at org.h2.command.Parser.prepareCommand(Parser.java:483)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.ExpressionColumn.getColumnException(ExpressionColumn.java:244)
+	at org.h2.expression.ExpressionColumn.optimizeOther(ExpressionColumn.java:226)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:213)
+	at org.h2.expression.Alias.optimize(Alias.java:52)
+	at org.h2.command.query.Select.optimizeExpressionsAndPreserveAliases(Select.java:1285)
+	at org.h2.command.query.Select.prepareExpressions(Select.java:1167)
+	at org.h2.command.query.Query.prepare(Query.java:218)
+	at org.h2.command.Parser.prepareCommand(Parser.java:489)
 	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:639)
 	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:559)
 	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1166)
@@ -151,7 +135,7 @@ SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"
 	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:656)
 	... 35 more
 
-com.example.server.e2e.ApiE2ETest.loginEndpointRegistersUser -- Time elapsed: 0.477 s <<< FAILURE!
+com.example.server.e2e.ApiE2ETest.loginEndpointRegistersUser -- Time elapsed: 0.474 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: 
 
 Expecting value to be true but was false
@@ -162,7 +146,7 @@ Expecting value to be true but was false
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 
-com.example.server.e2e.ApiE2ETest.statisticsEndpointsReturnAggregations -- Time elapsed: 0.062 s <<< ERROR!
+com.example.server.e2e.ApiE2ETest.statisticsEndpointsReturnAggregations -- Time elapsed: 0.018 s <<< ERROR!
 org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ?]
 	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
 	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
@@ -204,28 +188,20 @@ org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad 
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "roles" not found (candidates are: "ROLES"); SQL statement:
-SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42103-224]
+Caused by: org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "roles.ID" not found; SQL statement:
+SELECT "roles"."ID" AS "ID", "roles"."NAME" AS "NAME" FROM "roles" WHERE "roles"."NAME" = ? [42122-224]
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8067)
-	at org.h2.command.Parser.getTableOrViewNotFoundDbException(Parser.java:8035)
-	at org.h2.command.Parser.readTableOrView(Parser.java:8024)
-	at org.h2.command.Parser.readTablePrimary(Parser.java:1788)
-	at org.h2.command.Parser.readTableReference(Parser.java:2268)
-	at org.h2.command.Parser.parseSelectFromPart(Parser.java:2718)
-	at org.h2.command.Parser.parseSelect(Parser.java:2824)
-	at org.h2.command.Parser.parseQueryPrimary(Parser.java:2708)
-	at org.h2.command.Parser.parseQueryTerm(Parser.java:2564)
-	at org.h2.command.Parser.parseQueryExpressionBody(Parser.java:2543)
-	at org.h2.command.Parser.parseQueryExpressionBodyAndEndOfQuery(Parser.java:2536)
-	at org.h2.command.Parser.parseQueryExpression(Parser.java:2529)
-	at org.h2.command.Parser.parseQuery(Parser.java:2498)
-	at org.h2.command.Parser.parsePrepared(Parser.java:627)
-	at org.h2.command.Parser.parse(Parser.java:592)
-	at org.h2.command.Parser.parse(Parser.java:564)
-	at org.h2.command.Parser.prepareCommand(Parser.java:483)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.ExpressionColumn.getColumnException(ExpressionColumn.java:244)
+	at org.h2.expression.ExpressionColumn.optimizeOther(ExpressionColumn.java:226)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:213)
+	at org.h2.expression.Alias.optimize(Alias.java:52)
+	at org.h2.command.query.Select.optimizeExpressionsAndPreserveAliases(Select.java:1285)
+	at org.h2.command.query.Select.prepareExpressions(Select.java:1167)
+	at org.h2.command.query.Query.prepare(Query.java:218)
+	at org.h2.command.Parser.prepareCommand(Parser.java:489)
 	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:639)
 	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:559)
 	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1166)

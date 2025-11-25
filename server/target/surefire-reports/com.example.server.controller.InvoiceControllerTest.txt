@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.server.controller.InvoiceControllerTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.322 s -- in com.example.server.controller.InvoiceControllerTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.150 s -- in com.example.server.controller.InvoiceControllerTest
