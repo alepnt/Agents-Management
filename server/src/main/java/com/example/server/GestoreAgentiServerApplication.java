@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 // Importa l'annotazione che consente di attivare il supporto alla cache nell'applicazione.
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing;
 
 /**
  * Punto di ingresso dell'applicazione Spring Boot per il modulo server.
@@ -14,6 +15,7 @@ import org.springframework.cache.annotation.EnableCaching;
  */
 @SpringBootApplication // Indica che questa classe è il punto di partenza dell'app Spring Boot.
 @EnableCaching // Attiva la cache gestita da Spring per migliorare le prestazioni dove necessario.
+@EnableJdbcAuditing // Abilita l'auditing per valorizzare automaticamente i campi di creazione/aggiornamento.
 public class GestoreAgentiServerApplication { // Definisce la classe principale che avvia il server.
 
     // Metodo main invocato all'avvio del processo Java.

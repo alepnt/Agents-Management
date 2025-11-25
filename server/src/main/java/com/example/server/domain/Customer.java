@@ -2,6 +2,7 @@ package com.example.server.domain; // Definisce il package della classe
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.annotation.CreatedDate; // Imposta automaticamente la data di creazione
 import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
 import org.springframework.data.annotation.LastModifiedDate; // Importa l'annotazione per il tracciamento dell'ultimo aggiornamento
 import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
@@ -32,6 +33,7 @@ public class Customer { // Definisce l'entità Customer
 
     private String address; // Indirizzo del cliente
 
+    @CreatedDate // Imposta automaticamente il timestamp di creazione
     @Column("created_at") // Mappa il campo alla colonna created_at
     private Instant createdAt; // Timestamp di creazione del record
 
