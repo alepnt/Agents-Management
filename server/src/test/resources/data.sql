@@ -16,9 +16,7 @@ ALTER TABLE "roles" ALTER COLUMN "id" RESTART WITH 1;
 
 INSERT INTO "roles" (id, name) VALUES (1, 'Agent');
 
-INSERT INTO "teams" (id, name) VALUES (1, 'Sales');
-INSERT INTO "teams" (id, name) VALUES (2, 'Support');
-INSERT INTO "teams" (id, name) VALUES (3, 'Vendite');
+INSERT INTO "roles" (name) VALUES ('Agent');
 
 INSERT INTO "users" (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
 VALUES (
