@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.jdbc.core.mapping.JdbcMappingContext;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -44,6 +45,9 @@ class InvoiceControllerTest {
 
     @MockBean
     private InvoiceService invoiceService;
+
+    @MockBean
+    private JdbcMappingContext jdbcMappingContext;
 
     @Test
     @DisplayName("Create invoice returns persisted payload")

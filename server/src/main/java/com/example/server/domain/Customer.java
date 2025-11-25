@@ -67,7 +67,12 @@ public class Customer { // Definisce l'entità Customer
                                   String email, // Email del cliente
                                   String phone, // Telefono del cliente
                                   String address) { // Indirizzo del cliente
-        return new Customer(null, name, vatNumber, taxCode, email, phone, address, null, null); // Lascia i timestamp a null per permettere l'auditing di gestirli
+        Customer customer = new Customer(null, name, vatNumber, taxCode, email, phone, address, null, null); // Crea una nuova istanza senza valori per auditing
+
+        customer.createdAt = null; // Garantisce che i timestamp siano null prima della persistenza
+        customer.updatedAt = null; // Garantisce che i timestamp siano null prima della persistenza
+
+        return customer; // Restituisce il nuovo cliente con campi auditing null
     }
 
     public Customer withId(Long id) { // Restituisce una copia del cliente con un id specificato

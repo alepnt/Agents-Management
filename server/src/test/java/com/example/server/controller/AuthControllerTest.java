@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.jdbc.core.mapping.JdbcMappingContext;
 
 import java.time.Instant;
 
@@ -35,6 +36,9 @@ class AuthControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private JdbcMappingContext jdbcMappingContext;
 
     @Test
     @DisplayName("Login returns token payload when credentials are valid")
