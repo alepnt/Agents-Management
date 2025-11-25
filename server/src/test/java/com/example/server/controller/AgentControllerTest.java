@@ -42,6 +42,13 @@ class AgentControllerTest {
     @MockBean
     private JdbcMappingContext jdbcMappingContext;
 
+    // Disables the JDBC auditing infrastructure that would normally be auto-configured by
+    // @EnableJdbcAuditing on the main application class. Providing a bean with the expected
+    // name prevents Spring from trying to construct the default auditing handler (which
+    // requires a full JDBC configuration that is outside the scope of this slice test).
+    @MockBean(name = "jdbcAuditingHandler")
+    private Object jdbcAuditingHandler;
+
     @Test
     @DisplayName("List agents returns collection payload")
     void listAgents() throws Exception {
