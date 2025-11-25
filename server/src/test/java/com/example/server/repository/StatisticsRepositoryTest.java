@@ -3,6 +3,7 @@ package com.example.server.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 @DataJdbcTest
 @ActiveProfiles("test")
+@Import(StatisticsRepository.class)
 class StatisticsRepositoryTest {
 
     @Autowired
