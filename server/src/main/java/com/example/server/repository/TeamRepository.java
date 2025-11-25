@@ -17,5 +17,6 @@ import java.util.Optional;
 public interface TeamRepository extends CrudRepository<Team, Long> {
 
     // Retrieve a team by its name if present.
+    @org.springframework.data.jdbc.repository.query.Query("SELECT id, name FROM teams WHERE name = :name")
     Optional<Team> findByName(String name);
 }

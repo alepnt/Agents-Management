@@ -17,5 +17,6 @@ import java.util.Optional;
 public interface RoleRepository extends CrudRepository<Role, Long> {
 
     // Retrieve a role by its name if present.
+    @org.springframework.data.jdbc.repository.query.Query("SELECT id, name FROM roles WHERE name = :name")
     Optional<Role> findByName(String name);
 }
