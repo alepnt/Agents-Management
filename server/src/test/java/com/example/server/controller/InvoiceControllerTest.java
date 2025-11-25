@@ -49,6 +49,14 @@ class InvoiceControllerTest {
     @MockBean
     private JdbcMappingContext jdbcMappingContext;
 
+    // Prevent Spring Data JDBC auditing infrastructure from initializing in this MVC slice
+    // test. The application enables JDBC auditing globally, which would attempt to create
+    // the real auditing handler (and its dependencies) when the context starts. Providing a
+    // mock bean with the expected name short-circuits that setup so the controller tests can
+    // focus solely on the web layer.
+    @MockBean(name = "jdbcAuditingHandler")
+    private Object jdbcAuditingHandler;
+
     @Test
     @DisplayName("Create invoice returns persisted payload")
     void createInvoice() throws Exception {
