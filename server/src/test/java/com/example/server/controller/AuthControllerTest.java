@@ -40,6 +40,14 @@ class AuthControllerTest {
     @MockBean
     private JdbcMappingContext jdbcMappingContext;
 
+    // Prevents Spring Data JDBC auditing infrastructure from being initialized during this
+    // MVC slice test. The application enables JDBC auditing globally, which would otherwise
+    // attempt to construct a real auditing handler (and its dependencies) when the context
+    // starts. Providing a mock bean with the expected name short-circuits that setup so the
+    // controller tests can focus solely on the web layer.
+    @MockBean(name = "jdbcAuditingHandler")
+    private Object jdbcAuditingHandler;
+
     @Test
     @DisplayName("Login returns token payload when credentials are valid")
     void loginReturnsToken() throws Exception {
