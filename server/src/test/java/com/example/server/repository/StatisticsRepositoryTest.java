@@ -3,7 +3,10 @@ package com.example.server.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -15,7 +18,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 @DataJdbcTest
 @ActiveProfiles("test")
-@Import(StatisticsRepository.class)
+@Import({StatisticsRepository.class, StatisticsRepositoryTest.StatisticsRepositoryConfig.class})
 @Sql(scripts = "/data.sql")
 class StatisticsRepositoryTest {
 
@@ -73,5 +76,13 @@ class StatisticsRepositoryTest {
                         tuple(1L, "Sales", new BigDecimal("350.00")),
                         tuple(2L, "Support", new BigDecimal("300.00"))
                 );
+    }
+
+    @TestConfiguration
+    static class StatisticsRepositoryConfig {
+        @Bean
+        StatisticsRepository statisticsRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+            return new StatisticsRepository(jdbcTemplate);
+        }
     }
 }
