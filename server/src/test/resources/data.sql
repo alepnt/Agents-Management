@@ -12,10 +12,18 @@ VALUES (2, 'azure-2', 'bob@example.com', 'Bob Agent', NULL, 1, 2, TRUE, TIMESTAM
 INSERT INTO "agents" (id, user_id, agent_code, team_role) VALUES (1, 1, 'A-001', 'Lead');
 INSERT INTO "agents" (id, user_id, agent_code, team_role) VALUES (2, 2, 'A-002', 'Member');
 
+-- Ensure identity columns continue after seeded IDs
+ALTER TABLE "roles" ALTER COLUMN "id" RESTART WITH 2;
+ALTER TABLE "teams" ALTER COLUMN "id" RESTART WITH 4;
+ALTER TABLE "users" ALTER COLUMN "id" RESTART WITH 3;
+ALTER TABLE "agents" ALTER COLUMN "id" RESTART WITH 3;
+
 INSERT INTO "contracts" (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
 VALUES (1, 1, 'Customer A', 'Contract A', DATE '2023-01-01', NULL, 1000.00, 'ACTIVE');
 INSERT INTO "contracts" (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
 VALUES (2, 2, 'Customer B', 'Contract B', DATE '2023-01-01', NULL, 2000.00, 'ACTIVE');
+
+ALTER TABLE "contracts" ALTER COLUMN "id" RESTART WITH 3;
 
 INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (1, 1, 'INV-001', 'Customer A', 100.00, DATE '2023-12-15', DATE '2024-01-15', 'PAID', DATE '2024-01-10', NULL, TIMESTAMP '2024-01-10T00:00:00');
@@ -28,6 +36,8 @@ VALUES (4, 2, 'INV-004', 'Customer B', 400.00, DATE '2024-03-15', DATE '2024-04-
 INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (5, 1, 'INV-005', 'Customer A', 500.00, DATE '2022-10-01', DATE '2022-11-01', 'PAID', DATE '2022-11-10', NULL, TIMESTAMP '2022-11-10T00:00:00');
 
+ALTER TABLE "invoices" ALTER COLUMN "id" RESTART WITH 6;
+
 INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
 VALUES (1, 'INVOICE', 10, 'CREATED', 'Invoice created', TIMESTAMP '2024-01-01T10:00:00');
 INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
@@ -38,3 +48,5 @@ INSERT INTO "document_history" (id, document_type, document_id, action, descript
 VALUES (4, 'INVOICE', 11, 'PAYMENT_REGISTERED', 'Payment registered for invoice', TIMESTAMP '2024-02-01T10:00:00');
 INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
 VALUES (5, 'INVOICE', 10, 'DELETED', 'Invoice deleted permanently', TIMESTAMP '2024-03-01T10:00:00');
+
+ALTER TABLE "document_history" ALTER COLUMN "id" RESTART WITH 6;
