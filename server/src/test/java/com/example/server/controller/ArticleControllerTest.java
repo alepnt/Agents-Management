@@ -7,9 +7,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.jdbc.core.mapping.JdbcMappingContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ArticleController.class)
+@Import(ArticleControllerTest.Config.class)
 class ArticleControllerTest {
 
     @Autowired
@@ -41,8 +45,13 @@ class ArticleControllerTest {
     @MockBean
     private ArticleService articleService;
 
-    @MockBean
-    private JdbcMappingContext jdbcMappingContext;
+    @TestConfiguration
+    static class Config {
+        @Bean
+        JdbcMappingContext jdbcMappingContext() {
+            return new JdbcMappingContext();
+        }
+    }
 
     @Test
     @DisplayName("List articles returns all resources")
