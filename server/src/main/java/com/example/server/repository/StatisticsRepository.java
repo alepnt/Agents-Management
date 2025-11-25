@@ -19,7 +19,7 @@ public class StatisticsRepository {
 
     public List<Integer> findAvailableYears(String paidStatus) {
         String sql = """
-                SELECT DISTINCT YEAR(i.payment_date) AS payment_year
+                SELECT DISTINCT EXTRACT(YEAR FROM i.payment_date) AS payment_year
                 FROM invoices i
                 WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL
                 ORDER BY payment_year
@@ -30,12 +30,12 @@ public class StatisticsRepository {
 
     public List<MonthlyAggregate> findMonthlyTotals(int year, String paidStatus) {
         String sql = """
-                SELECT YEAR(i.payment_date) AS payment_year,
-                       MONTH(i.payment_date) AS payment_month,
+                SELECT EXTRACT(YEAR FROM i.payment_date) AS payment_year,
+                       EXTRACT(MONTH FROM i.payment_date) AS payment_month,
                        SUM(i.amount) AS total_amount
                 FROM invoices i
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND YEAR(i.payment_date) = :year
-                GROUP BY YEAR(i.payment_date), MONTH(i.payment_date)
+                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
+                GROUP BY EXTRACT(YEAR FROM i.payment_date), EXTRACT(MONTH FROM i.payment_date)
                 ORDER BY payment_month
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -61,7 +61,7 @@ public class StatisticsRepository {
                          JOIN agents a ON c.agent_id = a.id
                          JOIN users u ON a.user_id = u.id
                          JOIN teams t ON u.team_id = t.id
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND YEAR(i.payment_date) = :year
+                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
                 GROUP BY a.id, u.display_name, t.id, t.name
                 ORDER BY total_amount DESC
                 """;
@@ -88,7 +88,7 @@ public class StatisticsRepository {
                          JOIN agents a ON c.agent_id = a.id
                          JOIN users u ON a.user_id = u.id
                          JOIN teams t ON u.team_id = t.id
-                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND YEAR(i.payment_date) = :year
+                WHERE i.status = :paidStatus AND i.payment_date IS NOT NULL AND EXTRACT(YEAR FROM i.payment_date) = :year
                 GROUP BY t.id, t.name
                 ORDER BY total_amount DESC
                 """;

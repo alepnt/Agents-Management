@@ -67,7 +67,8 @@ public class Customer { // Definisce l'entità Customer
                                   String email, // Email del cliente
                                   String phone, // Telefono del cliente
                                   String address) { // Indirizzo del cliente
-        return new Customer(null, name, vatNumber, taxCode, email, phone, address, null, null); // Crea un cliente senza id e senza date
+        Instant now = Instant.now(); // Imposta un timestamp di default per soddisfare i vincoli NOT NULL del database
+        return new Customer(null, name, vatNumber, taxCode, email, phone, address, now, now); // Crea un cliente senza id con timestamp valorizzati
     }
 
     public Customer withId(Long id) { // Restituisce una copia del cliente con un id specificato
