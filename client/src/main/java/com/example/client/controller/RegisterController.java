@@ -184,10 +184,9 @@ public class RegisterController {
 
     private void openLoginWithPrefilledEmail(String email, String bannerMessage) {
         // Naviga verso Login ma passando email predefinita e messaggio.
-        String statusMessage = bannerMessage;
-        if (email != null && !email.isBlank()) {
-            statusMessage = bannerMessage + " (" + email + ")";
-        }
+        final String statusMessage = (email != null && !email.isBlank())
+                ? bannerMessage + " (" + email + ")"
+                : bannerMessage;
 
         navigate("/com/example/client/view/LoginView.fxml", type -> {
             if (type == LoginController.class) {
