@@ -73,6 +73,33 @@ public class LoginController {
                 MainViewController::create);
     }
 
+    public static LoginController create(SessionStore sessionStore,
+            AuthApiClient client,
+            TokenProvider tokenProvider,
+            MainViewFactory mainViewFactory) {
+        return new LoginController(
+                sessionStore,
+                client,
+                Optional.empty(),
+                Optional.empty(),
+                tokenProvider,
+                mainViewFactory);
+    }
+
+    public static LoginController create(SessionStore sessionStore,
+            AuthApiClient client,
+            TokenProvider tokenProvider,
+            String statusMessage,
+            String statusStyle) {
+        return new LoginController(
+                sessionStore,
+                client,
+                Optional.ofNullable(statusMessage),
+                Optional.ofNullable(statusStyle),
+                tokenProvider,
+                MainViewController::create);
+    }
+
     // Vari overload per supportare login precompilato, stati di errore precedenti,
     // override client e tokenProvider.
 
