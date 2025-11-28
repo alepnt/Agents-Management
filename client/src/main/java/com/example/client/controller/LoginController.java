@@ -75,6 +75,31 @@ public class LoginController {
 
     public static LoginController create(SessionStore sessionStore,
             AuthApiClient client,
+            TokenProvider tokenProvider) {
+        return new LoginController(
+                sessionStore,
+                client,
+                Optional.empty(),
+                Optional.empty(),
+                tokenProvider,
+                MainViewController::create);
+    }
+
+    public static LoginController create(SessionStore sessionStore,
+            AuthApiClient client,
+            String statusMessage,
+            String statusStyle) {
+        return new LoginController(
+                sessionStore,
+                client,
+                Optional.ofNullable(statusMessage),
+                Optional.ofNullable(statusStyle),
+                defaultTokenProvider(),
+                MainViewController::create);
+    }
+
+    public static LoginController create(SessionStore sessionStore,
+            AuthApiClient client,
             TokenProvider tokenProvider,
             MainViewFactory mainViewFactory) {
         return new LoginController(
