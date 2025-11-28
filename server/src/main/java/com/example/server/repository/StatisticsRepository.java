@@ -18,7 +18,8 @@ public class StatisticsRepository {                                    // Reposi
     }
 
     public List<Integer> findAvailableYears(String paidStatus) {       // Restituisce gli anni disponibili in base allo stato di pagamento.
-        String sql = """                                               // Query SQL multi-linea per estrarre anni distinti dai pagamenti.
+        // Query SQL multi-linea per estrarre anni distinti dai pagamenti.
+        String sql = """
                 SELECT DISTINCT EXTRACT(YEAR FROM i."payment_date") AS payment_year
                 FROM "invoices" i
                 WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL
@@ -29,7 +30,8 @@ public class StatisticsRepository {                                    // Reposi
     }
 
     public List<MonthlyAggregate> findMonthlyTotals(int year, String paidStatus) { // Aggrega i totali mensili di un anno.
-        String sql = """                                               // Query che somma gli importi per mese e anno dei pagamenti.
+        // Query che somma gli importi per mese e anno dei pagamenti.
+        String sql = """
                 SELECT EXTRACT(YEAR FROM i."payment_date") AS payment_year,
                        EXTRACT(MONTH FROM i."payment_date") AS payment_month,
                        SUM(i."amount") AS total_amount
@@ -51,7 +53,8 @@ public class StatisticsRepository {                                    // Reposi
     }
 
     public List<AgentAggregate> findAgentTotals(int year, String paidStatus) { // Aggrega i totali per agente e team.
-        String sql = """                                               // Query che unisce invoice, contracts, agents, users e teams.
+        // Query che unisce invoice, contracts, agents, users e teams.
+        String sql = """
                 SELECT a."id" AS agent_id,
                        u."display_name" AS agent_name,
                        t."id" AS team_id,
@@ -82,7 +85,8 @@ public class StatisticsRepository {                                    // Reposi
     }
 
     public List<TeamAggregate> findTeamTotals(int year, String paidStatus) { // Aggrega i totali dei team.
-        String sql = """                                               // Query che somma gli importi raggruppati per team.
+        // Query che somma gli importi raggruppati per team.
+        String sql = """
                 SELECT t."id" AS team_id,
                        t."name" AS team_name,
                        SUM(i."amount") AS total_amount

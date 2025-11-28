@@ -1,6 +1,8 @@
 package com.example.client.validation;
 // Package dedicato alle strategie di validazione lato client.
 
+import java.util.Optional;
+
 /**
  * Interfaccia che rappresenta una singola strategia di validazione.
  *
