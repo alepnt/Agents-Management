@@ -29,11 +29,14 @@ import com.example.common.dto.CommissionDTO;
 import com.example.common.dto.ContractDTO;
 import com.example.common.dto.CustomerDTO;
 import com.example.common.dto.DocumentHistoryDTO;
+import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.dto.InvoiceDTO;
 import com.example.common.dto.InvoiceLineDTO;
 import com.example.common.dto.InvoicePaymentRequest;
 import com.example.common.dto.MessageDTO;
 import com.example.common.dto.RoleDTO;
+import com.example.common.dto.AgentStatisticsDTO;
+import com.example.common.dto.TeamStatisticsDTO;
 import com.example.common.dto.TeamDTO;
 import com.example.common.dto.UserDTO;
 import com.example.common.enums.DocumentAction;
@@ -117,9 +120,9 @@ class DataCacheServiceOperationsTest {
         injectField(service, "backendGateway", gateway);
         injectField(service, "executor", new PreparedResultExecutor(responses));
 
-        Map<Integer, ?> agentCache = extractMap(service, "agentStatsCache");
-        Map<Integer, ?> teamCache = extractMap(service, "teamStatsCache");
-        Map<String, ?> historyCache = extractMap(service, "historyCache");
+        Map<Integer, AgentStatisticsDTO> agentCache = extractMap(service, "agentStatsCache");
+        Map<Integer, TeamStatisticsDTO> teamCache = extractMap(service, "teamStatsCache");
+        Map<String, DocumentHistoryPageDTO> historyCache = extractMap(service, "historyCache");
 
         agentCache.put(2024, gateway.agentStats);
         teamCache.put(2024, gateway.teamStats);
@@ -272,11 +275,11 @@ class DataCacheServiceOperationsTest {
 
         private final AgentDTO sampleAgent = new AgentDTO(1L, 1L, "A1", "Lead");
         private final TeamDTO sampleTeam = new TeamDTO(2L, "Team");
-        private final RoleDTO sampleRole = new RoleDTO(3L, "Admin", "desc");
-        private final UserDTO sampleUser = new UserDTO(4L, "User", "user@example.com", true, 1L, 2L, 3L);
-        private final MessageDTO sampleMessage = new MessageDTO(5L, "Oggetto", "Body", Instant.now(), 1L, 2L);
-        private final CommissionDTO sampleCommission = new CommissionDTO(6L, "Code", BigDecimal.ONE, BigDecimal.TEN, 1L, 2L, 3L);
-        private final InvoiceLineDTO sampleInvoiceLine = new InvoiceLineDTO(7L, 10L, 1L, "Line", 1, BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ZERO);
+        private final RoleDTO sampleRole = new RoleDTO(3L, "Admin");
+        private final UserDTO sampleUser = new UserDTO(4L, "azure-4", "user@example.com", "User", null, 1L, 2L, true, Instant.now().atZone(java.time.ZoneOffset.UTC).toLocalDateTime());
+        private final MessageDTO sampleMessage = new MessageDTO(5L, "conv-1", 1L, 2L, "Body", Instant.now());
+        private final CommissionDTO sampleCommission = new CommissionDTO(6L, 1L, 2L, BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ZERO, Instant.now());
+        private final InvoiceLineDTO sampleInvoiceLine = new InvoiceLineDTO(7L, 10L, 1L, "A1", "Line", BigDecimal.ONE, BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN);
 
         private final List<AgentDTO> agents = List.of(sampleAgent);
         private final List<TeamDTO> teams = List.of(sampleTeam);
