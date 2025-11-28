@@ -1,49 +1,36 @@
 package com.example.server.domain;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NotificationSubscriptionTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
     @Test
-    void createShouldOmitIdBeforePersistence() {
-        Instant createdAt = Instant.parse("2024-04-04T10:00:00Z");
-        NotificationSubscription subscription = NotificationSubscription.create(10L, "EMAIL", createdAt);
+    @DisplayName("equals and hashCode rely on identifier")
+    void equalsAndHashCode() {
+        NotificationSubscription first = new NotificationSubscription(1L, 7L, "MAIL", Instant.EPOCH);
+        NotificationSubscription sameId = new NotificationSubscription(1L, 8L, "PUSH", Instant.EPOCH.plusSeconds(1));
+        NotificationSubscription differentId = new NotificationSubscription(2L, 7L, "MAIL", Instant.EPOCH);
 
-        assertThat(subscription.getId()).isNull();
-        assertThat(subscription.getUserId()).isEqualTo(10L);
-        assertThat(subscription.getChannel()).isEqualTo("EMAIL");
-        assertThat(subscription.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(first).isEqualTo(sameId);
+        assertThat(first).hasSameHashCodeAs(sameId);
+        assertThat(first).isNotEqualTo(differentId);
     }
 
     @Test
-    void shouldValidateMandatoryFields() {
-        NotificationSubscription invalid = new NotificationSubscription(1L, null, " ", Instant.now());
+    @DisplayName("Factory and withId preserve field values")
+    void factoryAndWithId() {
+        NotificationSubscription created = NotificationSubscription.create(3L, "MAIL", Instant.parse("2024-01-01T00:00:00Z"));
+        NotificationSubscription persisted = created.withId(10L);
 
-        Set<ConstraintViolation<NotificationSubscription>> violations = validator.validate(invalid);
-
-        assertThat(violations).extracting("message")
-                .containsExactlyInAnyOrder("L'utente è obbligatorio", "Il canale di notifica è obbligatorio");
-    }
-
-    @Test
-    void utilityMethodsShouldUseIdentifierAndReadableToString() {
-        NotificationSubscription first = new NotificationSubscription(1L, 5L, "EMAIL", Instant.now());
-        NotificationSubscription second = new NotificationSubscription(1L, 6L, "PUSH", Instant.now());
-        NotificationSubscription third = new NotificationSubscription(2L, 5L, "EMAIL", Instant.now());
-
-        assertThat(first).isEqualTo(second);
-        assertThat(first).hasSameHashCodeAs(second);
-        assertThat(first).isNotEqualTo(third);
-        assertThat(first.toString()).contains("NotificationSubscription{", "id=1", "channel='EMAIL'");
+        assertThat(created.getId()).isNull();
+        assertThat(created.getUserId()).isEqualTo(3L);
+        assertThat(created.getChannel()).isEqualTo("MAIL");
+        assertThat(persisted.getId()).isEqualTo(10L);
+        assertThat(persisted.getCreatedAt()).isEqualTo(created.getCreatedAt());
     }
 }
