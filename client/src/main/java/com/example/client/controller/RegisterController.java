@@ -184,9 +184,14 @@ public class RegisterController {
 
     private void openLoginWithPrefilledEmail(String email, String bannerMessage) {
         // Naviga verso Login ma passando email predefinita e messaggio.
+        String statusMessage = bannerMessage;
+        if (email != null && !email.isBlank()) {
+            statusMessage = bannerMessage + " (" + email + ")";
+        }
+
         navigate("/com/example/client/view/LoginView.fxml", type -> {
             if (type == LoginController.class) {
-                return LoginController.create(sessionStore, authApiClient, email, bannerMessage);
+                return LoginController.create(sessionStore, authApiClient, statusMessage, null);
             }
             throw new IllegalStateException("Controller non supportato: " + type.getName());
         }, "Gestore Agenti - Login");
