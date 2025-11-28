@@ -1,15 +1,21 @@
-package com.example.common.dto;
+package com.example.common.dto;                                   // Package dei DTO condivisi tra client e server.
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import java.util.List;                       // Garantisce che la stringa sia un indirizzo email valido.
 
-import java.util.List;
+import jakarta.validation.constraints.Email;                    // Campo obbligatorio: non null e non vuoto.
+import jakarta.validation.constraints.NotBlank;                    // Lista obbligatoria: non vuota.
+import jakarta.validation.constraints.NotEmpty;                                            // Usato per rappresentare elenchi di destinatari e allegati.
 
-public record MailRequest(@NotBlank String subject,
-                          @NotBlank String body,
-                          @NotEmpty List<@Email String> to,
-                          List<@Email String> cc,
-                          List<@Email String> bcc,
-                          List<MailAttachmentDTO> attachments) {
-}
+/**
+ * DTO che rappresenta una richiesta di invio email.
+ * Include destinatari, contenuto, intestazioni e allegati.
+ */
+public record MailRequest(                                        // Record immutabile per modellare una richiesta di invio email.
+        @NotBlank String subject,                                  // Oggetto dell’email; obbligatorio.
+        @NotBlank String body,                                     // Corpo del messaggio; obbligatorio.
+        @NotEmpty List<@Email String> to,                          // Lista dei destinatari principali; deve contenere almeno un elemento valido.
+        List<@Email String> cc,                                    // Destinatari in copia; opzionali.
+        List<@Email String> bcc,                                   // Destinatari in copia nascosta; opzionali.
+        List<MailAttachmentDTO> attachments                        // Elenco degli allegati email; opzionale.
+) {
+}                                                                  // Fine del record MailRequest.

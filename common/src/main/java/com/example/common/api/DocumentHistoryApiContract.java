@@ -1,32 +1,42 @@
-package com.example.common.api;
+package com.example.common.api;                                         // Package che contiene i contratti API condivisi a livello applicativo.
 
-import com.example.common.dto.DocumentHistoryPageDTO;
-import com.example.common.enums.DocumentAction;
-import com.example.common.enums.DocumentType;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
+import java.time.OffsetDateTime;                   // DTO che rappresenta una pagina di risultati dello storico documentale.
+import java.util.List;                         // Enum che indica il tipo di azione registrata nello storico.
 
-import java.time.OffsetDateTime;
-import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;                           // Enum che indica il tipo di documento (es. contratto, fattura).
+import org.springframework.http.ResponseEntity;            // Permette la corretta deserializzazione delle date nei parametri REST.
+
+import com.example.common.dto.DocumentHistoryPageDTO;                         // Wrapper HTTP usato per restituire file binari.
+import com.example.common.enums.DocumentAction;                                        // Rappresenta un timestamp con fuso integrato.
+import com.example.common.enums.DocumentType;                                                  // Necessario per liste di azioni o altri filtri.
 
 /**
  * Contratto API per la consultazione dello storico documentale.
+ * Consente ricerche filtrate e l’esportazione dei risultati.
  */
-public interface DocumentHistoryApiContract {
+public interface DocumentHistoryApiContract {                            // Interfaccia principale dedicata alle operazioni sullo storico.
 
-    DocumentHistoryPageDTO search(DocumentType documentType,
-                                  Long documentId,
-                                  List<DocumentAction> actions,
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime from,
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to,
-                                  String search,
-                                  int page,
-                                  int size);
+    DocumentHistoryPageDTO search(                                       // Restituisce una pagina di risultati filtrati dello storico.
+            DocumentType documentType,                                   // Tipo di documento da filtrare.
+            Long documentId,                                             // ID del documento a cui lo storico appartiene.
+            List<DocumentAction> actions,                                // Lista di azioni da includere nel filtro (CREATED, UPDATED, ecc.).
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)          // Richiede il formato ISO 8601 nella richiesta REST.
+            OffsetDateTime from,                                         // Timestamp iniziale del filtro temporale.
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)          // Richiede il formato ISO 8601 nella richiesta REST.
+            OffsetDateTime to,                                           // Timestamp finale del filtro temporale.
+            String search,                                               // Termine di ricerca testuale libera (utente, descrizione, ecc.).
+            int page,                                                    // Numero della pagina richiesta (paginazione).
+            int size                                                     // Dimensione della pagina.
+    );
 
-    ResponseEntity<byte[]> export(DocumentType documentType,
-                                  Long documentId,
-                                  List<DocumentAction> actions,
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime from,
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to,
-                                  String search);
-}
+    ResponseEntity<byte[]> export(                                       // Esporta lo storico filtrato in formato binario (PDF/CSV/Excel).
+            DocumentType documentType,                                   // Tipo documento da esportare.
+            Long documentId,                                             // ID del documento collegato allo storico.
+            List<DocumentAction> actions,                                // Filtro sulle azioni incluse nell'esportazione.
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)          // Parsing automatico timestamp in formato ISO.
+            OffsetDateTime from,                                         // Intervallo temporale: inizio.
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)          // Parsing automatico timestamp in formato ISO.
+            OffsetDateTime to,                                           // Intervallo temporale: fine.
+            String search                                                // Filtro di ricerca testuale opzionale.
+    );
+}                                                                         // Fine dell'interfaccia DocumentHistoryApiContract.
