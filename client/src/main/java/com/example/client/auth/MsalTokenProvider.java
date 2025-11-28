@@ -1,111 +1,115 @@
-package com.example.client.auth;
+package com.example.client.auth; // Package dedicato all’autenticazione MSAL lato client.
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.aad.msal4j.IAccount;
-import com.microsoft.aad.msal4j.IAuthenticationResult;
-import com.microsoft.aad.msal4j.ITokenCacheAccessAspect;
-import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
-import com.microsoft.aad.msal4j.InteractiveRequestParameters;
-import com.microsoft.aad.msal4j.MsalClientException;
-import com.microsoft.aad.msal4j.MsalException;
-import com.microsoft.aad.msal4j.MsalInteractionRequiredException;
-import com.microsoft.aad.msal4j.MsalServiceException;
-import com.microsoft.aad.msal4j.PublicClientApplication;
-import com.microsoft.aad.msal4j.SilentParameters;
+import com.fasterxml.jackson.core.type.TypeReference; // Per deserializzare JSON del token ID.
+import com.fasterxml.jackson.databind.ObjectMapper; // Mapper JSON condiviso.
+import com.microsoft.aad.msal4j.*; // Import MSAL4J: account, token, eccezioni, parametri, client.
+import java.io.IOException; // Necessario per deserializzazione idToken.
+import java.net.MalformedURLException; // Validazione authority MSAL.
+import java.net.URI; // Redirect URI e authority.
+import java.time.Instant; // Per calcolare la scadenza dei token.
+import java.util.Base64; // Per decodificare ID token JWT.
+import java.util.Collections; // Collezioni vuote.
+import java.util.Map; // Claims estratti dal token.
+import java.util.Optional; // Risultati opzionali.
+import java.util.Set; // Scopes.
+import java.util.concurrent.CompletionException; // Errori async MSAL.
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.time.Instant;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletionException;
+public class MsalTokenProvider implements TokenProvider { // Implementa la gestione token tramite MSAL4J.
 
-public class MsalTokenProvider implements TokenProvider {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // Mapper JSON statico riutilizzato.
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final PublicClientApplication application; // Client MSAL4J configurato per l’applicazione.
+    private final URI redirectUri; // Redirect URI configurato.
+    private final String authority; // Endpoint authority MSAL.
+    private final Set<String> scopes; // Scopes richiesti.
+    private final TokenCache cache; // Cache MSAL serializzata.
+    private volatile IAuthenticationResult lastResult; // Ultimo token acquisito (per caching locale).
 
-    private final PublicClientApplication application;
-    private final URI redirectUri;
-    private final String authority;
-    private final Set<String> scopes;
-    private final TokenCache cache;
-    private volatile IAuthenticationResult lastResult;
-
-    public MsalTokenProvider(MsalConfiguration configuration) {
+    public MsalTokenProvider(MsalConfiguration configuration) { // Costruttore basato su configurazione MSAL.
         this.redirectUri = configuration.redirectUri();
         this.scopes = Set.copyOf(configuration.scopes());
         this.authority = configuration.authority();
         this.cache = new TokenCache();
         try {
             this.application = PublicClientApplication.builder(configuration.clientId())
-                    .authority(configuration.authority())
-                    .setTokenCacheAccessAspect(cache)
-                    .build();
+                    .authority(configuration.authority()) // Imposta authority.
+                    .setTokenCacheAccessAspect(cache) // Aggancia cache MSAL personalizzata.
+                    .build(); // Costruisce istanza MSAL.
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Authority MSAL non valida: " + configuration.authority(), e);
+            throw new IllegalArgumentException(
+                    "Authority MSAL non valida: " + configuration.authority(), e);
         }
     }
 
-    public static TokenProvider fromEnvironment() {
+    public static TokenProvider fromEnvironment() { // Factory method per lettura configurazione da ENV.
         return new MsalTokenProvider(MsalConfiguration.fromEnvironment());
     }
 
-    public static TokenProvider disabled(String reason) {
+    public static TokenProvider disabled(String reason) { // Factory per provider disattivato.
         return new DisabledTokenProvider(reason);
     }
 
     @Override
-    public synchronized Optional<MsalAuthenticationResult> acquireTokenSilently() throws MsalAuthenticationException {
+    public synchronized Optional<MsalAuthenticationResult> acquireTokenSilently()
+            throws MsalAuthenticationException {
+
         if (lastResult != null && !MsalTokenProvider.this.isExpired(lastResult)) {
-            return Optional.of(mapResult(lastResult));
+            return Optional.of(mapResult(lastResult)); // Se il token esiste ed è valido, restituiscilo.
         }
+
         try {
-            Set<IAccount> accounts = application.getAccounts().join();
-            if (accounts == null || accounts.isEmpty()) {
+            Set<IAccount> accounts = application.getAccounts().join(); // Ottieni account presenti nella cache MSAL.
+
+            if (accounts == null || accounts.isEmpty()) { // Se non ci sono account → richiesta interattiva.
                 return Optional.empty();
             }
-            IAccount account = accounts.iterator().next();
+
+            IAccount account = accounts.iterator().next(); // Usa il primo account disponibile.
             SilentParameters parameters = SilentParameters.builder(scopes, account).build();
-            lastResult = acquireTokenSilently(parameters);
+            lastResult = acquireTokenSilently(parameters); // Richiesta MSAL silenziosa.
+
             return Optional.of(mapResult(lastResult));
-        } catch (CompletionException ex) {
+
+        } catch (CompletionException ex) { // Eccezioni async → unwrap.
             Throwable root = unwrap(ex);
             if (root instanceof MsalInteractionRequiredException) {
-                return Optional.empty();
+                return Optional.empty(); // L’utente deve interagire → ritorna empty.
             }
             throw asAuthenticationException("acquisizione silenziosa", root);
+
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione silenziosa", ex);
         }
     }
 
     @Override
-    public synchronized MsalAuthenticationResult acquireTokenInteractive() throws MsalAuthenticationException {
+    public synchronized MsalAuthenticationResult acquireTokenInteractive()
+            throws MsalAuthenticationException {
+
         try {
-            InteractiveRequestParameters parameters = InteractiveRequestParameters
-                    .builder(redirectUri)
+            InteractiveRequestParameters parameters = InteractiveRequestParameters.builder(redirectUri)
                     .scopes(scopes)
-                    .build();
+                    .build(); // Costruisce richiesta interattiva.
+
             lastResult = application.acquireToken(parameters).join();
-            return mapResult(lastResult);
+            return mapResult(lastResult); // Mappa risultato MSAL → DTO.
+
         } catch (CompletionException ex) {
             throw asAuthenticationException("acquisizione interattiva", unwrap(ex));
+
         } catch (MsalException ex) {
             throw asAuthenticationException("acquisizione interattiva", ex);
         }
     }
 
-    private boolean isExpired(IAuthenticationResult result) {
-        return result == null || result.expiresOnDate() == null
-                || result.expiresOnDate().toInstant().isBefore(Instant.now());
+    private boolean isExpired(IAuthenticationResult result) { // Controllo scadenza token locale.
+        return result == null ||
+                result.expiresOnDate() == null ||
+                result.expiresOnDate().toInstant().isBefore(Instant.now());
     }
 
-    private IAuthenticationResult acquireTokenSilently(SilentParameters parameters) throws MsalAuthenticationException {
+    private IAuthenticationResult acquireTokenSilently(SilentParameters parameters)
+            throws MsalAuthenticationException {
         try {
             return application.acquireTokenSilently(parameters).join();
         } catch (MalformedURLException ex) {
@@ -113,39 +117,50 @@ public class MsalTokenProvider implements TokenProvider {
         }
     }
 
-    private MsalAuthenticationResult mapResult(IAuthenticationResult result) {
+    private MsalAuthenticationResult mapResult(IAuthenticationResult result) { // Converte MSAL result → DTO.
         if (result == null) {
             return null;
         }
+
         IAccount account = result.account();
-        Map<String, Object> claims = extractIdTokenClaims(result);
+        Map<String, Object> claims = extractIdTokenClaims(result); // Estrae claims da idToken.
+
         String displayName = firstNonBlank(
                 (String) claims.get("name"),
-                account != null ? account.username() : null
-        );
+                account != null ? account.username() : null);
+
         String objectId = firstNonBlank(
                 (String) claims.get("oid"),
-                account != null ? account.homeAccountId() : null
-        );
+                account != null ? account.homeAccountId() : null);
+
         String tenantId = (String) claims.get("tid");
+
         MsalAccount msalAccount = new MsalAccount(
                 account != null ? account.username() : null,
                 displayName,
                 objectId,
                 tenantId,
-                account != null ? account.homeAccountId() : null
-        );
-        Instant expiresOn = result.expiresOnDate() != null ? result.expiresOnDate().toInstant() : null;
-        return new MsalAuthenticationResult(result.accessToken(), null, expiresOn, authority, msalAccount);
+                account != null ? account.homeAccountId() : null);
+
+        Instant expiresOn = result.expiresOnDate() != null
+                ? result.expiresOnDate().toInstant()
+                : null;
+
+        return new MsalAuthenticationResult(
+                result.accessToken(),
+                null, // refreshToken non fornito da MSAL4J PublicClient.
+                expiresOn,
+                authority,
+                msalAccount);
     }
 
-    private Map<String, Object> extractIdTokenClaims(IAuthenticationResult result) {
+    private Map<String, Object> extractIdTokenClaims(IAuthenticationResult result) { // Decodifica ID token JWT.
         try {
             String idToken = result.idToken();
             if (idToken == null || idToken.isBlank()) {
                 return Collections.emptyMap();
             }
-            String[] parts = idToken.split("\\.");
+            String[] parts = idToken.split("\\."); // JWT → header.payload.signature
             if (parts.length < 2) {
                 return Collections.emptyMap();
             }
@@ -157,7 +172,7 @@ public class MsalTokenProvider implements TokenProvider {
         }
     }
 
-    private String firstNonBlank(String... values) {
+    private String firstNonBlank(String... values) { // Utility per selezionare primo valore non blank.
         if (values == null) {
             return null;
         }
@@ -170,22 +185,31 @@ public class MsalTokenProvider implements TokenProvider {
     }
 
     private MsalAuthenticationException asAuthenticationException(String phase, Throwable error) {
-        if (error instanceof MsalInteractionRequiredException interactionRequired) {
-            return new MsalAuthenticationException("È richiesta un'interazione utente per completare il login Microsoft", interactionRequired);
-        }
-        if (error instanceof MsalServiceException serviceException) {
+        if (error instanceof MsalInteractionRequiredException interactionRequired) { // L'utente deve interagire.
             return new MsalAuthenticationException(
-                    "Errore del servizio Microsoft durante " + phase + ": " + serviceException.errorCode(), serviceException);
+                    "È richiesta un'interazione utente per completare il login Microsoft",
+                    interactionRequired);
         }
-        if (error instanceof MsalClientException clientException) {
+
+        if (error instanceof MsalServiceException serviceException) { // Errori servizi Microsoft.
             return new MsalAuthenticationException(
-                    "Errore di configurazione MSAL durante " + phase + ": " + clientException.errorCode(), clientException);
+                    "Errore del servizio Microsoft durante " + phase + ": " + serviceException.errorCode(),
+                    serviceException);
         }
+
+        if (error instanceof MsalClientException clientException) { // Errori client MSAL (configurazione, rete…)
+            return new MsalAuthenticationException(
+                    "Errore di configurazione MSAL durante " + phase + ": " + clientException.errorCode(),
+                    clientException);
+        }
+
         String message = error != null ? error.getMessage() : "errore sconosciuto";
-        return new MsalAuthenticationException("Errore durante " + phase + ": " + message, error);
+        return new MsalAuthenticationException(
+                "Errore durante " + phase + ": " + message,
+                error);
     }
 
-    private Throwable unwrap(Throwable throwable) {
+    private Throwable unwrap(Throwable throwable) { // Risale alla causa reale degli errori async.
         Throwable current = throwable;
         while (current instanceof CompletionException && current.getCause() != null) {
             current = current.getCause();
@@ -193,37 +217,47 @@ public class MsalTokenProvider implements TokenProvider {
         return current;
     }
 
+    // ---------------------- CACHE TOKEN MSAL ----------------------
+
     private static final class TokenCache implements ITokenCacheAccessAspect {
-        private String cacheData;
+
+        private String cacheData; // Token cache serializzata in stringa.
 
         @Override
         public synchronized void beforeCacheAccess(ITokenCacheAccessContext context) {
-            if (cacheData != null) {
+            if (cacheData != null) { // Se esiste, deserializza la cache.
                 context.tokenCache().deserialize(cacheData);
             }
         }
 
         @Override
         public synchronized void afterCacheAccess(ITokenCacheAccessContext context) {
-            cacheData = context.tokenCache().serialize();
+            cacheData = context.tokenCache().serialize(); // Aggiorna stringa di cache dopo modifica.
         }
     }
 
+    // ---------------- PROVIDER DISABILITATO -----------------------
+
     private static final class DisabledTokenProvider implements TokenProvider {
+
         private final String reason;
 
-        private DisabledTokenProvider(String reason) {
-            this.reason = reason == null ? "Servizio MSAL non configurato" : reason;
+        private DisabledTokenProvider(String reason) { // Messaggio motivazione disable.
+            this.reason = reason == null
+                    ? "Servizio MSAL non configurato"
+                    : reason;
         }
 
         @Override
-        public Optional<MsalAuthenticationResult> acquireTokenSilently() throws MsalAuthenticationException {
-            throw new MsalAuthenticationException(reason);
+        public Optional<MsalAuthenticationResult> acquireTokenSilently()
+                throws MsalAuthenticationException {
+            throw new MsalAuthenticationException(reason); // Sempre errore → provider inattivo.
         }
 
         @Override
-        public MsalAuthenticationResult acquireTokenInteractive() throws MsalAuthenticationException {
-            throw new MsalAuthenticationException(reason);
+        public MsalAuthenticationResult acquireTokenInteractive()
+                throws MsalAuthenticationException {
+            throw new MsalAuthenticationException(reason); // Sempre errore → provider inattivo.
         }
     }
 }

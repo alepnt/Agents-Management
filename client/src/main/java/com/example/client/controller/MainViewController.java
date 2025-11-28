@@ -125,7 +125,8 @@ public class MainViewController {
     private final Observer<NotificationMessage> notificationObserver = this::onNotification;
     private final Observer<CommandMemento> historyObserver = this::onCommandExecuted;
     private final Observer<DataChangeEvent> dataChangeObserver = this::onDataChanged;
-    private final DateTimeFormatter historyFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.systemDefault());
+    private final DateTimeFormatter historyFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+            .withZone(ZoneId.systemDefault());
 
     private DocumentType currentHistoryType;
     private Long currentHistoryId;
@@ -613,7 +614,8 @@ public class MainViewController {
             messageConversationColumn.setCellValueFactory(new PropertyValueFactory<>("conversationId"));
             messageSenderColumn.setCellValueFactory(new PropertyValueFactory<>("senderId"));
             messageTeamColumn.setCellValueFactory(new PropertyValueFactory<>("teamId"));
-            messageCreatedColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
+            messageCreatedColumn.setCellValueFactory(
+                    cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
         }
 
         if (commissionTable != null) {
@@ -623,12 +625,14 @@ public class MainViewController {
             commissionTotalColumn.setCellValueFactory(new PropertyValueFactory<>("totalCommission"));
             commissionPaidColumn.setCellValueFactory(new PropertyValueFactory<>("paidCommission"));
             commissionPendingColumn.setCellValueFactory(new PropertyValueFactory<>("pendingCommission"));
-            commissionUpdatedColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getLastUpdated())));
+            commissionUpdatedColumn.setCellValueFactory(
+                    cell -> new SimpleStringProperty(formatInstant(cell.getValue().getLastUpdated())));
         }
 
         historyActionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
         historyDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-        historyTimestampColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
+        historyTimestampColumn
+                .setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
 
         if (historyTypeCombo != null) {
             historyTypeCombo.getItems().setAll(DocumentType.values());
@@ -645,7 +649,8 @@ public class MainViewController {
             historySearchDocumentIdColumn.setCellValueFactory(new PropertyValueFactory<>("documentId"));
             historySearchActionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
             historySearchDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-            historySearchTimestampColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
+            historySearchTimestampColumn.setCellValueFactory(
+                    cell -> new SimpleStringProperty(formatInstant(cell.getValue().getCreatedAt())));
             historySearchTable.setItems(historySearchItems);
         }
 
@@ -872,7 +877,8 @@ public class MainViewController {
     public void onDeleteInvoice() {
         InvoiceModel selected = invoiceTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona una fattura da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona una fattura da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteInvoice(selected.getId()));
@@ -1082,7 +1088,8 @@ public class MainViewController {
     public void onDeleteContract() {
         ContractModel selected = contractTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un contratto da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un contratto da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteContract(selected.getId()));
@@ -1118,7 +1125,8 @@ public class MainViewController {
     public void onDeleteAgent() {
         AgentModel selected = agentTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un agente da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un agente da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteAgent(selected.getId()));
@@ -1154,7 +1162,8 @@ public class MainViewController {
     public void onDeleteTeam() {
         TeamModel selected = teamTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un team da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un team da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteTeam(selected.getId()));
@@ -1190,7 +1199,8 @@ public class MainViewController {
     public void onDeleteRole() {
         RoleModel selected = roleTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un ruolo da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un ruolo da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteRole(selected.getId()));
@@ -1226,7 +1236,8 @@ public class MainViewController {
     public void onDeleteUser() {
         UserModel selected = userTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un utente da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un utente da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteUser(selected.getId()));
@@ -1262,7 +1273,8 @@ public class MainViewController {
     public void onDeleteMessage() {
         MessageModel selected = messageTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona un messaggio da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona un messaggio da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteMessage(selected.getId()));
@@ -1298,7 +1310,8 @@ public class MainViewController {
     public void onDeleteCommission() {
         CommissionModel selected = commissionTable.getSelectionModel().getSelectedItem();
         if (selected == null || selected.getId() == null) {
-            notificationService.publish(new NotificationMessage("warn", "Seleziona una commissione da eliminare", Instant.now()));
+            notificationService
+                    .publish(new NotificationMessage("warn", "Seleziona una commissione da eliminare", Instant.now()));
             return;
         }
         withSession(() -> dataCacheService.deleteCommission(selected.getId()));
@@ -1361,7 +1374,8 @@ public class MainViewController {
 
     @FXML
     public void onHistoryExportCsv() {
-        DocumentHistorySearchCriteria criteria = historyCurrentCriteria != null ? historyCurrentCriteria : buildHistoryCriteria();
+        DocumentHistorySearchCriteria criteria = historyCurrentCriteria != null ? historyCurrentCriteria
+                : buildHistoryCriteria();
         byte[] csv = withSession(() -> dataCacheService.exportDocumentHistory(criteria));
         if (csv == null) {
             return;
@@ -1488,7 +1502,8 @@ public class MainViewController {
                 .map(ComboBox::getValue)
                 .filter(Objects::nonNull)
                 .orElse(25);
-        DocumentHistoryPageDTO page = withSession(() -> dataCacheService.searchDocumentHistory(criteria, historyCurrentPage, size));
+        DocumentHistoryPageDTO page = withSession(
+                () -> dataCacheService.searchDocumentHistory(criteria, historyCurrentPage, size));
         if (page == null || page.getItems() == null) {
             historySearchItems.clear();
             updateHistoryPagination(null);
@@ -1500,7 +1515,8 @@ public class MainViewController {
     }
 
     private void refreshStatistics() {
-        AgentStatisticsDTO agentStats = withSession(() -> dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null));
+        AgentStatisticsDTO agentStats = withSession(
+                () -> dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null));
         if (agentStats == null) {
             return;
         }
@@ -1521,7 +1537,8 @@ public class MainViewController {
 
     private void updateInvoiceChart() {
         Map<String, Long> counts = invoiceItems.stream()
-                .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"), Collectors.counting()));
+                .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"),
+                        Collectors.counting()));
         invoiceStatusChart.setData(FXCollections.observableArrayList(counts.entrySet().stream()
                 .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
                 .toList()));
@@ -1529,7 +1546,8 @@ public class MainViewController {
 
     private void updateContractChart() {
         Map<String, Long> counts = contractItems.stream()
-                .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"), Collectors.counting()));
+                .collect(Collectors.groupingBy(item -> Optional.ofNullable(item.getStatus()).orElse("N/D"),
+                        Collectors.counting()));
         contractStatusChart.setData(FXCollections.observableArrayList(counts.entrySet().stream()
                 .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
                 .toList()));
@@ -1544,7 +1562,8 @@ public class MainViewController {
         series.setName("Provvigioni");
         statistics.monthlyTotals().stream()
                 .sorted((a, b) -> Integer.compare(a.month(), b.month()))
-                .forEach(entry -> series.getData().add(new XYChart.Data<>(monthLabel(entry.month()), entry.commission().doubleValue())));
+                .forEach(entry -> series.getData()
+                        .add(new XYChart.Data<>(monthLabel(entry.month()), entry.commission().doubleValue())));
         commissionTrendChart.getData().add(series);
     }
 
@@ -1569,7 +1588,8 @@ public class MainViewController {
             return;
         }
         teamCommissionPieChart.setData(FXCollections.observableArrayList(statistics.teamTotals().stream()
-                .map(team -> new PieChart.Data(team.teamName() != null && !team.teamName().isBlank() ? team.teamName() : "Senza team",
+                .map(team -> new PieChart.Data(
+                        team.teamName() != null && !team.teamName().isBlank() ? team.teamName() : "Senza team",
                         team.commission().doubleValue()))
                 .toList()));
     }
@@ -1584,7 +1604,8 @@ public class MainViewController {
             throw new IllegalArgumentException("La data di emissione è obbligatoria");
         }
         Long contractId = parseLong(invoiceContractField.getText()).orElse(null);
-        InvoiceStatus status = invoiceStatusCombo.getValue() != null ? invoiceStatusCombo.getValue() : InvoiceStatus.DRAFT;
+        InvoiceStatus status = invoiceStatusCombo.getValue() != null ? invoiceStatusCombo.getValue()
+                : InvoiceStatus.DRAFT;
         List<InvoiceLineDTO> lines = invoiceLineItems.stream()
                 .map(InvoiceLineModel::toDto)
                 .toList();
@@ -1863,9 +1884,11 @@ public class MainViewController {
     private void populateCommissionForm(CommissionModel model) {
         commissionAgentField.setText(model.getAgentId() != null ? model.getAgentId().toString() : "");
         commissionContractField.setText(model.getContractId() != null ? model.getContractId().toString() : "");
-        commissionTotalField.setText(model.getTotalCommission() != null ? model.getTotalCommission().toPlainString() : "");
+        commissionTotalField
+                .setText(model.getTotalCommission() != null ? model.getTotalCommission().toPlainString() : "");
         commissionPaidField.setText(model.getPaidCommission() != null ? model.getPaidCommission().toPlainString() : "");
-        commissionPendingField.setText(model.getPendingCommission() != null ? model.getPendingCommission().toPlainString() : "");
+        commissionPendingField
+                .setText(model.getPendingCommission() != null ? model.getPendingCommission().toPlainString() : "");
     }
 
     private void clearCommissionForm() {
@@ -2357,13 +2380,16 @@ public class MainViewController {
         chooser.setTitle("Salva " + description);
         chooser.setInitialFileName(defaultFileName);
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(description, "*." + extension));
-        File target = chooser.showSaveDialog(mainTabPane != null && mainTabPane.getScene() != null ? mainTabPane.getScene().getWindow() : null);
+        File target = chooser.showSaveDialog(
+                mainTabPane != null && mainTabPane.getScene() != null ? mainTabPane.getScene().getWindow() : null);
         if (target != null) {
             try {
                 Files.write(Path.of(target.toURI()), data);
-                notificationService.publish(new NotificationMessage("export", "File salvato: " + target.getName(), Instant.now()));
+                notificationService
+                        .publish(new NotificationMessage("export", "File salvato: " + target.getName(), Instant.now()));
             } catch (IOException ex) {
-                notificationService.publish(new NotificationMessage("error", "Errore nel salvataggio del file", Instant.now()));
+                notificationService
+                        .publish(new NotificationMessage("error", "Errore nel salvataggio del file", Instant.now()));
             }
         }
     }

@@ -1,39 +1,80 @@
 package com.example.client.model;
+// Package dei modelli JavaFX utilizzati lato client.
+
+/**
+ * Modello JavaFX per la gestione dei messaggi.
+ * Incapsula MessageDTO e fornisce proprietà osservabili utili per la UI
+ * (chat, conversazioni, notifiche in tempo reale, ecc.).
+ */
 
 import com.example.common.dto.MessageDTO;
+// DTO condiviso che rappresenta un messaggio.
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+// Proprietà JavaFX per il binding dinamico nella UI.
 
 import java.time.Instant;
+// Timestamp del messaggio.
 
 /**
- * Modello JavaFX per la gestione dei messaggi.
+ * Modello JavaFX per rappresentare un messaggio in una conversazione.
  */
 public class MessageModel {
 
+    // Identificativo univoco del messaggio.
     private final ObjectProperty<Long> id = new SimpleObjectProperty<>();
+
+    // Identificativo della conversazione (stringa perché può essere UUID).
     private final StringProperty conversationId = new SimpleStringProperty();
+
+    // Id mittente del messaggio (utente).
     private final ObjectProperty<Long> senderId = new SimpleObjectProperty<>();
+
+    // Id del team destinatario (per messaggi broadcast).
     private final ObjectProperty<Long> teamId = new SimpleObjectProperty<>();
+
+    // Corpo testuale del messaggio.
     private final StringProperty body = new SimpleStringProperty();
+
+    // Timestamp di creazione.
     private final ObjectProperty<Instant> createdAt = new SimpleObjectProperty<>();
 
+    /**
+     * Converte un MessageDTO in MessageModel (DTO → JavaFX Model).
+     */
     public static MessageModel fromDto(MessageDTO dto) {
         MessageModel model = new MessageModel();
-        model.setId(dto.getId());
-        model.setConversationId(dto.getConversationId());
-        model.setSenderId(dto.getSenderId());
-        model.setTeamId(dto.getTeamId());
-        model.setBody(dto.getBody());
-        model.setCreatedAt(dto.getCreatedAt());
+
+        model.setId(dto.getId()); // ID messaggio.
+        model.setConversationId(dto.getConversationId()); // ID conversazione.
+        model.setSenderId(dto.getSenderId()); // Mittente.
+        model.setTeamId(dto.getTeamId()); // Team destinatario.
+        model.setBody(dto.getBody()); // Testo.
+        model.setCreatedAt(dto.getCreatedAt()); // Timestamp.
+
         return model;
     }
 
+    /**
+     * Converte il modello JavaFX in un DTO (Model → DTO).
+     */
     public MessageDTO toDto() {
-        return new MessageDTO(getId(), getConversationId(), getSenderId(), getTeamId(), getBody(), getCreatedAt());
+        return new MessageDTO(
+                getId(),
+                getConversationId(),
+                getSenderId(),
+                getTeamId(),
+                getBody(),
+                getCreatedAt());
     }
+
+    // ===========================
+    // GETTER / SETTER
+    // + Proprietà JavaFX
+    // ===========================
 
     public Long getId() {
         return id.get();
