@@ -6,6 +6,7 @@ import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
+import com.example.client.session.SessionStore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
