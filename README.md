@@ -1,6 +1,6 @@
 # Gestore Agenti
 
-Questo repository contiene un progetto multi-modulo per l'applicazione Gestore Agenti. Il modulo **server** espone le API REST basate su Spring Boot e utilizza Microsoft SQL Server come database principale.
+Questo repository contiene un progetto multi-modulo per l'applicazione Gestore Agenti. Il modulo **server** espone le API REST basate su Spring Boot e utilizza Microsoft SQL Server come database principale. Per lo sviluppo locale viene attivato automaticamente il profilo `local`, che usa un database H2 in-memory e applica comunque le migrazioni Flyway; per collegarsi a un SQL Server reale abilita il profilo `sqlserver` (ad esempio con `SPRING_PROFILES_ACTIVE=sqlserver`).
 
 ## Prerequisiti
 
@@ -13,13 +13,15 @@ Questo repository contiene un progetto multi-modulo per l'applicazione Gestore A
 
 Le credenziali del database e i parametri del connection pool sono gestiti tramite variabili d'ambiente. È possibile valorizzarle direttamente prima dell'avvio oppure aggiungerle a un file `.env` utilizzato dagli strumenti di deploy.
 
-| Variabile            | Default                                                                  | Descrizione                                   |
-|----------------------|--------------------------------------------------------------------------|-----------------------------------------------|
-| `DB_URL`             | `jdbc:sqlserver://localhost:1433;databaseName=gestoreagenti;encrypt=true;trustServerCertificate=true` | URL JDBC Microsoft SQL Server                |
-| `DB_USERNAME`        | `sa`                                                                     | Utente SQL Server                              |
-| `DB_PASSWORD`        | `ChangeMe!`                                                              | Password SQL Server                            |
-| `DB_MAX_POOL_SIZE`   | `10`                                                                     | Numero massimo di connessioni nel pool         |
-| `DB_MIN_IDLE`        | `5`                                                                      | Connessioni minime inattive mantenute nel pool |
+| Variabile                 | Default                                                                  | Descrizione                                                                    |
+|---------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `DB_URL`                  | `jdbc:sqlserver://localhost:1433;databaseName=gestoreagenti;encrypt=true;trustServerCertificate=true` | URL JDBC Microsoft SQL Server                                                   |
+| `DB_USERNAME`             | `sa`                                                                     | Utente SQL Server                                                              |
+| `DB_PASSWORD`             | `ChangeMe!`                                                              | Password SQL Server                                                            |
+| `DB_AUTHENTICATION_MODE`  | `sql`                                                                    | `sql` per credenziali standard, `windows` per Integrated Security               |
+| `DB_NATIVE_LIBRARY_PATH`  | (vuoto)                                                                 | Percorso alla cartella contenente `sqljdbc_auth.dll` (solo modalità `windows`) |
+| `DB_MAX_POOL_SIZE`        | `10`                                                                     | Numero massimo di connessioni nel pool                                          |
+| `DB_MIN_IDLE`             | `5`                                                                      | Connessioni minime inattive mantenute nel pool                                  |
 
 ## Migrazioni database
 
