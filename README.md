@@ -84,6 +84,23 @@ Per lavorare su Windows puoi usare la console **PowerShell** o il terminale inte
 
 Se utilizzi VS Code, gli stessi comandi funzionano nel terminale integrato. Puoi anche definire un file `.env` con le variabili e usare estensioni come *Env Files* per caricarle prima di eseguire i comandi Maven o `java -jar`.
 
+### Avvio completo con script da desktop (PowerShell)
+
+Per partire più velocemente da Windows è disponibile lo script `scripts/start-desktop.ps1`, che compila il server, lo avvia e lancia il client JavaFX nello stesso terminale.
+
+1. (Opzionale) Prepara un file `.env` nella root del progetto con le variabili del database e di MSAL.
+2. Apri PowerShell nella cartella `Agents-Management`.
+3. Esegui lo script:
+
+   ```powershell
+   .\scripts\start-desktop.ps1
+   ```
+
+   - Usa `-Profile sqlserver` per attivare il profilo Spring `sqlserver`.
+   - Usa `-JavafxPlatform win` se Maven non rileva automaticamente la piattaforma JavaFX.
+
+Lo script arresta il server quando chiudi il client o interrompi l'esecuzione.
+
 ### Report di coverage
 
 I test del modulo **server** sono strumentati con JaCoCo. Per generare e visualizzare il report di coverage:
