@@ -105,14 +105,48 @@ Il file risultante sarà disponibile in `server/target/gestore-agenti-server-0.0
 ### Avvio del client JavaFX
 
 1. Verifica che il backend sia in esecuzione su `http://localhost:8080`.
-2. Avvia il client dalla root del progetto:
+2. Imposta le variabili d'ambiente richieste da MSAL prima di avviare il client. Usa i valori della tua registrazione applicativa su Azure AD:
+   - `MSAL_CLIENT_ID`: l'**Application (client) ID** mostrato nella scheda **Overview** dell'app registrata.
+   - `MSAL_REDIRECT_URI`: una **Redirect URI** configurata nell'app (tipo `http://localhost:53410`). Devi usare esattamente lo stesso valore dichiarato nel portale Azure.
+   - `MSAL_SCOPES`: gli scope per cui vuoi richiedere il consenso, ad esempio `https://graph.microsoft.com/.default` se l'app usa i permessi delegati/configurati per Microsoft Graph.
+
+   **Bypass in sviluppo (senza autenticazione Microsoft)**
+
+   Se vuoi saltare del tutto il popup Microsoft durante lo sviluppo, imposta *lo stesso* segreto su client e server:
+
+   - `MSAL_DEV_BYPASS_SECRET`: token condiviso che sostituisce l'access token reale.
+   - `MSAL_DEV_BYPASS_AZURE_ID` (opzionale): GUID fittizio da inviare come Azure ID (default `dev-azure-id`).
+   - `MSAL_DEV_BYPASS_EMAIL` / `MSAL_DEV_BYPASS_DISPLAY_NAME` (opzionali): dati fittizi per popolazione form.
+   - lato server aggiungi `SECURITY_AZURE_DEV_BYPASS_SECRET` (oppure proprietà `security.azure.dev-bypass-secret`) con lo stesso valore di `MSAL_DEV_BYPASS_SECRET`.
+
+   Con queste variabili il client genera un token fittizio e il server lo accetta senza contattare Azure AD.
+
+   Esempio su shell Bash/PowerShell (sostituisci gli ID con i valori della tua registrazione app su Azure AD):
+
+   ```bash
+   export MSAL_CLIENT_ID="<Application (client) ID>"
+   export MSAL_REDIRECT_URI="http://localhost:53410"
+   export MSAL_SCOPES="https://graph.microsoft.com/.default"
+   ```
+
+   In PowerShell usa:
+
+   ```powershell
+   $Env:MSAL_CLIENT_ID = "<Application (client) ID>"
+   $Env:MSAL_REDIRECT_URI = "http://localhost:53410"
+   $Env:MSAL_SCOPES = "https://graph.microsoft.com/.default"
+   ```
+
+   Se le variabili non sono configurate l'applicazione termina con l'errore `MSAL_CLIENT_ID non configurato`.
+
+3. Avvia il client dalla root del progetto:
 
    ```bash
    mvn -pl client -am javafx:run
    ```
 
    Su Windows puoi forzare il classifier corretto di JavaFX aggiungendo `-Djavafx.platform=win`.
-3. Se Maven segnala `No plugin found for prefix 'javafx'`, controlla che il proxy non blocchi l'accesso a Maven Central (vedi sezione precedente) e rilancia il comando con `-U` per forzare l'aggiornamento delle dipendenze:
+4. Se Maven segnala `No plugin found for prefix 'javafx'`, controlla che il proxy non blocchi l'accesso a Maven Central (vedi sezione precedente) e rilancia il comando con `-U` per forzare l'aggiornamento delle dipendenze:
 
    ```bash
    mvn -pl client -am -U javafx:run
