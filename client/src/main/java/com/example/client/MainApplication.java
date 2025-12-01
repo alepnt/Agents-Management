@@ -1,6 +1,7 @@
 package com.example.client;
 // Package principale dell’applicazione JavaFX lato client.
 
+import com.example.client.auth.DevBypassTokenProvider;
 import com.example.client.auth.MsalTokenProvider;
 import com.example.client.auth.TokenProvider;
 // Provider per ottenere token tramite MSAL (Azure AD) oppure fallback disabilitato.
@@ -214,6 +215,10 @@ public class MainApplication extends Application {
      */
     private TokenProvider buildTokenProvider() {
         try {
+            if (System.getenv("MSAL_DEV_BYPASS_SECRET") != null
+                    && !System.getenv("MSAL_DEV_BYPASS_SECRET").isBlank()) {
+                return DevBypassTokenProvider.fromEnvironment();
+            }
             return MsalTokenProvider.fromEnvironment();
         } catch (Exception e) {
             System.err.println("MSAL non disponibile: " + e.getMessage());

@@ -51,6 +51,7 @@ public class UserService { // Questa riga gestisce: public class UserService {.
     private final TeamRepository teamRepository; // Questa riga gestisce: private final TeamRepository teamRepository;.
     private final Clock clock; // Questa riga gestisce: private final Clock clock;.
     private final Set<String> scopes; // Questa riga gestisce: private final Set<String> scopes;.
+    private final String devBypassSecret; // Token di sviluppo per saltare MSAL.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     @Autowired // Questa riga gestisce: @Autowired.
     public UserService(MsalClientProvider msalClientProvider, // Questa riga gestisce: public UserService(MsalClientProvider msalClientProvider,.
@@ -59,7 +60,8 @@ public class UserService { // Questa riga gestisce: public class UserService {.
                        RoleRepository roleRepository, // Questa riga gestisce: RoleRepository roleRepository,.
                        TeamRepository teamRepository, // Questa riga gestisce: TeamRepository teamRepository,.
                        Clock clock, // Questa riga gestisce: Clock clock,.
-                       @Value("${security.azure.default-scope:https://graph.microsoft.com/.default}") String defaultScope) { // Questa riga gestisce: @Value("${security.azure.default-scope:https://graph.microsoft.com/.default}") String defaultScope) {.
+                       @Value("${security.azure.default-scope:https://graph.microsoft.com/.default}") String defaultScope, // Questa riga gestisce: @Value("${security.azure.default-scope:https://graph.microsoft.com/.default}") String defaultScope) {.
+                       @Value("${security.azure.dev-bypass-secret:}") String devBypassSecret) { // Segreto usato in sviluppo per saltare MSAL.
         this.msalClientProvider = msalClientProvider; // Questa riga gestisce: this.msalClientProvider = msalClientProvider;.
         this.userRepository = userRepository; // Questa riga gestisce: this.userRepository = userRepository;.
         this.agentRepository = agentRepository; // Questa riga gestisce: this.agentRepository = agentRepository;.
@@ -67,6 +69,7 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         this.teamRepository = teamRepository; // Questa riga gestisce: this.teamRepository = teamRepository;.
         this.clock = clock; // Questa riga gestisce: this.clock = clock;.
         this.scopes = parseScopes(defaultScope); // Questa riga gestisce: this.scopes = parseScopes(defaultScope);.
+        this.devBypassSecret = devBypassSecret; // Conserva il segreto opzionale di bypass.
     } // Questa riga gestisce: }.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     public UserService(MsalClientProvider msalClientProvider, // Questa riga gestisce: public UserService(MsalClientProvider msalClientProvider,.
@@ -74,7 +77,7 @@ public class UserService { // Questa riga gestisce: public class UserService {.
                        AgentRepository agentRepository, // Questa riga gestisce: AgentRepository agentRepository,.
                        RoleRepository roleRepository, // Questa riga gestisce: RoleRepository roleRepository,.
                        TeamRepository teamRepository) { // Questa riga gestisce: TeamRepository teamRepository) {.
-        this(msalClientProvider, userRepository, agentRepository, roleRepository, teamRepository, Clock.systemUTC(), "https://graph.microsoft.com/.default"); // Questa riga gestisce: this(msalClientProvider, userRepository, agentRepository, roleRepository, teamRepository, Clock.systemUTC(), "https://graph.microsoft.com/.default");.
+        this(msalClientProvider, userRepository, agentRepository, roleRepository, teamRepository, Clock.systemUTC(), "https://graph.microsoft.com/.default", ""); // Questa riga gestisce: this(msalClientProvider, userRepository, agentRepository, roleRepository, teamRepository, Clock.systemUTC(), "https://graph.microsoft.com/.default", "");.
     } // Questa riga gestisce: }.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     public List<UserDTO> findAll() { // Questa riga gestisce: public List<UserDTO> findAll() {.
@@ -203,6 +206,9 @@ public class UserService { // Questa riga gestisce: public class UserService {.
     } // Questa riga gestisce: }.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private String acquireDelegatedToken(String userAccessToken) { // Questa riga gestisce: private String acquireDelegatedToken(String userAccessToken) {.
+        if (StringUtils.hasText(devBypassSecret) && devBypassSecret.equals(userAccessToken)) { // Questa riga gestisce: bypass MSAL in dev.
+            return "dev-bypass-token"; // Questa riga gestisce: token fittizio per sviluppo.
+        } // Questa riga gestisce: }.
         try { // Questa riga gestisce: try {.
             ConfidentialClientApplication client = msalClientProvider.createClient(); // Questa riga gestisce: ConfidentialClientApplication client = msalClientProvider.createClient();.
             UserAssertion assertion = new UserAssertion(userAccessToken); // Questa riga gestisce: UserAssertion assertion = new UserAssertion(userAccessToken);.
