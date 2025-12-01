@@ -18,10 +18,10 @@ class NotificationSubscriptionMapperTest {
 
         NotificationSubscriptionDTO dto = NotificationSubscriptionMapper.toDto(entity);
 
-        assertThat(dto.id()).isEqualTo(4L);
-        assertThat(dto.userId()).isEqualTo(12L);
-        assertThat(dto.channel()).isEqualTo("PUSH");
-        assertThat(dto.createdAt()).isEqualTo(Instant.parse("2024-02-02T10:00:00Z"));
+        assertThat(dto.getId()).isEqualTo(4L);
+        assertThat(dto.getUserId()).isEqualTo(12L);
+        assertThat(dto.getChannel()).isEqualTo("PUSH");
+        assertThat(dto.getCreatedAt()).isEqualTo(Instant.parse("2024-02-02T10:00:00Z"));
     }
 
     @Test
