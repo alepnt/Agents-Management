@@ -210,6 +210,12 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         Long savedId = Objects.requireNonNull(saved.getId(), "user id must not be null"); // Questa riga gestisce: Long savedId = Objects.requireNonNull(saved.getId(), "user id must not be null");.
 // Riga vuota lasciata per separare meglio le sezioni del file.
         if (StringUtils.hasText(agentCode)) { // Questa riga gestisce: if (StringUtils.hasText(agentCode)) {.
+            agentRepository.findByAgentCode(agentCode)
+                    .filter(existing -> !savedId.equals(existing.getUserId()))
+                    .ifPresent(existing -> {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Codice agente già assegnato");
+                    });
+
             Agent agent = agentRepository.findByUserId(savedId) // Questa riga gestisce: Agent agent = agentRepository.findByUserId(savedId).
                     .map(existing -> new Agent(existing.getId(), existing.getUserId(), agentCode, existing.getTeamRole())) // Questa riga gestisce: .map(existing -> new Agent(existing.getId(), existing.getUserId(), agentCode, existing.getTeamRole())).
                     .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, agentCode, "Member"), // Questa riga gestisce: .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, agentCode, "Member"),
