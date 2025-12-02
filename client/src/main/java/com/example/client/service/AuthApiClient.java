@@ -4,6 +4,7 @@ package com.example.client.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.example.common.dto.RegistrationLookupDTO;
 // Jackson per serializzazione JSON, con supporto a Instant/LocalDateTime.
 
 import java.io.IOException;
@@ -146,6 +147,16 @@ public class AuthApiClient {
 
         // Deserializza la risposta nel DTO UserSummary
         return deserialize(response.body(), UserSummary.class);
+    }
+
+    public RegistrationLookupDTO registrationLookups() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/api/auth/register/lookups"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        ensureSuccess(response);
+        return deserialize(response.body(), RegistrationLookupDTO.class);
     }
 
     /**

@@ -10,6 +10,7 @@ import com.example.server.dto.LocalLoginRequest; // Questa riga gestisce: import
 import com.example.server.dto.LoginRequest; // Questa riga gestisce: import com.example.server.dto.LoginRequest;.
 import com.example.server.dto.RegisterRequest; // Questa riga gestisce: import com.example.server.dto.RegisterRequest;.
 import com.example.server.dto.UserSummary; // Questa riga gestisce: import com.example.server.dto.UserSummary;.
+import com.example.common.dto.RegistrationLookupDTO; // Suggerimenti per la registrazione.
 import com.example.server.repository.AgentRepository; // Questa riga gestisce: import com.example.server.repository.AgentRepository;.
 import com.example.server.repository.RoleRepository; // Questa riga gestisce: import com.example.server.repository.RoleRepository;.
 import com.example.server.repository.TeamRepository; // Questa riga gestisce: import com.example.server.repository.TeamRepository;.
@@ -218,6 +219,50 @@ public class UserService { // Questa riga gestisce: public class UserService {.
 // Riga vuota lasciata per separare meglio le sezioni del file.
         return toSummary(saved); // Questa riga gestisce: return toSummary(saved);.
     } // Questa riga gestisce: }.
+
+    public RegistrationLookupDTO registrationLookups() {
+        List<String> azureIds = userRepository.findAllByOrderByDisplayNameAsc().stream()
+                .map(User::getAzureId)
+                .filter(Objects::nonNull)
+                .filter(StringUtils::hasText)
+                .toList();
+
+        List<String> agentCodes = agentRepository.findAllByOrderByAgentCodeAsc().stream()
+                .map(Agent::getAgentCode)
+                .filter(StringUtils::hasText)
+                .toList();
+
+        List<String> roles = roleRepository.findAllByOrderByNameAsc().stream()
+                .map(Role::getName)
+                .filter(StringUtils::hasText)
+                .toList();
+
+        List<String> teams = teamRepository.findAllByOrderByNameAsc().stream()
+                .map(Team::getName)
+                .filter(StringUtils::hasText)
+                .toList();
+
+        return new RegistrationLookupDTO(azureIds, agentCodes, teams, roles, suggestNextAgentCode());
+    }
+
+    private String suggestNextAgentCode() {
+        return agentRepository.findTopByAgentCodeNotNullOrderByAgentCodeDesc()
+                .map(Agent::getAgentCode)
+                .map(this::incrementAgentCode)
+                .orElse("AG001");
+    }
+
+    private String incrementAgentCode(String current) {
+        String trimmed = current != null ? current.trim() : "";
+        if (!trimmed.matches("^[A-Za-z]{2}\\d{3,}$")) {
+            return "AG001";
+        }
+        String prefix = trimmed.substring(0, 2).toUpperCase();
+        String numericPart = trimmed.substring(2);
+        int value = Integer.parseInt(numericPart) + 1;
+        String next = String.format("%03d", value);
+        return prefix + next;
+    }
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private User registerAzureUser(LoginRequest request) { // Questa riga gestisce: private User registerAzureUser(LoginRequest request) {.
         LoginRequest requiredRequest = Objects.requireNonNull(request, "request must not be null"); // Questa riga gestisce: LoginRequest requiredRequest = Objects.requireNonNull(request, "request must not be null");.

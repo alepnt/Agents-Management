@@ -9,6 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 // Import Optional to wrap possibly absent query results.
+import java.util.List;
 import java.util.Optional;
 
 // Mark this interface as a Spring Data repository bean.
@@ -19,4 +20,6 @@ public interface RoleRepository extends CrudRepository<Role, Long> {
     // Retrieve a role by its name if present.
     @org.springframework.data.jdbc.repository.query.Query("SELECT id, name FROM roles WHERE name = :name")
     Optional<Role> findByName(String name);
+
+    List<Role> findAllByOrderByNameAsc();
 }
