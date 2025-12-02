@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
@@ -50,11 +51,12 @@ class UserServiceTest {
     @Mock
     private TeamRepository teamRepository;
 
+    private Clock clock;
     private UserService service;
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.fixed(Instant.parse("2024-05-01T12:00:00Z"), ZoneOffset.UTC);
+        clock = Clock.fixed(Instant.parse("2024-05-01T12:00:00Z"), ZoneOffset.UTC);
         service = new UserService(msalClientProvider, userRepository, agentRepository, roleRepository, teamRepository,
                 clock, "https://graph.microsoft.com/.default", "");
 
@@ -84,6 +86,29 @@ class UserServiceTest {
                 .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
 
         verify(agentRepository).findByAgentCode("AG-001");
+        verify(agentRepository, never()).save(any());
+    }
+
+    @Test
+    void registerFailsWhenEmailAlreadyExistsForAnotherUser() {
+        when(userRepository.findByEmail("user@example.com"))
+                .thenReturn(Optional.of(new User(15L, "az-existing", "user@example.com", "Existing User",
+                        null, 1L, 1L, true, LocalDateTime.now(clock))));
+
+        RegisterRequest request = new RegisterRequest(
+                "az-new",
+                "user@example.com",
+                "Nuovo Utente",
+                "AG-002",
+                "password-123",
+                null,
+                null);
+
+        assertThatThrownBy(() -> service.register(request))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+
+        verify(userRepository, never()).save(any());
         verify(agentRepository, never()).save(any());
     }
 
