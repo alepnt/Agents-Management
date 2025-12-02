@@ -250,23 +250,35 @@ public class LoginController {
 
     private void navigate(String fxmlPath, ControllerFactory controllerFactory, String title) {
         try {
-            URL resource = getClass().getResource(fxmlPath);
-            if (resource == null) {
-                throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
-            }
-
-            FXMLLoader loader = new FXMLLoader(resource);
-            loader.setControllerFactory(controllerFactory::create);
-
-            Parent root = loader.load();
+            Scene targetScene = buildSceneWithTheme(fxmlPath, controllerFactory);
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(targetScene);
             stage.setTitle(title);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             showValidationError("Impossibile aprire la vista richiesta: " + e.getMessage());
         }
+    }
+
+    private Scene buildSceneWithTheme(String fxmlPath, ControllerFactory controllerFactory) throws IOException {
+        URL resource = getClass().getResource(fxmlPath);
+        if (resource == null) {
+            throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
+        }
+
+        FXMLLoader loader = new FXMLLoader(resource);
+        loader.setControllerFactory(controllerFactory::create);
+
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+
+        URL theme = getClass().getResource("/com/example/client/style/theme.css");
+        if (theme != null) {
+            scene.getStylesheets().add(theme.toExternalForm());
+        }
+
+        return scene;
     }
 
     private void showValidationError(String message) {
