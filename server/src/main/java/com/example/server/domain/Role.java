@@ -1,6 +1,7 @@
 package com.example.server.domain; // Definisce il package della classe
 
 import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
+import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
 import org.springframework.data.relational.core.mapping.Table; // Importa l'annotazione per la tabella
 
 import java.util.Objects; // Importa utility per equals e hashCode
@@ -9,8 +10,10 @@ import java.util.Objects; // Importa utility per equals e hashCode
 public class Role { // Rappresenta un ruolo applicativo
 
     @Id // Indica la chiave primaria
+    @Column("id") // Allinea il nome colonna con lo schema H2
     private Long id; // Identificativo del ruolo
 
+    @Column("name") // Allinea il nome colonna con lo schema H2
     private String name; // Nome del ruolo
 
     public Role(Long id, String name) { // Costruttore completo
