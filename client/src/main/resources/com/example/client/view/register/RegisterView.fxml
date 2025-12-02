@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.client.controller.RegisterController"
+            styleClass="app-root">
+    <top>
+        <HBox alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <ImageView fitHeight="48.0" fitWidth="48.0" preserveRatio="true">
+                <image>
+                    <Image url="@/images/app-logo.png" />
+                </image>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox alignment="CENTER" spacing="18" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
+
+            <Label text="Registrazione" styleClass="title"/>
+            <Label fx:id="messageLabel" text="Compila il modulo per registrarti" wrapText="true" textAlignment="CENTER"
+                   styleClass="subtitle"/>
+
+            <GridPane hgap="12" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="140" />
+                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                </columnConstraints>
+
+                <Label text="Azure ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="azureIdField" promptText="GUID Azure" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Email" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="emailField" promptText="utente@example.com" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Nome visualizzato" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="displayNameField" promptText="Mario Rossi" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Codice agente" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="agentCodeField" promptText="Codice identificativo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Password locale" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="passwordField" promptText="Password sicura" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Team" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="teamNameField" promptText="Vendite" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Ruolo" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="roleNameField" promptText="Agent" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.rowIndex="7" GridPane.columnIndex="1">
+                    <Button fx:id="registerButton" text="Registra" onAction="#handleRegister" styleClass="primary-button"/>
+                    <Button text="Torna al login" onAction="#openLogin"/>
+                </HBox>
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>
