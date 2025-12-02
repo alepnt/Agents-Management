@@ -44,8 +44,8 @@ class DataCacheServiceCacheTest {
         StubGateway stubGateway = new StubGateway();
         DataCacheService dataCacheService = createServiceWithGateway(stubGateway);
 
-        AgentStatisticsDTO first = dataCacheService.getAgentStatistics(2024);
-        AgentStatisticsDTO second = dataCacheService.getAgentStatistics(2024);
+        AgentStatisticsDTO first = dataCacheService.getAgentStatistics(2024, null, null, null);
+        AgentStatisticsDTO second = dataCacheService.getAgentStatistics(2024, null, null, null);
 
         assertSame(first, second, "La statistica deve essere letta dalla cache per lo stesso anno");
         assertEquals(1, stubGateway.agentStatsCalls.get(), "La chiamata al backend deve essere eseguita solo una volta per anno");
@@ -113,7 +113,7 @@ class DataCacheServiceCacheTest {
         }
 
         @Override
-        public AgentStatisticsDTO agentStatistics(Integer year) {
+        public AgentStatisticsDTO agentStatistics(Integer year, java.time.LocalDate from, java.time.LocalDate to, Long roleId) {
             agentStatsCalls.incrementAndGet();
             int resolvedYear = year != null ? year : 2025;
             return new AgentStatisticsDTO(resolvedYear, List.of(resolvedYear), List.of(), List.of());

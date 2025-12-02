@@ -520,6 +520,12 @@ public class MainViewController {
 
     @FXML
     private ComboBox<Integer> statsYearCombo;
+    @FXML
+    private DatePicker statsFromDatePicker;
+    @FXML
+    private DatePicker statsToDatePicker;
+    @FXML
+    private ComboBox<RoleModel> statsRoleCombo;
 
     @FXML
     private LineChart<String, Number> commissionTrendChart;
@@ -752,6 +758,33 @@ public class MainViewController {
                     refreshStatistics();
                 }
             });
+        }
+
+        if (statsFromDatePicker != null) {
+            statsFromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refreshStatistics());
+        }
+
+        if (statsToDatePicker != null) {
+            statsToDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> refreshStatistics());
+        }
+
+        if (statsRoleCombo != null) {
+            statsRoleCombo.setItems(roleItems);
+            statsRoleCombo.setConverter(new StringConverter<>() {
+                @Override
+                public String toString(RoleModel role) {
+                    return role != null ? role.getName() : "";
+                }
+
+                @Override
+                public RoleModel fromString(String string) {
+                    return statsRoleCombo.getItems().stream()
+                            .filter(role -> role.getName() != null && role.getName().equals(string))
+                            .findFirst()
+                            .orElse(null);
+                }
+            });
+            statsRoleCombo.valueProperty().addListener((obs, oldValue, newValue) -> refreshStatistics());
         }
 
         invoiceLineItems.addListener((ListChangeListener<InvoiceLineModel>) change -> {
@@ -1515,8 +1548,16 @@ public class MainViewController {
     }
 
     private void refreshStatistics() {
+        Integer selectedYear = statsYearCombo != null ? statsYearCombo.getValue() : null;
+        LocalDate from = statsFromDatePicker != null ? statsFromDatePicker.getValue() : null;
+        LocalDate to = statsToDatePicker != null ? statsToDatePicker.getValue() : null;
+        Long roleId = Optional.ofNullable(statsRoleCombo)
+                .map(ComboBox::getValue)
+                .map(RoleModel::getId)
+                .orElse(null);
+
         AgentStatisticsDTO agentStats = withSession(
-                () -> dataCacheService.getAgentStatistics(statsYearCombo != null ? statsYearCombo.getValue() : null));
+                () -> dataCacheService.getAgentStatistics(selectedYear, from, to, roleId));
         if (agentStats == null) {
             return;
         }
@@ -1528,7 +1569,7 @@ public class MainViewController {
         }
         updateCommissionTrendChart(agentStats);
         updateAgentBarChart(agentStats);
-        TeamStatisticsDTO teamStats = withSession(() -> dataCacheService.getTeamStatistics(agentStats.year()));
+        TeamStatisticsDTO teamStats = withSession(() -> dataCacheService.getTeamStatistics(selectedYear, from, to, roleId));
         if (teamStats == null) {
             return;
         }

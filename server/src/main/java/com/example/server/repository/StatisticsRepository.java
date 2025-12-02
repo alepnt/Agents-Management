@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate; // T
 import org.springframework.stereotype.Repository;                      // Indica che la classe è un componente di accesso ai dati.
 
 import java.math.BigDecimal;                                           // Rappresenta valori numerici con precisione arbitraria.
+import java.time.LocalDate;                                            // Gestisce le date filtro.
 import java.util.List;                                                 // Supporta la gestione di liste di risultati.
 
 @Repository                                                             // Rende la classe un bean Spring di tipo repository.
@@ -29,32 +30,47 @@ public class StatisticsRepository {                                    // Reposi
         return jdbcTemplate.query(sql, params, (rs, rowNum) -> rs.getInt("payment_year"));  // Esegue la query e mappa l'anno come intero.
     }
 
-    public List<MonthlyAggregate> findMonthlyTotals(int year, String paidStatus) { // Aggrega i totali mensili di un anno.
-        // Query che somma gli importi per mese e anno dei pagamenti.
-        String sql = """
+    public List<MonthlyAggregate> findMonthlyTotals(LocalDate fromDate, LocalDate toDate, String paidStatus, Long roleId) { // Aggrega i totali mensili in un intervallo.
+        StringBuilder sql = new StringBuilder("""
                 SELECT EXTRACT(YEAR FROM i."payment_date") AS payment_year,
                        EXTRACT(MONTH FROM i."payment_date") AS payment_month,
                        SUM(i."amount") AS total_amount
                 FROM "invoices" i
-                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
-                GROUP BY EXTRACT(YEAR FROM i."payment_date"), EXTRACT(MONTH FROM i."payment_date")
-                ORDER BY payment_month
-                """;
-        MapSqlParameterSource params = new MapSqlParameterSource()     // Collezione di parametri SQL nominati.
-                .addValue("paidStatus", paidStatus)                    // Aggiunge filtro stato.
-                .addValue("year", year);                               // Aggiunge filtro anno.
+                         JOIN "contracts" c ON i."contract_id" = c."id"
+                         JOIN "agents" a ON c."agent_id" = a."id"
+                         JOIN "users" u ON a."user_id" = u."id"
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL
+                """);
 
-        RowMapper<MonthlyAggregate> mapper = (rs, rowNum) -> new MonthlyAggregate( // Mapper che costruisce un record MonthlyAggregate.
-                rs.getInt("payment_year"),                            // Estrae l'anno.
-                rs.getInt("payment_month"),                           // Estrae il mese.
-                rs.getBigDecimal("total_amount")                      // Estrae il totale.
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("paidStatus", paidStatus)
+                .addValue("fromDate", fromDate)
+                .addValue("toDate", toDate)
+                .addValue("roleId", roleId);
+
+        if (fromDate != null) {
+            sql.append(" AND i.\"payment_date\" >= :fromDate");
+        }
+        if (toDate != null) {
+            sql.append(" AND i.\"payment_date\" <= :toDate");
+        }
+        if (roleId != null) {
+            sql.append(" AND u.\"role_id\" = :roleId");
+        }
+
+        sql.append(" GROUP BY EXTRACT(YEAR FROM i.\"payment_date\"), EXTRACT(MONTH FROM i.\"payment_date\")")
+                .append(" ORDER BY payment_month");
+
+        RowMapper<MonthlyAggregate> mapper = (rs, rowNum) -> new MonthlyAggregate(
+                rs.getInt("payment_year"),
+                rs.getInt("payment_month"),
+                rs.getBigDecimal("total_amount")
         );
-        return jdbcTemplate.query(sql, params, mapper);               // Esegue la query con mappatura personalizzata.
+        return jdbcTemplate.query(sql.toString(), params, mapper);
     }
 
-    public List<AgentAggregate> findAgentTotals(int year, String paidStatus) { // Aggrega i totali per agente e team.
-        // Query che unisce invoice, contracts, agents, users e teams.
-        String sql = """
+    public List<AgentAggregate> findAgentTotals(LocalDate fromDate, LocalDate toDate, String paidStatus, Long roleId) { // Aggrega i totali per agente e team.
+        StringBuilder sql = new StringBuilder("""
                 SELECT a."id" AS agent_id,
                        u."display_name" AS agent_name,
                        t."id" AS team_id,
@@ -65,28 +81,40 @@ public class StatisticsRepository {                                    // Reposi
                          JOIN "agents" a ON c."agent_id" = a."id"
                          JOIN "users" u ON a."user_id" = u."id"
                          JOIN "teams" t ON u."team_id" = t."id"
-                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
-                GROUP BY a."id", u."display_name", t."id", t."name"
-                ORDER BY total_amount DESC
-                """;
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL
+                """);
 
-        MapSqlParameterSource params = new MapSqlParameterSource()     // Parametri nominati per filtrare anno e stato.
-                .addValue("year", year)
-                .addValue("paidStatus", paidStatus);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("paidStatus", paidStatus)
+                .addValue("fromDate", fromDate)
+                .addValue("toDate", toDate)
+                .addValue("roleId", roleId);
 
-        RowMapper<AgentAggregate> mapper = (rs, rowNum) -> new AgentAggregate( // Mapper custom per agente.
-                rs.getLong("agent_id"),                             // ID agente.
-                rs.getString("agent_name"),                         // Nome agente.
-                rs.getLong("team_id"),                              // ID team.
-                rs.getString("team_name"),                          // Nome team.
-                rs.getBigDecimal("total_amount")                    // Totale importi associati all'agente.
+        if (fromDate != null) {
+            sql.append(" AND i.\"payment_date\" >= :fromDate");
+        }
+        if (toDate != null) {
+            sql.append(" AND i.\"payment_date\" <= :toDate");
+        }
+        if (roleId != null) {
+            sql.append(" AND u.\"role_id\" = :roleId");
+        }
+
+        sql.append(" GROUP BY a.\"id\", u.\"display_name\", t.\"id\", t.\"name\"")
+                .append(" ORDER BY total_amount DESC");
+
+        RowMapper<AgentAggregate> mapper = (rs, rowNum) -> new AgentAggregate(
+                rs.getLong("agent_id"),
+                rs.getString("agent_name"),
+                rs.getLong("team_id"),
+                rs.getString("team_name"),
+                rs.getBigDecimal("total_amount")
         );
-        return jdbcTemplate.query(sql, params, mapper);              // Restituisce lista ordinata per totale.
+        return jdbcTemplate.query(sql.toString(), params, mapper);
     }
 
-    public List<TeamAggregate> findTeamTotals(int year, String paidStatus) { // Aggrega i totali dei team.
-        // Query che somma gli importi raggruppati per team.
-        String sql = """
+    public List<TeamAggregate> findTeamTotals(LocalDate fromDate, LocalDate toDate, String paidStatus, Long roleId) { // Aggrega i totali dei team.
+        StringBuilder sql = new StringBuilder("""
                 SELECT t."id" AS team_id,
                        t."name" AS team_name,
                        SUM(i."amount") AS total_amount
@@ -95,21 +123,34 @@ public class StatisticsRepository {                                    // Reposi
                          JOIN "agents" a ON c."agent_id" = a."id"
                          JOIN "users" u ON a."user_id" = u."id"
                          JOIN "teams" t ON u."team_id" = t."id"
-                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL AND EXTRACT(YEAR FROM i."payment_date") = :year
-                GROUP BY t."id", t."name"
-                ORDER BY total_amount DESC
-                """;
+                WHERE i."status" = :paidStatus AND i."payment_date" IS NOT NULL
+                """);
 
-        MapSqlParameterSource params = new MapSqlParameterSource()     // Parametri della query.
-                .addValue("year", year)
-                .addValue("paidStatus", paidStatus);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("paidStatus", paidStatus)
+                .addValue("fromDate", fromDate)
+                .addValue("toDate", toDate)
+                .addValue("roleId", roleId);
 
-        RowMapper<TeamAggregate> mapper = (rs, rowNum) -> new TeamAggregate( // Mapper custom per team.
-                rs.getLong("team_id"),                             // ID team.
-                rs.getString("team_name"),                         // Nome team.
-                rs.getBigDecimal("total_amount")                   // Totale importi del team.
+        if (fromDate != null) {
+            sql.append(" AND i.\"payment_date\" >= :fromDate");
+        }
+        if (toDate != null) {
+            sql.append(" AND i.\"payment_date\" <= :toDate");
+        }
+        if (roleId != null) {
+            sql.append(" AND u.\"role_id\" = :roleId");
+        }
+
+        sql.append(" GROUP BY t.\"id\", t.\"name\"")
+                .append(" ORDER BY total_amount DESC");
+
+        RowMapper<TeamAggregate> mapper = (rs, rowNum) -> new TeamAggregate(
+                rs.getLong("team_id"),
+                rs.getString("team_name"),
+                rs.getBigDecimal("total_amount")
         );
-        return jdbcTemplate.query(sql, params, mapper);              // Restituisce aggregazioni team.
+        return jdbcTemplate.query(sql.toString(), params, mapper);
     }
 
     // Record che rappresenta l'aggregazione mensile.

@@ -380,9 +380,15 @@
                         <Insets top="10" right="10" bottom="10" left="10" />
                     </padding>
                     <top>
-                        <HBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
                             <Label text="Anno" />
                             <ComboBox fx:id="statsYearCombo" prefWidth="120" />
+                            <Label text="Dal" />
+                            <DatePicker fx:id="statsFromDatePicker" />
+                            <Label text="Al" />
+                            <DatePicker fx:id="statsToDatePicker" />
+                            <Label text="Ruolo agente" />
+                            <ComboBox fx:id="statsRoleCombo" prefWidth="180" />
                             <Pane HBox.hgrow="ALWAYS" />
                             <Label text="Provvigioni su fatture pagate" />
                         </HBox>
