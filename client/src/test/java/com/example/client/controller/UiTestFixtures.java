@@ -61,19 +61,22 @@ final class UiTestFixtures {
 
     static class StubAuthApiClient extends AuthApiClient {
         private final java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver;
+        private final java.util.function.Function<com.example.client.service.LocalLoginForm, AuthSession> localLoginResolver;
         private final java.util.function.Supplier<UserSummary> registerSupplier;
 
         StubAuthApiClient(AuthSession session) {
-            this(form -> session, session != null ? session::user : () -> null);
+            this(form -> session, form -> session, session != null ? session::user : () -> null);
         }
 
         StubAuthApiClient(java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver) {
-            this(loginResolver, () -> null);
+            this(loginResolver, form -> null, () -> null);
         }
 
         StubAuthApiClient(java.util.function.Function<com.example.client.service.LoginForm, AuthSession> loginResolver,
+                          java.util.function.Function<com.example.client.service.LocalLoginForm, AuthSession> localLoginResolver,
                           java.util.function.Supplier<UserSummary> registerSupplier) {
             this.loginResolver = loginResolver;
+            this.localLoginResolver = localLoginResolver;
             this.registerSupplier = registerSupplier;
         }
 
@@ -82,6 +85,15 @@ final class UiTestFixtures {
             AuthSession session = loginResolver.apply(form);
             if (session == null) {
                 throw new IllegalStateException("Nessuna sessione di test disponibile per " + form.azureId());
+            }
+            return session;
+        }
+
+        @Override
+        public AuthSession loginWithLocalCredentials(com.example.client.service.LocalLoginForm form) {
+            AuthSession session = localLoginResolver.apply(form);
+            if (session == null) {
+                throw new IllegalStateException("Nessuna sessione locale di test disponibile per " + form.agentCode());
             }
             return session;
         }
