@@ -213,32 +213,46 @@ public class RegisterController {
         // Metodo generico per cambiare vista tramite caricamento FXML.
 
         try {
-            URL resource = getClass().getResource(fxmlPath);
-            // Recupera il file FXML.
-
-            if (resource == null) {
-                // Errore se la risorsa non esiste nel classpath.
-                throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
-            }
-
-            FXMLLoader loader = new FXMLLoader(resource);
-            loader.setControllerFactory(factory::create);
-            // Inietta un controller personalizzato.
-
-            Parent root = loader.load();
-            // Carica la UI.
+            Scene targetScene = buildSceneWithTheme(fxmlPath, factory);
 
             Stage stage = (Stage) registerButton.getScene().getWindow();
             // Recupera lo stage corrente dalla scena del bottone.
 
-            stage.setScene(new Scene(root));
+            stage.setScene(targetScene);
             stage.setTitle(title);
             // Cambia scena e titolo.
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Mostra errore se non riesce a caricare l’FXML.
             messageLabel.setText("Impossibile cambiare vista: " + e.getMessage());
+            AlertUtils.showError("Impossibile cambiare vista: " + e.getMessage());
         }
+    }
+
+    private Scene buildSceneWithTheme(String fxmlPath, ControllerFactory factory) throws IOException {
+        URL resource = getClass().getResource(fxmlPath);
+        // Recupera il file FXML.
+
+        if (resource == null) {
+            // Errore se la risorsa non esiste nel classpath.
+            throw new IllegalStateException("Risorsa FXML non trovata: " + fxmlPath);
+        }
+
+        FXMLLoader loader = new FXMLLoader(resource);
+        loader.setControllerFactory(factory::create);
+        // Inietta un controller personalizzato.
+
+        Parent root = loader.load();
+        // Carica la UI.
+
+        Scene scene = new Scene(root);
+
+        URL theme = getClass().getResource("/com/example/client/style/theme.css");
+        if (theme != null) {
+            scene.getStylesheets().add(theme.toExternalForm());
+        }
+
+        return scene;
     }
 
     @FunctionalInterface
