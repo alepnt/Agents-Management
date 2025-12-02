@@ -218,7 +218,7 @@ public class LoginController {
     @FXML
     public void openRegister(ActionEvent event) {
         navigate(
-                "/com/example/client/view/RegisterView.fxml",
+                "/com/example/client/view/register/RegisterView.fxml",
                 type -> {
                     if (type == RegisterController.class) {
                         return RegisterController.create(sessionStore, authApiClient);
