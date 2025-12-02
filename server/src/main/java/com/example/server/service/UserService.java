@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service; // Questa riga gestisce: import o
 import org.springframework.transaction.annotation.Transactional; // Questa riga gestisce: import org.springframework.transaction.annotation.Transactional;.
 import org.springframework.util.StringUtils; // Questa riga gestisce: import org.springframework.util.StringUtils;.
 import org.springframework.web.server.ResponseStatusException; // Questa riga gestisce: import org.springframework.web.server.ResponseStatusException;.
+import org.springframework.dao.DataAccessException;
 // Riga vuota lasciata per separare meglio le sezioni del file.
 import java.net.MalformedURLException; // Questa riga gestisce: import java.net.MalformedURLException;.
 import java.nio.charset.StandardCharsets; // Questa riga gestisce: import java.nio.charset.StandardCharsets;.
@@ -227,28 +228,36 @@ public class UserService { // Questa riga gestisce: public class UserService {.
     } // Questa riga gestisce: }.
 
     public RegistrationLookupDTO registrationLookups() {
-        List<String> azureIds = userRepository.findAllByOrderByDisplayNameAsc().stream()
-                .map(User::getAzureId)
-                .filter(Objects::nonNull)
-                .filter(StringUtils::hasText)
-                .toList();
+        try {
+            List<String> azureIds = safeList(userRepository.findAllByOrderByDisplayNameAsc()).stream()
+                    .map(User::getAzureId)
+                    .filter(Objects::nonNull)
+                    .filter(StringUtils::hasText)
+                    .toList();
 
-        List<String> agentCodes = agentRepository.findAllByOrderByAgentCodeAsc().stream()
-                .map(Agent::getAgentCode)
-                .filter(StringUtils::hasText)
-                .toList();
+            List<String> agentCodes = safeList(agentRepository.findAllByOrderByAgentCodeAsc()).stream()
+                    .map(Agent::getAgentCode)
+                    .filter(StringUtils::hasText)
+                    .toList();
 
-        List<String> roles = roleRepository.findAllByOrderByNameAsc().stream()
-                .map(Role::getName)
-                .filter(StringUtils::hasText)
-                .toList();
+            List<String> roles = safeList(roleRepository.findAllByOrderByNameAsc()).stream()
+                    .map(Role::getName)
+                    .filter(StringUtils::hasText)
+                    .toList();
 
-        List<String> teams = teamRepository.findAllByOrderByNameAsc().stream()
-                .map(Team::getName)
-                .filter(StringUtils::hasText)
-                .toList();
+            List<String> teams = safeList(teamRepository.findAllByOrderByNameAsc()).stream()
+                    .map(Team::getName)
+                    .filter(StringUtils::hasText)
+                    .toList();
 
-        return new RegistrationLookupDTO(azureIds, agentCodes, teams, roles, suggestNextAgentCode());
+            return new RegistrationLookupDTO(azureIds, agentCodes, teams, roles, suggestNextAgentCode());
+        } catch (DataAccessException ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Impossibile recuperare i dati di registrazione", ex);
+        }
+    }
+
+    private <T> List<T> safeList(List<T> items) {
+        return items != null ? items : List.of();
     }
 
     private String suggestNextAgentCode() {
