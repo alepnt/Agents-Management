@@ -12,7 +12,10 @@ import com.example.server.domain.Contract;
 import com.example.server.domain.Customer;
 import com.example.server.domain.User;
 import com.example.server.dto.AuthResponse;
+import com.example.server.dto.LocalLoginRequest;
 import com.example.server.dto.LoginRequest;
+import com.example.server.dto.RegisterRequest;
+import com.example.server.dto.UserSummary;
 import com.example.server.repository.AgentRepository;
 import com.example.server.repository.ContractRepository;
 import com.example.server.repository.CustomerRepository;
@@ -126,6 +129,22 @@ class ApiE2ETest {
         assertThat(response.getBody().accessToken()).isEqualTo("delegated-token");
         assertThat(response.getBody().user().email()).isEqualTo("login@example.com");
         assertThat(userRepository.findByAzureId("az-100")).isPresent();
+    }
+
+    @Test
+    @DisplayName("/auth/login/local autentica tramite codice agente e password")
+    void localLoginAuthenticatesWithAgentCode() {
+        RegisterRequest register = new RegisterRequest("az-local-1", "local@example.com", "Local User", "AG-LOCAL", "password-123", null, null);
+        restTemplate.postForEntity(url("/api/auth/register"), register, UserSummary.class);
+
+        LocalLoginRequest login = new LocalLoginRequest("AG-LOCAL", "password-123");
+
+        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(url("/api/auth/login/local"), login, AuthResponse.class);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().accessToken()).isNotBlank();
+        assertThat(response.getBody().user().email()).isEqualTo("local@example.com");
     }
 
     @Test

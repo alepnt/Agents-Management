@@ -1,6 +1,7 @@
 package com.example.server.controller;
 
 import com.example.server.dto.AuthResponse;
+import com.example.server.dto.LocalLoginRequest;
 import com.example.server.dto.LoginRequest;
 import com.example.server.dto.RegisterRequest;
 import com.example.server.dto.UserSummary;
@@ -73,9 +74,39 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Local login returns token payload when credentials are valid")
+    void localLoginReturnsToken() throws Exception {
+        AuthResponse response = new AuthResponse(
+                "local-token",
+                "Bearer",
+                Instant.parse("2024-01-01T00:00:00Z"),
+                new UserSummary(1L, "local@example.com", "Local User", "azure-1", 2L, 3L)
+        );
+        when(userService.loginWithLocalCredentials(any(LocalLoginRequest.class))).thenReturn(response);
+
+        LocalLoginRequest request = new LocalLoginRequest("AG-001", "password-123");
+
+        mockMvc.perform(post("/api/auth/login/local")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("local-token"))
+                .andExpect(jsonPath("$.user.email").value("local@example.com"));
+    }
+
+    @Test
     @DisplayName("Login rejects missing fields with validation error")
     void loginValidationError() throws Exception {
         mockMvc.perform(post("/api/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Local login rejects missing fields with validation error")
+    void localLoginValidationError() throws Exception {
+        mockMvc.perform(post("/api/auth/login/local")
                         .contentType(APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -90,6 +121,20 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest("token", "user@example.com", "User", "azure-1");
 
         mockMvc.perform(post("/api/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Local login maps service exception to HTTP status")
+    void localLoginServiceError() throws Exception {
+        when(userService.loginWithLocalCredentials(any(LocalLoginRequest.class)))
+                .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+
+        LocalLoginRequest request = new LocalLoginRequest("AG-001", "password-123");
+
+        mockMvc.perform(post("/api/auth/login/local")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());

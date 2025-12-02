@@ -6,6 +6,7 @@ import com.example.client.auth.MsalTokenProvider; // Provider MSAL predefinito.
 import com.example.client.auth.TokenProvider; // Interfaccia astratta per il retrieval dei token.
 import com.example.client.service.AuthApiClient; // Client REST per autenticazione backend.
 import com.example.client.service.AuthSession; // Sessione autenticata lato backend.
+import com.example.client.service.LocalLoginForm; // Payload per il login locale.
 import com.example.client.service.LoginForm; // Payload per il login REST.
 import com.example.client.session.SessionStore; // Storage persistente della sessione.
 import javafx.application.Platform; // Utilità per thread JavaFX.
@@ -17,6 +18,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -34,6 +37,12 @@ public class LoginController {
     private Button loginButton; // Pulsante di accesso.
     @FXML
     private Hyperlink registerLink; // Link alla vista di registrazione.
+    @FXML
+    private TextField agentCodeField; // Campo per il codice agente.
+    @FXML
+    private PasswordField passwordField; // Campo per la password locale.
+    @FXML
+    private Button localLoginButton; // Pulsante per il login locale.
 
     // --- Dipendenze principali del controller ---
     private final SessionStore sessionStore; // Persistenza locale sessione.
@@ -192,7 +201,7 @@ public class LoginController {
 
     @FXML
     public void handleLogin(ActionEvent event) {
-        loginButton.setDisable(true); // Disabilita doppio click.
+        setButtonsDisabled(true); // Disabilita doppio click su entrambi i pulsanti.
         updateStatus("Connessione a Microsoft in corso...");
 
         // Se l'ambiente è headless (es. TestFX) → login sincrono
@@ -208,6 +217,16 @@ public class LoginController {
         CompletableFuture
                 .supplyAsync(this::acquireMsalToken)
                 .thenApply(this::authenticateWithBackend)
+                .whenComplete((session, error) -> Platform.runLater(() -> handleAuthenticationResult(session, error)));
+    }
+
+    @FXML
+    public void handleLocalLogin(ActionEvent event) {
+        setButtonsDisabled(true); // Evita doppi invii.
+        updateStatus("Verifica delle credenziali locali...");
+
+        CompletableFuture
+                .supplyAsync(this::authenticateLocally)
                 .whenComplete((session, error) -> Platform.runLater(() -> handleAuthenticationResult(session, error)));
     }
 
@@ -344,6 +363,27 @@ public class LoginController {
         }
     }
 
+    private AuthSession authenticateLocally() {
+        String agentCode = agentCodeField != null ? agentCodeField.getText() : null;
+        String password = passwordField != null ? passwordField.getText() : null;
+
+        if (agentCode == null || agentCode.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Inserisci codice agente e password per continuare.");
+        }
+
+        try {
+            LocalLoginForm form = new LocalLoginForm(agentCode.trim(), password);
+            AuthSession session = authApiClient.loginWithLocalCredentials(form);
+            sessionStore.saveForUser(session.user().azureId(), session);
+            return session;
+        } catch (IOException e) {
+            throw new CompletionException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CompletionException(e);
+        }
+    }
+
     private LoginForm buildLoginForm(MsalAuthenticationResult msalResult) {
         // Estrazione informazioni account Microsoft
         String email = msalResult.account() != null ? msalResult.account().username() : null;
@@ -370,7 +410,7 @@ public class LoginController {
     // ---------------------------
 
     private void handleAuthenticationResult(AuthSession session, Throwable error) {
-        loginButton.setDisable(false);
+        setButtonsDisabled(false);
 
         if (error != null) {
             handleAuthenticationError(error);
@@ -384,6 +424,8 @@ public class LoginController {
         Throwable root = unwrap(throwable);
 
         if (root instanceof MsalAuthenticationException) {
+            showValidationError(root.getMessage());
+        } else if (root instanceof IllegalArgumentException) {
             showValidationError(root.getMessage());
         } else if (root instanceof IOException) {
             showValidationError("Autenticazione fallita: " + root.getMessage());
@@ -416,6 +458,15 @@ public class LoginController {
     // -------------------------
     // UTILITIES GENERICHE
     // -------------------------
+
+    private void setButtonsDisabled(boolean disabled) {
+        if (loginButton != null) {
+            loginButton.setDisable(disabled);
+        }
+        if (localLoginButton != null) {
+            localLoginButton.setDisable(disabled);
+        }
+    }
 
     private Throwable unwrap(Throwable throwable) {
         Throwable current = throwable;
