@@ -11,6 +11,14 @@ import java.time.LocalDate;                                   // Utilizzato per 
  */
 public interface StatisticsApiContract {                      // Interfaccia che definisce le operazioni di consultazione statistiche.
 
+    default AgentStatisticsDTO agentStatistics(Integer year) { // Supporta la precedente firma con il solo anno.
+        return agentStatistics(year, null, null, null);        // Delega alla nuova API con i filtri opzionali.
+    }
+
+    default TeamStatisticsDTO teamStatistics(Integer year) {   // Supporta la precedente firma con il solo anno.
+        return teamStatistics(year, null, null, null);         // Delega alla nuova API con i filtri opzionali.
+    }
+
     AgentStatisticsDTO agentStatistics(Integer year,           // Restituisce le statistiche aggregate per agente.
                                        LocalDate from,         // Data di inizio filtro (inclusa), opzionale.
                                        LocalDate to,           // Data di fine filtro (inclusa), opzionale.
