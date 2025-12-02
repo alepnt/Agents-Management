@@ -4,6 +4,7 @@ import com.example.client.model.DocumentHistorySearchCriteria;
 import com.example.common.dto.AgentStatisticsDTO;
 import com.example.common.dto.DocumentHistoryDTO;
 import com.example.common.dto.DocumentHistoryPageDTO;
+import com.example.common.dto.TeamStatisticsDTO;
 import com.example.common.enums.DocumentAction;
 import com.example.common.enums.DocumentType;
 import com.example.client.session.SessionStore;
@@ -13,11 +14,13 @@ import org.junit.jupiter.api.io.TempDir;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 class DataCacheServiceCacheTest {
@@ -49,6 +52,34 @@ class DataCacheServiceCacheTest {
 
         assertSame(first, second, "La statistica deve essere letta dalla cache per lo stesso anno");
         assertEquals(1, stubGateway.agentStatsCalls.get(), "La chiamata al backend deve essere eseguita solo una volta per anno");
+    }
+
+    @Test
+    void getAgentStatisticsUsesFiltersInCacheKey() throws Exception {
+        StubGateway stubGateway = new StubGateway();
+        DataCacheService dataCacheService = createServiceWithGateway(stubGateway);
+
+        AgentStatisticsDTO january = dataCacheService.getAgentStatistics(2024, LocalDate.of(2024, 1, 1), null, 1L);
+        AgentStatisticsDTO januaryCached = dataCacheService.getAgentStatistics(2024, LocalDate.of(2024, 1, 1), null, 1L);
+        AgentStatisticsDTO february = dataCacheService.getAgentStatistics(2024, LocalDate.of(2024, 2, 1), null, 1L);
+
+        assertSame(january, januaryCached, "Lo stesso filtro deve riutilizzare il valore in cache");
+        assertNotSame(january, february, "Filtri differenti devono generare chiavi di cache differenti");
+        assertEquals(2, stubGateway.agentStatsCalls.get(), "La chiamata deve essere ripetuta quando cambia il filtro");
+    }
+
+    @Test
+    void getTeamStatisticsCachesPerFilterCombination() throws Exception {
+        StubGateway stubGateway = new StubGateway();
+        DataCacheService dataCacheService = createServiceWithGateway(stubGateway);
+
+        TeamStatisticsDTO sales = dataCacheService.getTeamStatistics(2024, null, null, 1L);
+        TeamStatisticsDTO support = dataCacheService.getTeamStatistics(2024, null, null, 2L);
+        TeamStatisticsDTO salesCached = dataCacheService.getTeamStatistics(2024, null, null, 1L);
+
+        assertNotSame(sales, support, "Ruoli differenti devono produrre cache differenti");
+        assertSame(sales, salesCached, "Lo stesso filtro deve riutilizzare il valore in cache");
+        assertEquals(2, stubGateway.teamStatsCalls.get(), "Il backend deve essere invocato una volta per ogni combinazione di filtri");
     }
 
     @Test
@@ -85,6 +116,7 @@ class DataCacheServiceCacheTest {
     private static class StubGateway extends BackendGateway {
         private final AtomicInteger historyCalls = new AtomicInteger();
         private final AtomicInteger agentStatsCalls = new AtomicInteger();
+        private final AtomicInteger teamStatsCalls = new AtomicInteger();
         private final AtomicInteger exportCalls = new AtomicInteger();
         private final DocumentHistoryPageDTO historyPage = new DocumentHistoryPageDTO(
                 List.of(new DocumentHistoryDTO(
@@ -117,6 +149,13 @@ class DataCacheServiceCacheTest {
             agentStatsCalls.incrementAndGet();
             int resolvedYear = year != null ? year : 2025;
             return new AgentStatisticsDTO(resolvedYear, List.of(resolvedYear), List.of(), List.of());
+        }
+
+        @Override
+        public TeamStatisticsDTO teamStatistics(Integer year, java.time.LocalDate from, java.time.LocalDate to, Long roleId) {
+            teamStatsCalls.incrementAndGet();
+            int resolvedYear = year != null ? year : 2025;
+            return new TeamStatisticsDTO(resolvedYear, List.of(resolvedYear), List.of());
         }
 
         @Override
