@@ -4,6 +4,7 @@ import com.example.common.enums.DocumentAction; // Importa l'enum che descrive l
 import com.example.common.enums.DocumentType; // Importa l'enum che identifica i tipi di documento supportati.
 import com.example.server.domain.DocumentHistory; // Importa l'entità che rappresenta una riga dello storico documentale.
 import com.example.server.service.DocumentHistoryQuery; // Importa l'oggetto di query con i filtri richiesti.
+import java.sql.Timestamp;
 import org.springframework.jdbc.core.RowMapper; // RowMapper per convertire le righe del ResultSet in oggetti dominio.
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource; // Gestisce i parametri nominati della query SQL.
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate; // Template JDBC che supporta parametri nominati.
@@ -29,7 +30,8 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
         Long documentId = rs.getObject("document_id") != null ? rs.getLong("document_id") : null; // Preleva l'ID documento gestendo i null.
         String action = rs.getString("action"); // Ottiene l'azione eseguita sul documento.
         String description = rs.getString("description"); // Acquisisce la descrizione associata all'evento.
-        Instant createdAt = rs.getTimestamp("created_at").toInstant(); // Converte il timestamp SQL in Instant.
+        Timestamp createdAtColumn = rs.getTimestamp("created_at"); // Legge il timestamp, che potrebbe essere nullo su dati legacy.
+        Instant createdAt = createdAtColumn != null ? createdAtColumn.toInstant() : null; // Converte in Instant solo se valorizzato.
         return new DocumentHistory( // Crea un nuovo oggetto DocumentHistory popolato.
                 id, // Imposta l'ID del record storico.
                 documentType != null ? DocumentType.valueOf(documentType) : null, // Converte il tipo documento in enum se presente.
