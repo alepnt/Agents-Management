@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +35,11 @@ class StatisticsRepositoryTest {
 
     @Test
     void findMonthlyTotalsShouldGroupResultsByMonthForTargetYear() {
-        List<StatisticsRepository.MonthlyAggregate> totals = statisticsRepository.findMonthlyTotals(2024, "PAID");
+        List<StatisticsRepository.MonthlyAggregate> totals = statisticsRepository.findMonthlyTotals(
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 12, 31),
+                "PAID",
+                null);
 
         assertThat(totals)
                 .hasSize(3)
@@ -50,7 +55,11 @@ class StatisticsRepositoryTest {
 
     @Test
     void findAgentTotalsShouldReturnAggregatedTotalsOrderedByAmount() {
-        List<StatisticsRepository.AgentAggregate> totals = statisticsRepository.findAgentTotals(2024, "PAID");
+        List<StatisticsRepository.AgentAggregate> totals = statisticsRepository.findAgentTotals(
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 12, 31),
+                "PAID",
+                null);
 
         assertThat(totals)
                 .extracting(StatisticsRepository.AgentAggregate::agentId,
@@ -66,7 +75,11 @@ class StatisticsRepositoryTest {
 
     @Test
     void findTeamTotalsShouldAggregateInvoicesByTeam() {
-        List<StatisticsRepository.TeamAggregate> totals = statisticsRepository.findTeamTotals(2024, "PAID");
+        List<StatisticsRepository.TeamAggregate> totals = statisticsRepository.findTeamTotals(
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 12, 31),
+                "PAID",
+                null);
 
         assertThat(totals)
                 .extracting(StatisticsRepository.TeamAggregate::teamId,
