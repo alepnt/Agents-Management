@@ -98,9 +98,9 @@ class StatisticsServiceTest {
     void shouldReturnMonthlyTotalsSortedByYearAndMonth() {
         when(statisticsRepository.findAvailableYears("PAID")).thenReturn(List.of(2022, 2023));
         when(statisticsRepository.findMonthlyTotals(any(), any(), eq("PAID"), isNull())).thenReturn(List.of(
-                new StatisticsRepository.MonthlyAggregate(2023, 1, new BigDecimal("20")),
+                new StatisticsRepository.MonthlyAggregate(2022, 6, new BigDecimal("5")),
                 new StatisticsRepository.MonthlyAggregate(2022, 12, new BigDecimal("10")),
-                new StatisticsRepository.MonthlyAggregate(2022, 6, new BigDecimal("5"))
+                new StatisticsRepository.MonthlyAggregate(2023, 1, new BigDecimal("20"))
         ));
         when(statisticsRepository.findAgentTotals(any(), any(), eq("PAID"), isNull())).thenReturn(List.of());
         when(commissionService.applyDefaultCommissionRate(any())).thenAnswer(invocation -> invocation.getArgument(0));
