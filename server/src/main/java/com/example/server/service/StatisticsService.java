@@ -94,7 +94,8 @@ public class StatisticsService {
 
         List<MonthlyCommissionDTO> monthlyTotals = statisticsRepository
                 .findMonthlyTotals(fromDate, toDate, PAID_STATUS, roleId).stream()
-                .sorted(Comparator.comparing(StatisticsRepository.MonthlyAggregate::getMonth))
+                .sorted(Comparator.comparing(StatisticsRepository.MonthlyAggregate::getYear)
+                        .thenComparing(StatisticsRepository.MonthlyAggregate::getMonth))
                 .map(aggregate -> new MonthlyCommissionDTO(
                         aggregate.getYear(),
                         aggregate.getMonth(),
