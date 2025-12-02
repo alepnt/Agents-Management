@@ -27,7 +27,9 @@ public final class DocumentHistoryQuery { // Definisce una classe immutabile per
     private DocumentHistoryQuery(Builder builder) { // Costruttore privato che riceve il builder.
         this.documentType = builder.documentType; // Assegna il tipo di documento dal builder.
         this.documentId = builder.documentId; // Assegna l'id del documento dal builder.
-        this.actions = builder.actions; // Assegna la lista di azioni dal builder.
+        this.actions = builder.actions != null // Copia non modificabile della lista di azioni per mantenere l'immutabilità.
+                ? List.copyOf(builder.actions)
+                : List.of();
         this.from = builder.from; // Assegna la data di inizio dal builder.
         this.to = builder.to; // Assegna la data di fine dal builder.
         this.searchText = builder.searchText; // Assegna il testo di ricerca dal builder.
