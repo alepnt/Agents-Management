@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,6 +62,21 @@ class DocumentHistoryQueryTest {
                 .build();
 
         assertEquals("INVOICE|42|CREATED,UPDATED|2024-01-01T10:15:30Z|2024-02-01T10:15:30Z|ricerca|2|5", query.cacheKey());
+    }
+
+    @Test
+    void shouldDefensivelyCopyAndExposeImmutableActions() {
+        List<DocumentAction> mutableActions = new ArrayList<>();
+        mutableActions.add(DocumentAction.CREATED);
+
+        DocumentHistoryQuery query = DocumentHistoryQuery.builder()
+                .actions(mutableActions)
+                .build();
+
+        mutableActions.add(DocumentAction.UPDATED);
+
+        assertEquals(List.of(DocumentAction.CREATED), query.getActions(), "query should not be affected by caller mutations");
+        assertThrows(UnsupportedOperationException.class, () -> query.getActions().add(DocumentAction.DELETED));
     }
 
     @Test
