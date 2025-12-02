@@ -8,7 +8,7 @@ public record RegisterRequest( // Record describing the payload for a new user r
         @NotBlank String azureId, // Unique Azure AD identifier that ties the user to the identity provider
         @NotBlank @Email String email, // Email address associated with the new account
         @NotBlank String displayName, // Display name shown throughout the application
-        @Size(min = 6, max = 64) String agentCode, // Code assigned to the agent with length restrictions
+        @Size(min = 5, max = 64) String agentCode, // Code assigned to the agent with length restrictions
         @Size(min = 8, max = 128) String password, // Password selected by the user meeting security length requirements
         String teamName, // Optional name of the team the user should join
         String roleName // Optional role label requested for the user

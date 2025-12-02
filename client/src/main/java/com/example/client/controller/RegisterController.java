@@ -18,12 +18,15 @@ import com.example.client.validation.EmailValidationStrategy;
 import com.example.client.validation.PasswordValidationStrategy;
 // Validatori modulari: CompositeValidator applica più strategie a un valore.
 
+import com.example.common.dto.RegistrationLookupDTO;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -32,6 +35,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 // Import di utilità per gestione errori e Optional.
 
@@ -39,19 +43,19 @@ public class RegisterController {
     // Controller responsabile della schermata di registrazione.
 
     @FXML
-    private TextField azureIdField; // Campo per l’Azure ID.
+    private ComboBox<String> azureIdField; // Campo per l’Azure ID con lookup.
     @FXML
     private TextField emailField; // Campo email dell'utente.
     @FXML
     private TextField displayNameField; // Campo nome visualizzato.
     @FXML
-    private TextField agentCodeField; // Campo codice agente (opzionale).
+    private ComboBox<String> agentCodeField; // Campo codice agente (opzionale) con lookup.
     @FXML
     private PasswordField passwordField; // Campo per la password.
     @FXML
-    private TextField teamNameField; // Campo nome del team (opzionale).
+    private ComboBox<String> teamNameField; // Campo nome del team (opzionale) con lookup.
     @FXML
-    private TextField roleNameField; // Campo ruolo dell’utente (opzionale).
+    private ComboBox<String> roleNameField; // Campo ruolo dell’utente (opzionale) con lookup.
     @FXML
     private Label messageLabel; // Etichetta dove vengono mostrati errori/successi.
     @FXML
@@ -80,8 +84,15 @@ public class RegisterController {
     // Costruttore privato usato dalla factory: dependency injection manuale.
 
     @FXML
+    public void initialize() {
+        loadLookups();
+    }
+
+    @FXML
     public void handleRegister(ActionEvent event) {
         // Metodo richiamato al click del bottone di registrazione.
+
+        String azureId = comboValue(azureIdField);
 
         Optional<String> emailError = emailValidator.validate(emailField.getText());
         // Verifica se l'email è valida.
@@ -108,34 +119,31 @@ public class RegisterController {
             return;
         }
 
-        if (azureIdField.getText() == null || azureIdField.getText().isBlank()) {
+        if (azureId == null || azureId.isBlank()) {
             // Azure ID obbligatorio.
             setMessage("Specificare l'Azure ID", false);
             AlertUtils.showError("Specificare l'Azure ID");
             return;
         }
 
-        String agentCode = agentCodeField.getText();
-        agentCode = (agentCode == null || agentCode.isBlank()) ? null : agentCode.trim();
+        String agentCode = comboValue(agentCodeField);
         // Codice agente opzionale ma pulito.
 
-        if (agentCode != null && agentCode.length() < 6) {
-            // Se presente, deve avere almeno 6 caratteri.
-            setMessage("Il codice agente deve avere almeno 6 caratteri", false);
-            AlertUtils.showError("Il codice agente deve avere almeno 6 caratteri");
+        if (agentCode != null && agentCode.length() < 5) {
+            // Se presente, deve avere almeno 5 caratteri (es. AG001).
+            setMessage("Il codice agente deve avere almeno 5 caratteri", false);
+            AlertUtils.showError("Il codice agente deve avere almeno 5 caratteri");
             return;
         }
 
-        String teamName = teamNameField.getText();
-        teamName = (teamName == null || teamName.isBlank()) ? null : teamName.trim();
+        String teamName = comboValue(teamNameField);
         // Nome team opzionale.
 
-        String roleName = roleNameField.getText();
-        roleName = (roleName == null || roleName.isBlank()) ? null : roleName.trim();
+        String roleName = comboValue(roleNameField);
         // Nome ruolo opzionale.
 
         RegisterForm form = new RegisterForm(
-                azureIdField.getText().trim(),
+                azureId,
                 emailField.getText().trim(),
                 displayNameField.getText().trim(),
                 agentCode,
@@ -169,6 +177,45 @@ public class RegisterController {
             setMessage(errorMessage, false);
             AlertUtils.showError(errorMessage);
         }
+    }
+
+    private void loadLookups() {
+        try {
+            RegistrationLookupDTO lookup = authApiClient.registrationLookups();
+            applyLookup(azureIdField, lookup.getAzureIds(), null);
+            applyLookup(agentCodeField, lookup.getAgentCodes(), lookup.getNextAgentCode());
+            applyLookup(teamNameField, lookup.getTeamNames(), null);
+            applyLookup(roleNameField, lookup.getRoleNames(), null);
+        } catch (Exception e) {
+            setMessage("Impossibile caricare i suggerimenti: " + e.getMessage(), false);
+        }
+    }
+
+    private void applyLookup(ComboBox<String> comboBox, List<String> values, String suggestedValue) {
+        if (comboBox == null) {
+            return;
+        }
+        if (values != null) {
+            comboBox.getItems().setAll(values);
+        }
+        if (suggestedValue != null && !suggestedValue.isBlank()) {
+            comboBox.setValue(suggestedValue);
+            comboBox.getEditor().setText(suggestedValue);
+        }
+    }
+
+    private String comboValue(ComboBox<String> comboBox) {
+        if (comboBox == null) {
+            return null;
+        }
+        String value = comboBox.getEditor().getText();
+        if ((value == null || value.isBlank()) && comboBox.getValue() != null) {
+            value = comboBox.getValue();
+        }
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 
     @FXML

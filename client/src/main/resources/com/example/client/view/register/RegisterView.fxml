@@ -38,7 +38,7 @@
                 </columnConstraints>
 
                 <Label text="Azure ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="azureIdField" promptText="GUID Azure" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="azureIdField" promptText="GUID Azure" editable="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
                 <Label text="Email" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                 <TextField fx:id="emailField" promptText="utente@example.com" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
@@ -47,16 +47,16 @@
                 <TextField fx:id="displayNameField" promptText="Mario Rossi" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                 <Label text="Codice agente" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="agentCodeField" promptText="Codice identificativo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="agentCodeField" promptText="Codice identificativo" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
                 <Label text="Password locale" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
                 <PasswordField fx:id="passwordField" promptText="Password sicura" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
                 <Label text="Team" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <TextField fx:id="teamNameField" promptText="Vendite" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="teamNameField" promptText="Vendite" editable="true" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
                 <Label text="Ruolo" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                <TextField fx:id="roleNameField" promptText="Agent" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="roleNameField" promptText="Agent" editable="true" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
                 <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.rowIndex="7" GridPane.columnIndex="1">
                     <Button fx:id="registerButton" text="Registra" onAction="#handleRegister" styleClass="primary-button"/>

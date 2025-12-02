@@ -5,10 +5,12 @@ import com.example.server.dto.LocalLoginRequest; // Import delle dipendenze nece
 import com.example.server.dto.LoginRequest; // Import delle dipendenze necessarie
 import com.example.server.dto.RegisterRequest; // Import delle dipendenze necessarie
 import com.example.server.dto.UserSummary; // Import delle dipendenze necessarie
+import com.example.common.dto.RegistrationLookupDTO; // Suggerimenti per la registrazione
 import com.example.server.service.UserService; // Import delle dipendenze necessarie
 import jakarta.validation.Valid; // Import delle dipendenze necessarie
 import org.springframework.http.HttpStatus; // Import delle dipendenze necessarie
 import org.springframework.http.ResponseEntity; // Import delle dipendenze necessarie
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping; // Import delle dipendenze necessarie
 import org.springframework.web.bind.annotation.RequestBody; // Import delle dipendenze necessarie
 import org.springframework.web.bind.annotation.RequestMapping; // Import delle dipendenze necessarie
@@ -39,4 +41,9 @@ public class AuthController { // Dichiarazione della classe controller
         UserSummary summary = userService.register(request); // Gestione di un DTO di risposta
         return ResponseEntity.status(HttpStatus.CREATED).body(summary); // Restituisce il risultato dell operazione
     } // Istruzione di gestione del controller
+
+    @GetMapping("/register/lookups")
+    public ResponseEntity<RegistrationLookupDTO> registrationLookups() {
+        return ResponseEntity.ok(userService.registrationLookups());
+    }
 } // Istruzione di gestione del controller
