@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional; // Questa riga 
 import org.springframework.util.StringUtils; // Questa riga gestisce: import org.springframework.util.StringUtils;.
 import org.springframework.web.server.ResponseStatusException; // Questa riga gestisce: import org.springframework.web.server.ResponseStatusException;.
 import org.springframework.dao.DataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 // Riga vuota lasciata per separare meglio le sezioni del file.
 import java.net.MalformedURLException; // Questa riga gestisce: import java.net.MalformedURLException;.
 import java.nio.charset.StandardCharsets; // Questa riga gestisce: import java.nio.charset.StandardCharsets;.
@@ -48,7 +50,9 @@ import java.util.regex.Pattern;
 // Riga vuota lasciata per separare meglio le sezioni del file.
 @Service // Questa riga gestisce: @Service.
 public class UserService { // Questa riga gestisce: public class UserService {.
-// Riga vuota lasciata per separare meglio le sezioni del file.
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    // Riga vuota lasciata per separare meglio le sezioni del file.
+
     private static final String DEFAULT_ROLE = "Agent"; // Questa riga gestisce: private static final String DEFAULT_ROLE = "Agent";.
     private static final String DEFAULT_TEAM = "Vendite"; // Questa riga gestisce: private static final String DEFAULT_TEAM = "Vendite";.
 // Riga vuota lasciata per separare meglio le sezioni del file.
@@ -252,7 +256,8 @@ public class UserService { // Questa riga gestisce: public class UserService {.
 
             return new RegistrationLookupDTO(azureIds, agentCodes, teams, roles, suggestNextAgentCode());
         } catch (DataAccessException ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Impossibile recuperare i dati di registrazione", ex);
+            log.error("Impossibile recuperare i dati di registrazione, restituisco valori di fallback", ex);
+            return new RegistrationLookupDTO(List.of(), List.of(), List.of(), List.of(), "AG-001");
         }
     }
 
