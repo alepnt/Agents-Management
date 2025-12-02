@@ -201,6 +201,12 @@ public class UserService { // Questa riga gestisce: public class UserService {.
                 .map(this::normalize)
                 .filter(code -> !code.isBlank())
                 .orElseGet(this::nextAgentCode);
+
+        userRepository.findByEmail(requiredRequest.email())
+                .filter(existing -> !Objects.equals(existing.getAzureId(), requiredRequest.azureId()))
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già registrata");
+                });
 // Riga vuota lasciata per separare meglio le sezioni del file.
         User user = userRepository.findByAzureId(requiredRequest.azureId()) // Questa riga gestisce: User user = userRepository.findByAzureId(requiredRequest.azureId()).
                 .map(existing -> existing.updateFromAzure(requiredRequest.displayName(), requiredRequest.email())) // Questa riga gestisce: .map(existing -> existing.updateFromAzure(requiredRequest.displayName(), requiredRequest.email())).
