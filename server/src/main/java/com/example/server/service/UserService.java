@@ -42,6 +42,8 @@ import java.util.Optional; // Questa riga gestisce: import java.util.Optional;.
 import java.util.Set; // Questa riga gestisce: import java.util.Set;.
 import java.util.concurrent.ExecutionException; // Questa riga gestisce: import java.util.concurrent.ExecutionException;.
 import java.util.UUID; // Questa riga gestisce: import java.util.UUID;.
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 // Riga vuota lasciata per separare meglio le sezioni del file.
 @Service // Questa riga gestisce: @Service.
 public class UserService { // Questa riga gestisce: public class UserService {.
@@ -190,6 +192,10 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         RegisterRequest requiredRequest = Objects.requireNonNull(request, "request must not be null"); // Questa riga gestisce: RegisterRequest requiredRequest = Objects.requireNonNull(request, "request must not be null");.
         Long roleId = resolveRoleId(Optional.ofNullable(requiredRequest.roleName()).filter(name -> !name.isBlank()).orElse(DEFAULT_ROLE)); // Questa riga gestisce: Long roleId = resolveRoleId(Optional.ofNullable(requiredRequest.roleName()).filter(name -> !name.isBlank()).orElse(DEFAULT_ROLE));.
         Long teamId = resolveTeamId(Optional.ofNullable(requiredRequest.teamName()).filter(name -> !name.isBlank()).orElse(DEFAULT_TEAM)); // Questa riga gestisce: Long teamId = resolveTeamId(Optional.ofNullable(requiredRequest.teamName()).filter(name -> !name.isBlank()).orElse(DEFAULT_TEAM));.
+        String agentCode = Optional.ofNullable(requiredRequest.agentCode())
+                .map(this::normalize)
+                .filter(code -> !code.isBlank())
+                .orElseGet(this::nextAgentCode);
 // Riga vuota lasciata per separare meglio le sezioni del file.
         User user = userRepository.findByAzureId(requiredRequest.azureId()) // Questa riga gestisce: User user = userRepository.findByAzureId(requiredRequest.azureId()).
                 .map(existing -> existing.updateFromAzure(requiredRequest.displayName(), requiredRequest.email())) // Questa riga gestisce: .map(existing -> existing.updateFromAzure(requiredRequest.displayName(), requiredRequest.email())).
@@ -203,10 +209,10 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         User saved = userRepository.save(user); // Questa riga gestisce: User saved = userRepository.save(user);.
         Long savedId = Objects.requireNonNull(saved.getId(), "user id must not be null"); // Questa riga gestisce: Long savedId = Objects.requireNonNull(saved.getId(), "user id must not be null");.
 // Riga vuota lasciata per separare meglio le sezioni del file.
-        if (requiredRequest.agentCode() != null && !requiredRequest.agentCode().isBlank()) { // Questa riga gestisce: if (requiredRequest.agentCode() != null && !requiredRequest.agentCode().isBlank()) {.
+        if (StringUtils.hasText(agentCode)) { // Questa riga gestisce: if (StringUtils.hasText(agentCode)) {.
             Agent agent = agentRepository.findByUserId(savedId) // Questa riga gestisce: Agent agent = agentRepository.findByUserId(savedId).
-                    .map(existing -> new Agent(existing.getId(), existing.getUserId(), requiredRequest.agentCode(), existing.getTeamRole())) // Questa riga gestisce: .map(existing -> new Agent(existing.getId(), existing.getUserId(), requiredRequest.agentCode(), existing.getTeamRole())).
-                    .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, requiredRequest.agentCode(), "Member"), // Questa riga gestisce: .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, requiredRequest.agentCode(), "Member"),.
+                    .map(existing -> new Agent(existing.getId(), existing.getUserId(), agentCode, existing.getTeamRole())) // Questa riga gestisce: .map(existing -> new Agent(existing.getId(), existing.getUserId(), agentCode, existing.getTeamRole())).
+                    .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, agentCode, "Member"), // Questa riga gestisce: .orElseGet(() -> Objects.requireNonNull(Agent.forUser(savedId, agentCode, "Member"),
                             "agent must not be null")); // Questa riga gestisce: "agent must not be null"));.
             agentRepository.save(Objects.requireNonNull(agent, "agent must not be null")); // Questa riga gestisce: agentRepository.save(Objects.requireNonNull(agent, "agent must not be null"));.
         } // Questa riga gestisce: }.
@@ -372,6 +378,31 @@ public class UserService { // Questa riga gestisce: public class UserService {.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private String normalize(String value) { // Questa riga gestisce: private String normalize(String value) {.
         return value != null ? value.trim() : null; // Questa riga gestisce: return value != null ? value.trim() : null;.
+    } // Questa riga gestisce: }.
+// Riga vuota lasciata per separare meglio le sezioni del file.
+    private String nextAgentCode() { // Recupera il prossimo codice agente disponibile.
+        return agentRepository.findTopByAgentCodeNotNullOrderByAgentCodeDesc()
+                .map(Agent::getAgentCode)
+                .map(this::incrementAgentCode)
+                .orElse("AG-001");
+    } // Questa riga gestisce: }.
+// Riga vuota lasciata per separare meglio le sezioni del file.
+    private String incrementAgentCode(String latestCode) { // Incrementa il codice agente preservando il padding numerico.
+        String normalized = normalize(latestCode);
+        if (!StringUtils.hasText(normalized)) {
+            return "AG-001";
+        }
+
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(normalized);
+        if (matcher.matches()) {
+            String prefix = matcher.group(1);
+            String number = matcher.group(2);
+            int nextValue = Integer.parseInt(number) + 1;
+            String padded = String.format("%0" + number.length() + "d", nextValue);
+            return prefix + padded;
+        }
+
+        return normalized + "-001";
     } // Questa riga gestisce: }.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private Set<String> parseScopes(String scopeExpression) { // Questa riga gestisce: private Set<String> parseScopes(String scopeExpression) {.
