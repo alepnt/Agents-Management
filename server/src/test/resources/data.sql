@@ -1,24 +1,27 @@
-TRUNCATE TABLE "document_history";
-TRUNCATE TABLE "invoices";
-TRUNCATE TABLE "contracts";
-TRUNCATE TABLE "agents";
-TRUNCATE TABLE "users";
-TRUNCATE TABLE "teams";
-TRUNCATE TABLE "roles";
+TRUNCATE TABLE document_history;
+TRUNCATE TABLE invoices;
+TRUNCATE TABLE contracts;
+TRUNCATE TABLE agents;
+TRUNCATE TABLE users;
+TRUNCATE TABLE teams;
+TRUNCATE TABLE roles;
 
-ALTER TABLE "document_history" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "invoices" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "contracts" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "agents" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "users" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "teams" ALTER COLUMN "id" RESTART WITH 1;
-ALTER TABLE "roles" ALTER COLUMN "id" RESTART WITH 1;
+ALTER TABLE document_history ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE invoices ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE contracts ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE agents ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE users ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE teams ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE roles ALTER COLUMN id RESTART WITH 1;
 
-INSERT INTO "roles" (id, name) VALUES (1, 'Agent');
+INSERT INTO roles (id, name) VALUES (1, 'Agent');
 
-INSERT INTO "roles" (name) VALUES ('Agent');
+INSERT INTO roles (name) VALUES ('Agent');
 
-INSERT INTO "users" (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
+INSERT INTO teams (id, name) VALUES (1, 'Sales');
+INSERT INTO teams (id, name) VALUES (2, 'Support');
+
+INSERT INTO users (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
 VALUES (
     1,
     'azure-1',
@@ -30,7 +33,7 @@ VALUES (
     TRUE,
     TIMESTAMP '2023-01-01T00:00:00'
 );
-INSERT INTO "users" (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
+INSERT INTO users (id, azure_id, email, display_name, password_hash, role_id, team_id, active, created_at)
 VALUES (
     2,
     'azure-2',
@@ -43,14 +46,14 @@ VALUES (
     TIMESTAMP '2023-01-01T00:00:00'
 );
 
-INSERT INTO "agents" (id, user_id, agent_code, team_role)
+INSERT INTO agents (id, user_id, agent_code, team_role)
 VALUES (
     1,
     1,
     'A-001',
     'Lead'
 );
-INSERT INTO "agents" (id, user_id, agent_code, team_role)
+INSERT INTO agents (id, user_id, agent_code, team_role)
 VALUES (
     2,
     2,
@@ -58,7 +61,7 @@ VALUES (
     'Member'
 );
 
-INSERT INTO "contracts" (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
+INSERT INTO contracts (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
 VALUES (
     1,
     1,
@@ -69,7 +72,7 @@ VALUES (
     1000.00,
     'ACTIVE'
 );
-INSERT INTO "contracts" (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
+INSERT INTO contracts (id, agent_id, customer_name, description, start_date, end_date, total_value, status)
 VALUES (
     2,
     2,
@@ -81,7 +84,7 @@ VALUES (
     'ACTIVE'
 );
 
-INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
+INSERT INTO invoices (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (
     10,
     1,
@@ -95,7 +98,7 @@ VALUES (
     NULL,
     TIMESTAMP '2024-01-10T00:00:00'
 );
-INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
+INSERT INTO invoices (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (
     11,
     1,
@@ -109,7 +112,7 @@ VALUES (
     NULL,
     TIMESTAMP '2024-02-05T00:00:00'
 );
-INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
+INSERT INTO invoices (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (
     12,
     2,
@@ -123,7 +126,7 @@ VALUES (
     NULL,
     TIMESTAMP '2024-03-20T00:00:00'
 );
-INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
+INSERT INTO invoices (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (
     13,
     2,
@@ -137,7 +140,7 @@ VALUES (
     NULL,
     TIMESTAMP '2024-03-15T00:00:00'
 );
-INSERT INTO "invoices" (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
+INSERT INTO invoices (id, contract_id, invoice_number, customer_name, amount, issue_date, due_date, status, payment_date, notes, created_at)
 VALUES (
     14,
     1,
@@ -152,7 +155,7 @@ VALUES (
     TIMESTAMP '2022-11-10T00:00:00'
 );
 
-INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+INSERT INTO document_history (id, document_type, document_id, action, description, created_at)
 VALUES (
     1,
     'INVOICE',
@@ -161,7 +164,7 @@ VALUES (
     'Invoice created',
     TIMESTAMP '2024-01-01T10:00:00'
 );
-INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+INSERT INTO document_history (id, document_type, document_id, action, description, created_at)
 VALUES (
     2,
     'INVOICE',
@@ -170,7 +173,7 @@ VALUES (
     'Invoice updated',
     TIMESTAMP '2024-01-02T10:00:00'
 );
-INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+INSERT INTO document_history (id, document_type, document_id, action, description, created_at)
 VALUES (
     3,
     'CONTRACT',
@@ -179,7 +182,7 @@ VALUES (
     'Contract created',
     TIMESTAMP '2024-01-03T10:00:00'
 );
-INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+INSERT INTO document_history (id, document_type, document_id, action, description, created_at)
 VALUES (
     4,
     'INVOICE',
@@ -188,7 +191,7 @@ VALUES (
     'Payment registered for invoice',
     TIMESTAMP '2024-02-01T10:00:00'
 );
-INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+INSERT INTO document_history (id, document_type, document_id, action, description, created_at)
 VALUES (
     5,
     'INVOICE',
