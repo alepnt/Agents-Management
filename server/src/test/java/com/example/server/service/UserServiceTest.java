@@ -4,12 +4,14 @@ import com.example.server.domain.Agent;
 import com.example.server.domain.Role;
 import com.example.server.domain.Team;
 import com.example.server.domain.User;
+import com.example.common.dto.RegistrationLookupDTO;
 import com.example.server.dto.RegisterRequest;
 import com.example.server.repository.AgentRepository;
 import com.example.server.repository.RoleRepository;
 import com.example.server.repository.TeamRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.security.MsalClientProvider;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,6 +85,20 @@ class UserServiceTest {
 
         verify(agentRepository).findByAgentCode("AG-001");
         verify(agentRepository, never()).save(any());
+    }
+
+    @Test
+    void registrationLookupsReturnFallbackOnDataAccessErrors() {
+        when(userRepository.findAllByOrderByDisplayNameAsc())
+                .thenThrow(new DataAccessResourceFailureException("database not reachable"));
+
+        RegistrationLookupDTO lookup = service.registrationLookups();
+
+        assertThat(lookup.getAzureIds()).isEmpty();
+        assertThat(lookup.getAgentCodes()).isEmpty();
+        assertThat(lookup.getRoleNames()).isEmpty();
+        assertThat(lookup.getTeamNames()).isEmpty();
+        assertThat(lookup.getNextAgentCode()).isEqualTo("AG-001");
     }
 }
 
