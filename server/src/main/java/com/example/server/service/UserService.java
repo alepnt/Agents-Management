@@ -6,6 +6,7 @@ import com.example.server.domain.Role; // Questa riga gestisce: import com.examp
 import com.example.server.domain.Team; // Questa riga gestisce: import com.example.server.domain.Team;.
 import com.example.server.domain.User; // Questa riga gestisce: import com.example.server.domain.User;.
 import com.example.server.dto.AuthResponse; // Questa riga gestisce: import com.example.server.dto.AuthResponse;.
+import com.example.server.dto.LocalLoginRequest; // Questa riga gestisce: import com.example.server.dto.LocalLoginRequest;.
 import com.example.server.dto.LoginRequest; // Questa riga gestisce: import com.example.server.dto.LoginRequest;.
 import com.example.server.dto.RegisterRequest; // Questa riga gestisce: import com.example.server.dto.RegisterRequest;.
 import com.example.server.dto.UserSummary; // Questa riga gestisce: import com.example.server.dto.UserSummary;.
@@ -20,11 +21,13 @@ import com.microsoft.aad.msal4j.ConfidentialClientApplication; // Questa riga ge
 import com.microsoft.aad.msal4j.MsalException; // Questa riga gestisce: import com.microsoft.aad.msal4j.MsalException;.
 import com.microsoft.aad.msal4j.OnBehalfOfParameters; // Questa riga gestisce: import com.microsoft.aad.msal4j.OnBehalfOfParameters;.
 import com.microsoft.aad.msal4j.UserAssertion; // Questa riga gestisce: import com.microsoft.aad.msal4j.UserAssertion;.
+import org.springframework.http.HttpStatus; // Questa riga gestisce: import org.springframework.http.HttpStatus;.
 import org.springframework.beans.factory.annotation.Autowired; // Questa riga gestisce: import org.springframework.beans.factory.annotation.Autowired;.
 import org.springframework.beans.factory.annotation.Value; // Questa riga gestisce: import org.springframework.beans.factory.annotation.Value;.
 import org.springframework.stereotype.Service; // Questa riga gestisce: import org.springframework.stereotype.Service;.
 import org.springframework.transaction.annotation.Transactional; // Questa riga gestisce: import org.springframework.transaction.annotation.Transactional;.
 import org.springframework.util.StringUtils; // Questa riga gestisce: import org.springframework.util.StringUtils;.
+import org.springframework.web.server.ResponseStatusException; // Questa riga gestisce: import org.springframework.web.server.ResponseStatusException;.
 // Riga vuota lasciata per separare meglio le sezioni del file.
 import java.net.MalformedURLException; // Questa riga gestisce: import java.net.MalformedURLException;.
 import java.nio.charset.StandardCharsets; // Questa riga gestisce: import java.nio.charset.StandardCharsets;.
@@ -38,6 +41,7 @@ import java.util.Objects; // Questa riga gestisce: import java.util.Objects;.
 import java.util.Optional; // Questa riga gestisce: import java.util.Optional;.
 import java.util.Set; // Questa riga gestisce: import java.util.Set;.
 import java.util.concurrent.ExecutionException; // Questa riga gestisce: import java.util.concurrent.ExecutionException;.
+import java.util.UUID; // Questa riga gestisce: import java.util.UUID;.
 // Riga vuota lasciata per separare meglio le sezioni del file.
 @Service // Questa riga gestisce: @Service.
 public class UserService { // Questa riga gestisce: public class UserService {.
@@ -150,6 +154,36 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         Instant expiresAt = Instant.now(clock).plusSeconds(3600); // Questa riga gestisce: Instant expiresAt = Instant.now(clock).plusSeconds(3600);.
         return new AuthResponse(delegatedToken, "Bearer", expiresAt, toSummary(savedUser)); // Questa riga gestisce: return new AuthResponse(delegatedToken, "Bearer", expiresAt, toSummary(savedUser));.
     } // Questa riga gestisce: }.
+
+    @Transactional // Questa riga gestisce: @Transactional.
+    public AuthResponse loginWithLocalCredentials(LocalLoginRequest request) { // Gestisce l'autenticazione con codice agente e password.
+        LocalLoginRequest requiredRequest = Objects.requireNonNull(request, "request must not be null"); // Convalida input.
+        String normalizedAgentCode = normalize(requiredRequest.agentCode()); // Normalizza il codice agente.
+
+        if (!StringUtils.hasText(normalizedAgentCode) || !StringUtils.hasText(requiredRequest.password())) { // Verifica campi obbligatori.
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Codice agente e password sono obbligatori"); // Risponde con errore 400.
+        } // fine verifica campi.
+
+        Agent agent = agentRepository.findByAgentCode(normalizedAgentCode) // Recupera l'agente dal codice.
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenziali non valide")); // Errore se non trovato.
+
+        User user = userRepository.findById(agent.getUserId()) // Recupera l'utente associato.
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenziali non valide")); // Errore se manca.
+
+        if (Boolean.FALSE.equals(user.getActive())) { // Verifica se l'utente è attivo.
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Utente disabilitato"); // Blocco utenti disattivati.
+        } // fine check active.
+
+        String expectedHash = user.getPasswordHash(); // Hash memorizzato.
+        String providedHash = hashPassword(requiredRequest.password()); // Hash della password fornita.
+        if (!StringUtils.hasText(expectedHash) || !expectedHash.equals(providedHash)) { // Confronta gli hash.
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenziali non valide"); // Errore se non coincidono.
+        } // fine check password.
+
+        Instant expiresAt = Instant.now(clock).plusSeconds(3600); // Scadenza del token locale.
+        String accessToken = generateLocalAccessToken(user, agent); // Token effimero per la sessione locale.
+        return new AuthResponse(accessToken, "Bearer", expiresAt, toSummary(user)); // Costruisce la risposta di autenticazione.
+    } // fine loginWithLocalCredentials.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     @Transactional // Questa riga gestisce: @Transactional.
     public UserSummary register(RegisterRequest request) { // Questa riga gestisce: public UserSummary register(RegisterRequest request) {.
@@ -230,6 +264,15 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         Long teamId = resolveTeamId(DEFAULT_TEAM); // Questa riga gestisce: Long teamId = resolveTeamId(DEFAULT_TEAM);.
         return User.newAzureUser(requiredRequest.azureId(), requiredRequest.email(), requiredRequest.displayName(), roleId, teamId); // Questa riga gestisce: return User.newAzureUser(requiredRequest.azureId(), requiredRequest.email(), requiredRequest.displayName(), roleId, teamId);.
     } // Questa riga gestisce: }.
+// Riga vuota lasciata per separare meglio le sezioni del file.
+    private String generateLocalAccessToken(User user, Agent agent) { // Genera un token effimero per accessi locali.
+        String seed = String.join(":", // Crea una stringa seme con dati utente e agente.
+                Optional.ofNullable(user.getAzureId()).orElse(""),
+                Optional.ofNullable(user.getEmail()).orElse(""),
+                Optional.ofNullable(agent.getAgentCode()).orElse(""),
+                UUID.randomUUID().toString());
+        return java.util.HexFormat.of().formatHex(seed.getBytes(StandardCharsets.UTF_8)); // Restituisce il token codificato in esadecimale.
+    } // fine generateLocalAccessToken.
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private Long resolveRoleId(String name) { // Questa riga gestisce: private Long resolveRoleId(String name) {.
         String requiredName = Objects.requireNonNull(name, "name must not be null"); // Questa riga gestisce: String requiredName = Objects.requireNonNull(name, "name must not be null");.

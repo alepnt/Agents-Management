@@ -14,5 +14,5 @@ public interface AgentRepository extends CrudRepository<Agent, Long> { // Estend
 
     Optional<Agent> findByUserId(Long userId); // Trova un agente associato all'ID utente specificato.
 
-    Optional<Agent> findTopByAgentCodeNotNullOrderByAgentCodeDesc(); // Recupera l'ultimo codice agente valorizzato.
+    Optional<Agent> findByAgentCode(String agentCode); // Trova un agente a partire dal suo codice identificativo.
 }

@@ -1,6 +1,7 @@
 package com.example.server.controller; // Package del controller
 
 import com.example.server.dto.AuthResponse; // Import delle dipendenze necessarie
+import com.example.server.dto.LocalLoginRequest; // Import delle dipendenze necessarie
 import com.example.server.dto.LoginRequest; // Import delle dipendenze necessarie
 import com.example.server.dto.RegisterRequest; // Import delle dipendenze necessarie
 import com.example.server.dto.UserSummary; // Import delle dipendenze necessarie
@@ -28,6 +29,11 @@ public class AuthController { // Dichiarazione della classe controller
     @PostMapping("/login") // Mapping per una richiesta POST
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) { // Inizio di un metodo esposto dal controller
         return ResponseEntity.ok(userService.loginWithMicrosoft(request)); // Restituisce il risultato dell operazione
+    } // Istruzione di gestione del controller
+
+    @PostMapping("/login/local") // Mapping per autenticazione locale con codice agente
+    public ResponseEntity<AuthResponse> loginWithAgentCode(@Valid @RequestBody LocalLoginRequest request) { // Metodo esposto per login locale
+        return ResponseEntity.ok(userService.loginWithLocalCredentials(request)); // Restituisce il risultato dell operazione
     } // Istruzione di gestione del controller
 
     @PostMapping("/register") // Mapping per una richiesta POST

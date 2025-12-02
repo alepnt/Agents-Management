@@ -33,11 +33,13 @@ class LoginUiTest extends ApplicationTest {
     private SessionStore sessionStore;
     private AuthSession session;
     private Map<String, AuthSession> availableSessions;
+    private Map<String, AuthSession> availableLocalSessions;
     private UiTestFixtures.StubAuthApiClient authApiClient;
     private UiTestFixtures.StubMainViewFactory mainViewFactory;
     private UiTestFixtures.StubTokenProvider tokenProvider;
     private Stage primaryStage;
     private AtomicInteger loginInvocations;
+    private AtomicInteger localLoginInvocations;
 
     @BeforeAll
     static void configureHeadless() {
@@ -50,11 +52,17 @@ class LoginUiTest extends ApplicationTest {
         session = UiTestFixtures.demoSession();
         availableSessions = new HashMap<>();
         availableSessions.put(session.user().azureId(), session);
+        availableLocalSessions = new HashMap<>();
+        availableLocalSessions.put("AG-DEMO", session);
         loginInvocations = new AtomicInteger();
+        localLoginInvocations = new AtomicInteger();
         authApiClient = new UiTestFixtures.StubAuthApiClient(form -> {
             loginInvocations.incrementAndGet();
             return availableSessions.get(form.azureId());
-        });
+        }, localForm -> {
+            localLoginInvocations.incrementAndGet();
+            return availableLocalSessions.get(localForm.agentCode());
+        }, () -> session.user());
         mainViewFactory = new UiTestFixtures.StubMainViewFactory();
         tokenProvider = new UiTestFixtures.StubTokenProvider();
         FxToolkit.registerPrimaryStage();
@@ -128,6 +136,19 @@ class LoginUiTest extends ApplicationTest {
         assertEquals(0, loginInvocations.get());
     }
 
+    @Test
+    void localLoginNavigatesWithoutMsal() {
+        clickOn("#agentCodeField").write("AG-DEMO");
+        clickOn("#passwordField").write("password-123");
+
+        clickOn("#localLoginButton");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThat("#mainTabPane", NodeMatchers.isVisible());
+        assertEquals(0, loginInvocations.get());
+        assertEquals(1, localLoginInvocations.get());
+    }
+
     private void loadLoginScene() throws IOException {
         if (primaryStage == null) {
             try {
@@ -179,12 +200,20 @@ class LoginUiTest extends ApplicationTest {
             availableSessions = new HashMap<>();
             availableSessions.put(session.user().azureId(), session);
         }
+        if (availableLocalSessions == null) {
+            availableLocalSessions = new HashMap<>();
+            availableLocalSessions.put("AG-DEMO", session);
+        }
         if (authApiClient == null) {
             loginInvocations = new AtomicInteger();
+            localLoginInvocations = new AtomicInteger();
             authApiClient = new UiTestFixtures.StubAuthApiClient(form -> {
                 loginInvocations.incrementAndGet();
                 return availableSessions.get(form.azureId());
-            });
+            }, localForm -> {
+                localLoginInvocations.incrementAndGet();
+                return availableLocalSessions.get(localForm.agentCode());
+            }, () -> session.user());
         }
         if (mainViewFactory == null) {
             mainViewFactory = new UiTestFixtures.StubMainViewFactory();

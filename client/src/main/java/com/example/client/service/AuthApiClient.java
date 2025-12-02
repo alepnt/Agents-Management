@@ -92,6 +92,27 @@ public class AuthApiClient {
     }
 
     /**
+     * Esegue il login locale utilizzando codice agente e password memorizzata.
+     */
+    public AuthSession loginWithLocalCredentials(LocalLoginForm form) throws IOException, InterruptedException {
+
+        HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/api/auth/login/local"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        serialize(new LocalLoginPayload(
+                                form.agentCode(),
+                                form.password()))))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        ensureSuccess(response);
+
+        AuthResponsePayload payload = deserialize(response.body(), AuthResponsePayload.class);
+        return new AuthSession(payload.accessToken(), payload.tokenType(), payload.expiresAt(), payload.user());
+    }
+
+    /**
      * Registra un nuovo utente.
      *
      * Campi richiesti:
@@ -175,6 +196,14 @@ public class AuthApiClient {
             String email,
             String displayName,
             String azureId) {
+    }
+
+    /**
+     * Payload JSON inviato dal client per il login locale.
+     */
+    private record LocalLoginPayload(
+            String agentCode,
+            String password) {
     }
 
     /**

@@ -32,6 +32,11 @@
             <Button fx:id="loginButton" text="Accedi con Microsoft" onAction="#handleLogin"
                     maxWidth="Infinity" prefWidth="280" styleClass="primary-button"/>
             <Label fx:id="statusLabel" text="Clicca su &quot;Accedi con Microsoft&quot; per iniziare" wrapText="true" textAlignment="CENTER"/>
+            <Label text="Oppure usa le credenziali locali" styleClass="subtitle" wrapText="true" textAlignment="CENTER"/>
+            <TextField fx:id="agentCodeField" promptText="Codice agente" maxWidth="Infinity" prefWidth="280"/>
+            <PasswordField fx:id="passwordField" promptText="Password" maxWidth="Infinity" prefWidth="280"/>
+            <Button fx:id="localLoginButton" text="Accedi con credenziali locali" onAction="#handleLocalLogin"
+                    maxWidth="Infinity" prefWidth="280"/>
             <Hyperlink fx:id="registerLink" text="Registrati" onAction="#openRegister"/>
         </VBox>
     </center>
