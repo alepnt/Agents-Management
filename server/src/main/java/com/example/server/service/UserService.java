@@ -249,19 +249,7 @@ public class UserService { // Questa riga gestisce: public class UserService {.
         return agentRepository.findTopByAgentCodeNotNullOrderByAgentCodeDesc()
                 .map(Agent::getAgentCode)
                 .map(this::incrementAgentCode)
-                .orElse("AG001");
-    }
-
-    private String incrementAgentCode(String current) {
-        String trimmed = current != null ? current.trim() : "";
-        if (!trimmed.matches("^[A-Za-z]{2}\\d{3,}$")) {
-            return "AG001";
-        }
-        String prefix = trimmed.substring(0, 2).toUpperCase();
-        String numericPart = trimmed.substring(2);
-        int value = Integer.parseInt(numericPart) + 1;
-        String next = String.format("%03d", value);
-        return prefix + next;
+                .orElse("AG-001");
     }
 // Riga vuota lasciata per separare meglio le sezioni del file.
     private User registerAzureUser(LoginRequest request) { // Questa riga gestisce: private User registerAzureUser(LoginRequest request) {.
