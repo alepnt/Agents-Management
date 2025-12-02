@@ -59,7 +59,7 @@ public class StatisticsRepository {                                    // Reposi
         }
 
         sql.append(" GROUP BY EXTRACT(YEAR FROM i.\"payment_date\"), EXTRACT(MONTH FROM i.\"payment_date\")")
-                .append(" ORDER BY payment_month");
+                .append(" ORDER BY payment_year ASC, payment_month ASC");
 
         RowMapper<MonthlyAggregate> mapper = (rs, rowNum) -> new MonthlyAggregate(
                 rs.getInt("payment_year"),

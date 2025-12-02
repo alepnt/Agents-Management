@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,7 +93,6 @@ public class StatisticsService {
 
         List<MonthlyCommissionDTO> monthlyTotals = statisticsRepository
                 .findMonthlyTotals(fromDate, toDate, PAID_STATUS, roleId).stream()
-                .sorted(Comparator.comparing(StatisticsRepository.MonthlyAggregate::getMonth))
                 .map(aggregate -> new MonthlyCommissionDTO(
                         aggregate.getYear(),
                         aggregate.getMonth(),

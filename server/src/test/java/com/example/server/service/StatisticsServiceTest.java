@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 
@@ -91,6 +92,32 @@ class StatisticsServiceTest {
         assertThat(stats.year()).isEqualTo(2021);
         assertThat(stats.teamTotals()).hasSize(1);
         assertThat(stats.teamTotals().getFirst().commission()).isEqualTo(new BigDecimal("5"));
+    }
+
+    @Test
+    void shouldReturnMonthlyTotalsSortedByYearAndMonth() {
+        when(statisticsRepository.findAvailableYears("PAID")).thenReturn(List.of(2022, 2023));
+        when(statisticsRepository.findMonthlyTotals(any(), any(), eq("PAID"), isNull())).thenReturn(List.of(
+                new StatisticsRepository.MonthlyAggregate(2022, 6, new BigDecimal("5")),
+                new StatisticsRepository.MonthlyAggregate(2022, 12, new BigDecimal("10")),
+                new StatisticsRepository.MonthlyAggregate(2023, 1, new BigDecimal("20"))
+        ));
+        when(statisticsRepository.findAgentTotals(any(), any(), eq("PAID"), isNull())).thenReturn(List.of());
+        when(commissionService.applyDefaultCommissionRate(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AgentStatisticsDTO stats = service.agentStatistics(null,
+                LocalDate.of(2022, 6, 1),
+                LocalDate.of(2023, 2, 28),
+                null);
+
+        assertThat(stats.year()).isEqualTo(2022);
+        assertThat(stats.monthlyTotals())
+                .extracting(MonthlyCommissionDTO::year, MonthlyCommissionDTO::month)
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple(2022, 6),
+                        org.assertj.core.groups.Tuple.tuple(2022, 12),
+                        org.assertj.core.groups.Tuple.tuple(2023, 1)
+                );
     }
 
 }
