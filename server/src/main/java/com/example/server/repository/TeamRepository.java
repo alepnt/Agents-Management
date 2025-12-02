@@ -9,6 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 // Import Optional to represent potentially missing results.
+import java.util.List;
 import java.util.Optional;
 
 // Mark this interface as a Spring Data repository bean.
@@ -19,4 +20,6 @@ public interface TeamRepository extends CrudRepository<Team, Long> {
     // Retrieve a team by its name if present.
     @org.springframework.data.jdbc.repository.query.Query("SELECT id, name FROM teams WHERE name = :name")
     Optional<Team> findByName(String name);
+
+    List<Team> findAllByOrderByNameAsc();
 }

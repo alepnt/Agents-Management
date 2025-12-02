@@ -13,4 +13,6 @@ public interface AgentRepository extends CrudRepository<Agent, Long> { // Estend
     List<Agent> findAllByOrderByAgentCodeAsc(); // Recupera tutti gli agenti ordinati per codice in ordine crescente.
 
     Optional<Agent> findByUserId(Long userId); // Trova un agente associato all'ID utente specificato.
+
+    Optional<Agent> findTopByAgentCodeNotNullOrderByAgentCodeDesc(); // Recupera l'ultimo codice agente valorizzato.
 }

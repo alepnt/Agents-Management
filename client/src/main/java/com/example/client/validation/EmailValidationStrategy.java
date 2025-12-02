@@ -22,7 +22,7 @@ public class EmailValidationStrategy implements ValidationStrategy {
      *
      * Non è una regex perfetta (RFC è molto più complessa) ma ottima per uso UI.
      */
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]*\\.[A-Za-z0-9.-]+$");
 
     /**
      * Valida il valore passato secondo due regole:
