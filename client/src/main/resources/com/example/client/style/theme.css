@@ -43,9 +43,12 @@
 .date-picker,
 .text-area {
     -fx-text-fill: #000000;
-    -fx-prompt-text-fill: rgba(255, 224, 87, 0.62);
+    -fx-prompt-text-fill: #8a7a2a;
     -fx-background-color: #ffffff;
     -fx-background-radius: 6;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
 }
 
 .tab-pane *.tab-header-area {
