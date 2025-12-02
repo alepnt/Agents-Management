@@ -9,6 +9,7 @@ import com.example.common.enums.InvoiceStatus;
 import com.example.server.repository.StatisticsRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.Comparator;
 import java.util.List;
@@ -22,8 +23,8 @@ public class StatisticsService {
 
     private final StatisticsRepository statisticsRepository;
     private final CommissionService commissionService;
-    private final Map<Integer, AgentStatisticsDTO> agentCache = new ConcurrentHashMap<>();
-    private final Map<Integer, TeamStatisticsDTO> teamCache = new ConcurrentHashMap<>();
+    private final Map<StatisticsCacheKey, AgentStatisticsDTO> agentCache = new ConcurrentHashMap<>();
+    private final Map<StatisticsCacheKey, TeamStatisticsDTO> teamCache = new ConcurrentHashMap<>();
 
     public StatisticsService(StatisticsRepository statisticsRepository,
                             CommissionService commissionService) {
@@ -31,39 +32,41 @@ public class StatisticsService {
         this.commissionService = commissionService;
     }
 
-    public AgentStatisticsDTO agentStatistics(Integer requestedYear) {
+    public AgentStatisticsDTO agentStatistics(Integer requestedYear, LocalDate from, LocalDate to, Long roleId) {
         List<Integer> availableYears = statisticsRepository.findAvailableYears(PAID_STATUS);
         if (availableYears.isEmpty()) {
             int currentYear = Year.now().getValue();
             return new AgentStatisticsDTO(currentYear, List.of(currentYear), List.of(), List.of());
         }
 
-        int targetYear = resolveYear(requestedYear, availableYears);
-        AgentStatisticsDTO cached = agentCache.get(targetYear);
+        int targetYear = resolveYear(requestedYear, availableYears, from, to);
+        StatisticsCacheKey cacheKey = new StatisticsCacheKey(targetYear, from, to, roleId);
+        AgentStatisticsDTO cached = agentCache.get(cacheKey);
         if (cached != null && cached.years().equals(availableYears)) {
             return cached;
         }
 
-        AgentStatisticsDTO computed = buildAgentStatistics(targetYear, availableYears);
-        agentCache.put(targetYear, computed);
+        AgentStatisticsDTO computed = buildAgentStatistics(targetYear, availableYears, from, to, roleId);
+        agentCache.put(cacheKey, computed);
         return computed;
     }
 
-    public TeamStatisticsDTO teamStatistics(Integer requestedYear) {
+    public TeamStatisticsDTO teamStatistics(Integer requestedYear, LocalDate from, LocalDate to, Long roleId) {
         List<Integer> availableYears = statisticsRepository.findAvailableYears(PAID_STATUS);
         if (availableYears.isEmpty()) {
             int currentYear = Year.now().getValue();
             return new TeamStatisticsDTO(currentYear, List.of(currentYear), List.of());
         }
 
-        int targetYear = resolveYear(requestedYear, availableYears);
-        TeamStatisticsDTO cached = teamCache.get(targetYear);
+        int targetYear = resolveYear(requestedYear, availableYears, from, to);
+        StatisticsCacheKey cacheKey = new StatisticsCacheKey(targetYear, from, to, roleId);
+        TeamStatisticsDTO cached = teamCache.get(cacheKey);
         if (cached != null && cached.years().equals(availableYears)) {
             return cached;
         }
 
-        TeamStatisticsDTO computed = buildTeamStatistics(targetYear, availableYears);
-        teamCache.put(targetYear, computed);
+        TeamStatisticsDTO computed = buildTeamStatistics(targetYear, availableYears, from, to, roleId);
+        teamCache.put(cacheKey, computed);
         return computed;
     }
 
@@ -72,16 +75,25 @@ public class StatisticsService {
         teamCache.clear();
     }
 
-    private int resolveYear(Integer requestedYear, List<Integer> availableYears) {
+    private int resolveYear(Integer requestedYear, List<Integer> availableYears, LocalDate from, LocalDate to) {
+        if (from != null) {
+            return from.getYear();
+        }
+        if (to != null) {
+            return to.getYear();
+        }
         if (requestedYear != null && availableYears.contains(requestedYear)) {
             return requestedYear;
         }
         return availableYears.get(availableYears.size() - 1);
     }
 
-    private AgentStatisticsDTO buildAgentStatistics(int targetYear, List<Integer> availableYears) {
+    private AgentStatisticsDTO buildAgentStatistics(int targetYear, List<Integer> availableYears, LocalDate from, LocalDate to, Long roleId) {
+        LocalDate fromDate = from != null ? from : Year.of(targetYear).atMonth(1).atDay(1);
+        LocalDate toDate = to != null ? to : Year.of(targetYear).atMonth(12).atEndOfMonth();
+
         List<MonthlyCommissionDTO> monthlyTotals = statisticsRepository
-                .findMonthlyTotals(targetYear, PAID_STATUS).stream()
+                .findMonthlyTotals(fromDate, toDate, PAID_STATUS, roleId).stream()
                 .sorted(Comparator.comparing(StatisticsRepository.MonthlyAggregate::getMonth))
                 .map(aggregate -> new MonthlyCommissionDTO(
                         aggregate.getYear(),
@@ -90,7 +102,7 @@ public class StatisticsService {
                 .toList();
 
         List<AgentCommissionDTO> agentTotals = statisticsRepository
-                .findAgentTotals(targetYear, PAID_STATUS).stream()
+                .findAgentTotals(fromDate, toDate, PAID_STATUS, roleId).stream()
                 .map(aggregate -> new AgentCommissionDTO(
                         aggregate.getAgentId(),
                         aggregate.getAgentName(),
@@ -104,9 +116,12 @@ public class StatisticsService {
         return new AgentStatisticsDTO(targetYear, List.copyOf(availableYears), monthlyTotals, agentTotals);
     }
 
-    private TeamStatisticsDTO buildTeamStatistics(int targetYear, List<Integer> availableYears) {
+    private TeamStatisticsDTO buildTeamStatistics(int targetYear, List<Integer> availableYears, LocalDate from, LocalDate to, Long roleId) {
+        LocalDate fromDate = from != null ? from : Year.of(targetYear).atMonth(1).atDay(1);
+        LocalDate toDate = to != null ? to : Year.of(targetYear).atMonth(12).atEndOfMonth();
+
         List<TeamCommissionDTO> teamTotals = statisticsRepository
-                .findTeamTotals(targetYear, PAID_STATUS).stream()
+                .findTeamTotals(fromDate, toDate, PAID_STATUS, roleId).stream()
                 .map(aggregate -> new TeamCommissionDTO(
                         aggregate.getTeamId(),
                         aggregate.getTeamName(),
@@ -114,6 +129,9 @@ public class StatisticsService {
                 .toList();
 
         return new TeamStatisticsDTO(targetYear, List.copyOf(availableYears), teamTotals);
+    }
+
+    private record StatisticsCacheKey(int year, LocalDate from, LocalDate to, Long roleId) {
     }
 
 }

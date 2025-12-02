@@ -564,18 +564,50 @@ public class BackendGateway {
         return sendBytes(request);
     }
 
-    public AgentStatisticsDTO agentStatistics(Integer year) {
-        String path = year != null ? "/api/stats/agent?year=" + year : "/api/stats/agent";
-        HttpRequest request = authorizedRequest(path)
+    public AgentStatisticsDTO agentStatistics(Integer year, LocalDate from, LocalDate to, Long roleId) {
+        StringBuilder path = new StringBuilder("/api/stats/agent");
+        List<String> params = new ArrayList<>();
+        if (year != null) {
+            params.add("year=" + year);
+        }
+        if (from != null) {
+            params.add("from=" + URLEncoder.encode(from.toString(), StandardCharsets.UTF_8));
+        }
+        if (to != null) {
+            params.add("to=" + URLEncoder.encode(to.toString(), StandardCharsets.UTF_8));
+        }
+        if (roleId != null) {
+            params.add("roleId=" + roleId);
+        }
+        if (!params.isEmpty()) {
+            path.append('?').append(String.join("&", params));
+        }
+        HttpRequest request = authorizedRequest(path.toString())
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {
         });
     }
 
-    public TeamStatisticsDTO teamStatistics(Integer year) {
-        String path = year != null ? "/api/stats/team?year=" + year : "/api/stats/team";
-        HttpRequest request = authorizedRequest(path)
+    public TeamStatisticsDTO teamStatistics(Integer year, LocalDate from, LocalDate to, Long roleId) {
+        StringBuilder path = new StringBuilder("/api/stats/team");
+        List<String> params = new ArrayList<>();
+        if (year != null) {
+            params.add("year=" + year);
+        }
+        if (from != null) {
+            params.add("from=" + URLEncoder.encode(from.toString(), StandardCharsets.UTF_8));
+        }
+        if (to != null) {
+            params.add("to=" + URLEncoder.encode(to.toString(), StandardCharsets.UTF_8));
+        }
+        if (roleId != null) {
+            params.add("roleId=" + roleId);
+        }
+        if (!params.isEmpty()) {
+            path.append('?').append(String.join("&", params));
+        }
+        HttpRequest request = authorizedRequest(path.toString())
                 .GET()
                 .build();
         return send(request, new TypeReference<>() {

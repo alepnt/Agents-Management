@@ -44,6 +44,7 @@ import com.example.common.observer.Observer;
 
 import org.springframework.lang.NonNull;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,8 +57,8 @@ public class DataCacheService {
     private final SessionStore sessionStore;
     private final CommandHistoryCaretaker caretaker = new CommandHistoryCaretaker();
     private final NotificationCenter<DataChangeEvent> dataChangeCenter = new NotificationCenter<>();
-    private final Map<Integer, AgentStatisticsDTO> agentStatsCache = new ConcurrentHashMap<>();
-    private final Map<Integer, TeamStatisticsDTO> teamStatsCache = new ConcurrentHashMap<>();
+    private final Map<StatisticsCacheKey, AgentStatisticsDTO> agentStatsCache = new ConcurrentHashMap<>();
+    private final Map<StatisticsCacheKey, TeamStatisticsDTO> teamStatsCache = new ConcurrentHashMap<>();
     private final Map<String, DocumentHistoryPageDTO> historyCache = new ConcurrentHashMap<>();
 
     private BackendGateway backendGateway;
@@ -358,22 +359,16 @@ public class DataCacheService {
         return caretaker;
     }
 
-    public AgentStatisticsDTO getAgentStatistics(Integer year) {
-        if (year != null) {
-            return agentStatsCache.computeIfAbsent(year, backendGateway::agentStatistics);
-        }
-        AgentStatisticsDTO statistics = backendGateway.agentStatistics(null);
-        agentStatsCache.put(statistics.year(), statistics);
-        return statistics;
+    public AgentStatisticsDTO getAgentStatistics(Integer year, LocalDate from, LocalDate to, Long roleId) {
+        StatisticsCacheKey key = new StatisticsCacheKey(year, from, to, roleId);
+        return agentStatsCache.computeIfAbsent(key,
+                unused -> backendGateway.agentStatistics(key.year(), key.from(), key.to(), key.roleId()));
     }
 
-    public TeamStatisticsDTO getTeamStatistics(Integer year) {
-        if (year != null) {
-            return teamStatsCache.computeIfAbsent(year, backendGateway::teamStatistics);
-        }
-        TeamStatisticsDTO statistics = backendGateway.teamStatistics(null);
-        teamStatsCache.put(statistics.year(), statistics);
-        return statistics;
+    public TeamStatisticsDTO getTeamStatistics(Integer year, LocalDate from, LocalDate to, Long roleId) {
+        StatisticsCacheKey key = new StatisticsCacheKey(year, from, to, roleId);
+        return teamStatsCache.computeIfAbsent(key,
+                unused -> backendGateway.teamStatistics(key.year(), key.from(), key.to(), key.roleId()));
     }
 
     public void invalidateStatistics() {
@@ -427,6 +422,9 @@ public class DataCacheService {
 
     private void publishChange(@NonNull DataChangeType type) {
         dataChangeCenter.notifyObservers(new DataChangeEvent(type, java.time.Instant.now()));
+    }
+
+    private record StatisticsCacheKey(Integer year, LocalDate from, LocalDate to, Long roleId) {
     }
 
 }
