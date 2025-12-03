@@ -289,11 +289,20 @@ WITH monthly_base AS (
 )
 INSERT INTO "statistics_monthly" (reference_year, reference_month, revenue, commissions, active_customers, top_agent_id)
 SELECT 2024,
-       mb.month_no,
-       mb.revenue,
-       mb.commissions,
-       mb.active_customers,
-       mta.agent_id
-FROM monthly_base mb
-LEFT JOIN monthly_top_agents mta ON mta.month_no = mb.month_no
-ORDER BY mb.month_no;
+       MONTH(i.issue_date),
+       SUM(CASE WHEN i.status = 'PAID' THEN i.amount ELSE 0 END),
+       SUM(CASE WHEN i.status = 'PAID' THEN i.amount * 0.08 ELSE 0 END),
+       COUNT(DISTINCT i.customer_id),
+       (
+           SELECT c.agent_id
+           FROM "contracts" c
+           JOIN "invoices" mi ON mi.contract_id = c.id
+           WHERE MONTH(mi.issue_date) = MONTH(i.issue_date)
+             AND mi.status = 'PAID'
+           GROUP BY c.agent_id
+           ORDER BY SUM(mi.amount) DESC
+           FETCH FIRST 1 ROW ONLY
+       )
+FROM "invoices" i
+GROUP BY MONTH(i.issue_date)
+ORDER BY MONTH(i.issue_date);
