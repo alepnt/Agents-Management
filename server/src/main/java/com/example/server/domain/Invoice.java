@@ -15,6 +15,7 @@ import java.util.Objects; // Utility per equals e hashCode
 public class Invoice { // Entità che rappresenta una fattura
 
     @Id // Identificatore univoco della fattura
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Campo per l'ID
 
     @Column("contract_id") // Colonna che memorizza il contratto collegato

@@ -12,6 +12,7 @@ import java.util.Objects; // Importa utilità per confronti e hash
 public class Commission { // Definisce l'entità Commission
 
     @Id // Identifica il campo come chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco della commissione
 
     @Column("agent_id") // Mappa il campo alla colonna agent_id

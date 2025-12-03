@@ -13,6 +13,7 @@ import java.util.Objects; // Importa utility per equals e hashCode
 public class NotificationSubscription { // Rappresenta un'iscrizione alle notifiche per un utente
 
     @Id // Indica la chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo dell'iscrizione
 
     @Column("user_id") // Colonna che collega l'utente

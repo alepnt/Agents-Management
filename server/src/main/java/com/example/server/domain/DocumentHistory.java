@@ -13,6 +13,7 @@ import java.util.Objects; // Utilità per equals e hashCode
 public class DocumentHistory { // Modello di dominio che traccia le azioni compiute sui documenti
 
     @Id // Identificativo univoco del record
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Campo per l'ID della riga
 
     @Column("document_type") // Colonna che memorizza il tipo di documento

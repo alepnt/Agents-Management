@@ -16,6 +16,7 @@ import java.util.Objects; // Importa utilità per confronti e hash
 public class Article { // Definisce l'entità Article
 
     @Id // Identifica il campo come chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco dell'articolo
 
     @NotBlank(message = "Il codice articolo è obbligatorio")
