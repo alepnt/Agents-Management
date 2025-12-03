@@ -7,6 +7,7 @@ import com.example.client.service.BackendGateway;
 import com.example.common.dto.ChatConversationDTO;
 import com.example.common.dto.ChatMessageDTO;
 import com.example.common.dto.ChatMessageRequest;
+import com.example.common.dto.UserDTO;
 // DTO condivisi per conversazioni, messaggi e richiesta invio messaggio.
 
 import javafx.application.Platform;
@@ -18,6 +19,7 @@ import javafx.collections.ObservableList;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
@@ -26,8 +28,10 @@ import javafx.scene.layout.HBox;
 // Componenti UI JavaFX.
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 // Threading per polling continuo dei messaggi.
 
@@ -73,6 +77,9 @@ public class ChatView extends BorderPane {
     private final AtomicBoolean polling = new AtomicBoolean(false);
     // Indica se il polling è attivo (thread-safe).
 
+    private final Map<Long, String> displayNameCache = new ConcurrentHashMap<>();
+    // Cache thread-safe dei nomi visualizzati degli utenti.
+
     private Long userId;
     // ID dell’utente che sta usando la chat.
 
@@ -92,6 +99,18 @@ public class ChatView extends BorderPane {
         splitPane.getItems().add(messageList); // colonna destra
         splitPane.setDividerPositions(0.3); // rapporto larghezze
         setCenter(splitPane);
+
+        conversationList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(ChatConversationDTO item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.title());
+                }
+            }
+        });
 
         // === Box inferiore per composizione messaggi ===
         HBox composerBox = new HBox(8, composer, sendButton);
@@ -145,7 +164,7 @@ public class ChatView extends BorderPane {
         Platform.runLater(() -> {
             messages.setAll(
                     data.stream()
-                            .map(msg -> String.format("%s: %s", msg.createdAt(), msg.body()))
+                            .map(this::formatMessage)
                             .toList());
         });
     }
@@ -184,7 +203,7 @@ public class ChatView extends BorderPane {
                     // Se ci sono messaggi non ancora mostrati → aggiungili
                     if (!newMessages.isEmpty()) {
                         Platform.runLater(() -> newMessages.forEach(msg -> messages.add(
-                                String.format("%s: %s", msg.createdAt(), msg.body()))));
+                                formatMessage(msg))));
                     }
 
                 } catch (Exception ex) {
@@ -206,5 +225,26 @@ public class ChatView extends BorderPane {
     public void stop() {
         polling.set(false);
         executor.shutdownNow();
+    }
+
+    private String formatMessage(ChatMessageDTO message) {
+        String displayName = resolveDisplayName(message.senderId());
+        return String.format("[%s] %s: %s", message.createdAt(), displayName, message.body());
+    }
+
+    private String resolveDisplayName(Long userId) {
+        if (userId == null) {
+            return "Sconosciuto";
+        }
+
+        return displayNameCache.computeIfAbsent(userId, id -> {
+            try {
+                UserDTO user = backendGateway.getUser(id);
+                String displayName = user != null ? user.getDisplayName() : null;
+                return displayName != null && !displayName.isBlank() ? displayName : "Utente " + id;
+            } catch (Exception ex) {
+                return "Utente " + id;
+            }
+        });
     }
 }

@@ -145,7 +145,14 @@ public class ChatService { // Incapsula la logica dell'applicazione relativa all
         if (conversationId.startsWith(TEAM_PREFIX)) { // Se è una conversazione di team
             return "Team " + Optional.ofNullable(user.getTeamId()).map(Object::toString).orElse("sconosciuto"); // Usa il team dell'utente o indica sconosciuto
         }
-        return conversationId; // Per conversazioni individuali usa l'id
+        try {
+            long participantId = Long.parseLong(conversationId); // Prova a interpretare l'id come utente
+            return userRepository.findById(participantId)
+                    .map(User::getDisplayName)
+                    .orElse(conversationId); // Se non trovato, mostra l'id originale
+        } catch (NumberFormatException ex) {
+            return conversationId; // Per conversazioni non numeriche usa l'id
+        }
     }
 
     private String truncate(String body) { // Accorcia il testo del messaggio per anteprima
