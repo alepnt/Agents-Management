@@ -54,9 +54,9 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
                 .append(fromClause) // Aggiunge il blocco FROM e i filtri.
                 .append(" ORDER BY \"created_at\" DESC"); // Ordina i risultati dalla voce più recente.
         if (query.isPaginated()) { // Applica la paginazione solo se richiesta.
-            sql.append(" LIMIT :limit OFFSET :offset"); // Usa la sintassi Postgres/H2 per limit e offset.
-            parameters.addValue("limit", query.getSize()); // Imposta il numero di elementi da recuperare.
+            sql.append(" OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY"); // Usa la sintassi compatibile con SQL Server/H2.
             parameters.addValue("offset", query.offset()); // Imposta l'offset calcolato dalla query.
+            parameters.addValue("limit", query.getSize()); // Imposta il numero di elementi da recuperare.
         }
         List<DocumentHistory> items = jdbcTemplate.query(sql.toString(), parameters, // Esegue la query e mappa i risultati.
                 Objects.requireNonNull(ROW_MAPPER, "rowMapper must not be null")); // Utilizza il RowMapper definito per creare gli oggetti dominio.
