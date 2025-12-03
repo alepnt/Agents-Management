@@ -18,13 +18,17 @@ import javafx.collections.ObservableList;
 // Liste osservabili per ListView.
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 // Componenti UI JavaFX.
 
 import java.util.List;
@@ -34,6 +38,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 // Threading per polling continuo dei messaggi.
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Vista JavaFX completa per la chat:
@@ -50,19 +57,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ChatView extends BorderPane {
 
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
+
     private final BackendGateway backendGateway;
     // Gateway di comunicazione verso il server per la chat.
 
     private final ObservableList<ChatConversationDTO> conversations = FXCollections.observableArrayList();
     // Lista osservabile delle conversazioni.
 
-    private final ObservableList<String> messages = FXCollections.observableArrayList();
-    // Messaggi in formato "timestamp: testo" per ListView.
+    private final ObservableList<ChatMessageDTO> messages = FXCollections.observableArrayList();
+    // Lista osservabile di messaggi di chat.
 
     private final ListView<ChatConversationDTO> conversationList = new ListView<>(conversations);
     // ListView delle conversazioni.
 
-    private final ListView<String> messageList = new ListView<>(messages);
+    private final ListView<ChatMessageDTO> messageList = new ListView<>(messages);
     // ListView dei messaggi della conversazione selezionata.
 
     private final TextArea composer = new TextArea();
@@ -109,6 +119,47 @@ public class ChatView extends BorderPane {
                 } else {
                     setText(item.title());
                 }
+            }
+        });
+
+        // Cell factory per disegnare i messaggi come bolle stile app di messaggistica
+        messageList.setCellFactory(list -> new ListCell<>() {
+            private final Label body = new Label();
+            private final Label meta = new Label();
+            private final VBox bubble = new VBox(body, meta);
+            private final HBox container = new HBox(bubble);
+
+            {
+                body.setWrapText(true);
+                meta.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+
+                bubble.setSpacing(4);
+                bubble.setPadding(new Insets(8, 12, 8, 12));
+                bubble.maxWidthProperty().bind(messageList.widthProperty().multiply(0.7));
+            }
+
+            @Override
+            protected void updateItem(ChatMessageDTO item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                boolean isSelf = userId != null && userId.equals(item.senderId());
+                String background = isSelf ? "#d2ebff" : "#f1f1f1";
+                String borderColor = isSelf ? "#9bc9ff" : "#d9d9d9";
+                bubble.setStyle("-fx-background-color: " + background + "; " +
+                        "-fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: " + borderColor + ";");
+
+                container.setAlignment(isSelf ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+                HBox.setHgrow(bubble, Priority.NEVER);
+
+                body.setText(item.body());
+                meta.setText(formatMeta(item));
+
+                setGraphic(container);
             }
         });
 
@@ -161,12 +212,7 @@ public class ChatView extends BorderPane {
         }
         List<ChatMessageDTO> data = backendGateway.listChatMessages(userId, conversationId, null);
 
-        Platform.runLater(() -> {
-            messages.setAll(
-                    data.stream()
-                            .map(this::formatMessage)
-                            .toList());
-        });
+        Platform.runLater(() -> messages.setAll(data));
     }
 
     /**
@@ -202,8 +248,7 @@ public class ChatView extends BorderPane {
 
                     // Se ci sono messaggi non ancora mostrati → aggiungili
                     if (!newMessages.isEmpty()) {
-                        Platform.runLater(() -> newMessages.forEach(msg -> messages.add(
-                                formatMessage(msg))));
+                        Platform.runLater(() -> messages.addAll(newMessages));
                     }
 
                 } catch (Exception ex) {
@@ -227,9 +272,10 @@ public class ChatView extends BorderPane {
         executor.shutdownNow();
     }
 
-    private String formatMessage(ChatMessageDTO message) {
+    private String formatMeta(ChatMessageDTO message) {
         String displayName = resolveDisplayName(message.senderId());
-        return String.format("[%s] %s: %s", message.createdAt(), displayName, message.body());
+        String timestamp = message.createdAt() != null ? TIME_FORMATTER.format(message.createdAt()) : "";
+        return timestamp.isBlank() ? displayName : displayName + " • " + timestamp;
     }
 
     private String resolveDisplayName(Long userId) {
