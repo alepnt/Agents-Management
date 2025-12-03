@@ -10,7 +10,7 @@
             fx:controller="com.example.client.controller.RegisterController"
             styleClass="app-root">
     <top>
-        <HBox alignment="CENTER_RIGHT">
+        <HBox alignment="CENTER">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10" />
             </padding>
