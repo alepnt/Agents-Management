@@ -264,7 +264,7 @@ VALUES
 (2024, (SELECT COALESCE(SUM(amount),0) FROM "invoices" WHERE status = 'PAID'),
        (SELECT COALESCE(SUM(amount * 0.08),0) FROM "invoices" WHERE status = 'PAID'),
        (SELECT COUNT(*) FROM "customers"),
-       (SELECT TOP 1 c.agent_id FROM "contracts" c JOIN "invoices" i ON i.contract_id = c.id WHERE i.status = 'PAID' GROUP BY c.agent_id ORDER BY SUM(i.amount) DESC));
+       (SELECT c.agent_id FROM "contracts" c JOIN "invoices" i ON i.contract_id = c.id WHERE i.status = 'PAID' GROUP BY c.agent_id ORDER BY SUM(i.amount) DESC LIMIT 1));
 
 WITH invoices_with_month AS (
     SELECT id,
