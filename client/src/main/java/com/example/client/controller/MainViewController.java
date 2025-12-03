@@ -19,10 +19,12 @@ import com.example.client.service.AuthApiClient;
 import com.example.client.service.AuthSession;
 import com.example.client.service.BackendCommunicationException;
 import com.example.client.service.BackendServiceException;
+import com.example.client.service.BackendGateway;
 import com.example.client.service.DataCacheService;
 import com.example.client.service.NotificationService;
 import com.example.client.service.SessionExpiredException;
 import com.example.client.session.SessionStore;
+import com.example.client.view.ChatView;
 import com.example.client.auth.MsalTokenProvider;
 import com.example.client.auth.TokenProvider;
 import com.example.common.dto.ContractDTO;
@@ -135,6 +137,8 @@ public class MainViewController {
     private long historyTotalPages;
     private DocumentHistorySearchCriteria historyCurrentCriteria = new DocumentHistorySearchCriteria();
     private boolean sessionExpired;
+    private Stage chatStage;
+    private ChatView chatView;
 
     public MainViewController() {
         this(null, new SessionStore());
@@ -855,6 +859,37 @@ public class MainViewController {
         refreshStatistics();
         refreshHistorySearch(true);
         notificationService.publish(new NotificationMessage("refresh", "Dati aggiornati", Instant.now()));
+    }
+
+    @FXML
+    public void openChatWindow() {
+        withSession(() -> {
+            AuthSession session = sessionStore.currentSession().orElse(null);
+            if (session == null || session.user() == null || session.user().id() == null) {
+                notifyError("Impossibile aprire la chat: utente non disponibile.");
+                return null;
+            }
+
+            if (chatStage == null || !chatStage.isShowing()) {
+                chatView = new ChatView(new BackendGateway(sessionStore));
+                chatView.bindUser(session.user().id());
+
+                chatStage = new Stage();
+                chatStage.setTitle("Chat");
+                Scene scene = new Scene(chatView, 900, 600);
+                URL theme = getClass().getResource("/com/example/client/style/theme.css");
+                if (theme != null) {
+                    scene.getStylesheets().add(theme.toExternalForm());
+                }
+                chatStage.setScene(scene);
+                chatStage.setOnCloseRequest(event -> closeChatWindow(false));
+                chatStage.show();
+            } else {
+                chatStage.toFront();
+                chatStage.requestFocus();
+            }
+            return null;
+        });
     }
 
     @FXML
@@ -2103,9 +2138,23 @@ public class MainViewController {
     }
 
     public void shutdown() {
+        closeChatWindow(true);
         notificationService.unsubscribe(notificationObserver);
         dataCacheService.unsubscribeDataChanges(dataChangeObserver);
         dataCacheService.getCaretaker().unsubscribe(historyObserver);
+    }
+
+    private void closeChatWindow(boolean requestClose) {
+        if (chatView != null) {
+            chatView.stop();
+            chatView = null;
+        }
+        if (chatStage != null) {
+            if (requestClose) {
+                chatStage.close();
+            }
+            chatStage = null;
+        }
     }
 
     private DocumentHistorySearchCriteria buildHistoryCriteria() {
