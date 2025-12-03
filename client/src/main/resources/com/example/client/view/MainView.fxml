@@ -28,9 +28,11 @@
         </ToolBar>
     </top>
     <center>
-        <TabPane fx:id="mainTabPane">
-            <Tab text="Fatture" closable="false">
-                <BorderPane>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <content>
+                <TabPane fx:id="mainTabPane">
+                    <Tab text="Fatture" closable="false">
+                        <BorderPane>
                     <top>
                         <VBox spacing="8">
                             <padding>
@@ -375,8 +377,8 @@
                     </center>
                 </BorderPane>
             </Tab>
-            <Tab text="Statistiche" closable="false">
-                <BorderPane>
+                    <Tab text="Statistiche" closable="false">
+                        <BorderPane>
                     <padding>
                         <Insets top="10" right="10" bottom="10" left="10" />
                     </padding>
@@ -424,8 +426,10 @@
                         </GridPane>
                     </center>
                 </BorderPane>
-            </Tab>
-        </TabPane>
+                    </Tab>
+                </TabPane>
+            </content>
+        </ScrollPane>
     </center>
     <bottom>
         <Label fx:id="notificationLabel" text="Pronto">
