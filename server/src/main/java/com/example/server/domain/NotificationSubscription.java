@@ -20,6 +20,7 @@ public class NotificationSubscription { // Rappresenta un'iscrizione alle notifi
     @NotNull(message = "L'utente è obbligatorio")
     private Long userId; // Identificativo dell'utente collegato
 
+    @Column("channel") // Colonna per il canale di notifica in lowercase
     @NotBlank(message = "Il canale di notifica è obbligatorio")
     private String channel; // Canale di notifica (es. email, push)
 

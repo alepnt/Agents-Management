@@ -19,12 +19,15 @@ public class Article { // Definisce l'entità Article
     @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco dell'articolo
 
+    @Column("code") // Colonna per il codice articolo in lowercase
     @NotBlank(message = "Il codice articolo è obbligatorio")
     private String code; // Codice articolo
 
+    @Column("name") // Colonna per il nome articolo in lowercase
     @NotBlank(message = "Il nome articolo è obbligatorio")
     private String name; // Nome dell'articolo
 
+    @Column("description") // Colonna per la descrizione in lowercase
     private String description; // Descrizione dell'articolo
 
     @Column("unit_price") // Mappa il campo alla colonna unit_price

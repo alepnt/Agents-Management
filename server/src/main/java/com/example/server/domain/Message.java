@@ -23,6 +23,7 @@ public class Message { // Modello che rappresenta un messaggio di chat
     @Column("team_id") // Colonna che memorizza l'ID del team
     private Long teamId; // Identificativo del team associato
 
+    @Column("body") // Colonna per il contenuto del messaggio in lowercase
     private String body; // Contenuto testuale del messaggio
 
     @Column("created_at") // Colonna che memorizza la data di creazione

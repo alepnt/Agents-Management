@@ -23,8 +23,10 @@ public class InvoiceLine { // Rappresenta una riga di dettaglio di fattura
     @Column("article_code") // Colonna per il codice articolo
     private String articleCode; // Codice che identifica l'articolo
 
+    @Column("description") // Colonna per la descrizione in lowercase
     private String description; // Descrizione della riga
 
+    @Column("quantity") // Colonna per la quantità in lowercase
     private BigDecimal quantity; // Quantità fatturata
 
     @Column("unit_price") // Colonna per il prezzo unitario
@@ -33,6 +35,7 @@ public class InvoiceLine { // Rappresenta una riga di dettaglio di fattura
     @Column("vat_rate") // Colonna per l'aliquota IVA
     private BigDecimal vatRate; // Aliquota IVA applicata
 
+    @Column("total") // Colonna per il totale in lowercase
     private BigDecimal total; // Totale calcolato per la riga
 
     public InvoiceLine(Long id, // Costruttore completo con ID
