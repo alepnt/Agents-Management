@@ -34,9 +34,9 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
         Instant createdAt = createdAtColumn != null ? createdAtColumn.toInstant() : null; // Converte in Instant solo se valorizzato.
         return new DocumentHistory( // Crea un nuovo oggetto DocumentHistory popolato.
                 id, // Imposta l'ID del record storico.
-                documentType != null ? DocumentType.valueOf(documentType) : null, // Converte il tipo documento in enum se presente.
+                documentType != null ? DocumentType.valueOf(documentType.trim()) : null, // Converte il tipo documento in enum se presente.
                 documentId, // Imposta l'ID del documento correlato.
-                action != null ? DocumentAction.valueOf(action) : null, // Converte l'azione in enum se presente.
+                action != null ? DocumentAction.valueOf(action.trim()) : null, // Converte l'azione in enum se presente.
                 description, // Imposta la descrizione dell'azione.
                 createdAt // Imposta la data di creazione dell'evento.
         );
