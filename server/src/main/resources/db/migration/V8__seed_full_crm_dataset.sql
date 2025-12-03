@@ -285,17 +285,21 @@ WITH invoices_with_month AS (
 ), monthly_top_agents AS (
     SELECT month_no, agent_id
     FROM (
-        SELECT iw.month_no,
-               c.agent_id,
-               SUM(iw.amount) AS paid_amount,
+        SELECT mt.month_no,
+               mt.agent_id,
                ROW_NUMBER() OVER (
-                   PARTITION BY iw.month_no
-                   ORDER BY SUM(iw.amount) DESC, c.agent_id
+                   PARTITION BY mt.month_no
+                   ORDER BY mt.paid_amount DESC, mt.agent_id
                ) AS rn
-        FROM invoices_with_month iw
-        JOIN "contracts" c ON iw.contract_id = c.id
-        WHERE iw.status = 'PAID'
-        GROUP BY iw.month_no, c.agent_id
+        FROM (
+            SELECT iw.month_no,
+                   c.agent_id,
+                   SUM(iw.amount) AS paid_amount
+            FROM invoices_with_month iw
+            JOIN "contracts" c ON iw.contract_id = c.id
+            WHERE iw.status = 'PAID'
+            GROUP BY iw.month_no, c.agent_id
+        ) mt
     ) ranked
     WHERE rn = 1
 )
