@@ -10,6 +10,7 @@ import java.util.Objects; // Importa la utility per confrontare e calcolare hash
 public class Agent { // Definisce l'entità Agent
 
     @Id // Identifica il campo come chiave primaria
+    @Column("id") // Specifica il nome esatto della colonna per mantenere la corretta corrispondenza con la tabella
     private Long id; // Identificativo univoco dell'agente
 
     @Column("user_id") // Mappa il campo alla colonna user_id
