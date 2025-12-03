@@ -20,8 +20,10 @@ public class Notification { // Modello che rappresenta una notifica
     @Column("team_id") // Colonna per l'ID del team
     private Long teamId; // Identificativo del team destinatario
 
+    @Column("title") // Colonna per il titolo in lowercase
     private String title; // Titolo della notifica
 
+    @Column("message") // Colonna per il messaggio in lowercase
     private String message; // Contenuto della notifica
 
     @Column("is_read") // Colonna che indica se la notifica è stata letta

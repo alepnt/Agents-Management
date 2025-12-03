@@ -13,6 +13,7 @@ public class Team { // Rappresenta un team aziendale
     @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo del team
 
+    @Column("name") // Colonna per il nome del team in lowercase
     private String name; // Nome del team
 
     public Team(Long id, String name) { // Costruttore completo

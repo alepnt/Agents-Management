@@ -18,6 +18,7 @@ public class Customer { // Definisce l'entità Customer
     @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco del cliente
 
+    @Column("name") // Colonna per il nome del cliente in lowercase
     @NotBlank(message = "Il nome del cliente è obbligatorio")
     private String name; // Nome del cliente
 
@@ -27,11 +28,14 @@ public class Customer { // Definisce l'entità Customer
     @Column("tax_code") // Mappa il campo alla colonna tax_code
     private String taxCode; // Codice fiscale del cliente
 
+    @Column("email") // Colonna per l'email in lowercase
     @Email(message = "Email non valida")
     private String email; // Email del cliente
 
+    @Column("phone") // Colonna per il numero di telefono in lowercase
     private String phone; // Numero di telefono del cliente
 
+    @Column("address") // Colonna per l'indirizzo in lowercase
     private String address; // Indirizzo del cliente
 
     @CreatedDate // Imposta automaticamente il timestamp di creazione

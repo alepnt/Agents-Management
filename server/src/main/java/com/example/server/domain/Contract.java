@@ -22,6 +22,7 @@ public class Contract { // Definisce l'entità Contract
     @Column("customer_name") // Mappa il campo alla colonna customer_name
     private String customerName; // Nome del cliente
 
+    @Column("description") // Colonna per la descrizione in lowercase
     private String description; // Descrizione del contratto
 
     @Column("start_date") // Mappa il campo alla colonna start_date
@@ -33,6 +34,7 @@ public class Contract { // Definisce l'entità Contract
     @Column("total_value") // Mappa il campo alla colonna total_value
     private BigDecimal totalValue; // Valore economico del contratto
 
+    @Column("status") // Colonna per lo stato del contratto in lowercase
     private ContractStatus status; // Stato attuale del contratto
 
     public Contract(Long id, // Costruttore completo
