@@ -182,6 +182,22 @@ Il file risultante sarà disponibile in `server/target/gestore-agenti-server-0.0
    mvn -pl client -am -U javafx:run
    ```
 
+## Sezioni principali dell'interfaccia client
+
+### ChatView
+
+- Vista principale per la messaggistica tra agenti.
+- Si apre dalla dashboard tramite il pulsante **Chat** nella toolbar superiore, che lancia una finestra dedicata collegata
+  all'utente corrente.
+- A sinistra mostra la lista delle conversazioni; selezionandone una si caricano i messaggi nella colonna di destra.
+- In basso include un'area di testo “Scrivi un messaggio…” e il pulsante **Invia** per mandare nuovi messaggi nella conversazione selezionata.
+
+### NotificationTabView
+
+- Tab dedicata alle notifiche dell'utente, con lista e pulsante **Aggiorna** in alto.
+- Quando collegata a un utente tramite `bindUser`, carica le notifiche iniziali e avvia il polling automatico per mantenerle aggiornate.
+- Può essere aggiunta al `TabPane` principale della dashboard per esporre rapidamente la sezione notifiche.
+
 ## Test di integrazione
 
 I test di integrazione utilizzano Testcontainers per avviare automaticamente un container Microsoft SQL Server. Assicurarsi che Docker sia in esecuzione prima di lanciare i test.
