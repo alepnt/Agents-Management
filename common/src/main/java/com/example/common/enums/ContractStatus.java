@@ -8,6 +8,7 @@ public enum ContractStatus { // Enumerazione che rappresenta gli stati possibili
 
     DRAFT, // Contratto creato ma non ancora attivo.
     ACTIVE, // Contratto attualmente in vigore.
+    EXPIRED, // Contratto scaduto e non più valido.
     SUSPENDED, // Contratto sospeso temporaneamente.
     TERMINATED // Contratto terminato o annullato in modo definitivo.
 } // Fine dell'enum ContractStatus.
