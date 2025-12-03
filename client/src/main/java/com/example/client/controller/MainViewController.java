@@ -838,6 +838,10 @@ public class MainViewController {
 
     @FXML
     public void refreshData() {
+        // Invalida le cache per forzare il fetch dal server quando l'utente
+        // preme il pulsante di refresh.
+        dataCacheService.invalidateStatistics();
+        dataCacheService.invalidateHistory();
         refreshCustomers();
         refreshArticles();
         refreshInvoices();
