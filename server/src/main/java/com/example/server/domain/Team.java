@@ -1,6 +1,7 @@
 package com.example.server.domain; // Definisce il package della classe
 
 import org.springframework.data.annotation.Id; // Importa l'annotazione per la chiave primaria
+import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per la colonna
 import org.springframework.data.relational.core.mapping.Table; // Importa l'annotazione per la tabella
 
 import java.util.Objects; // Importa utility per equals e hashCode
@@ -9,6 +10,7 @@ import java.util.Objects; // Importa utility per equals e hashCode
 public class Team { // Rappresenta un team aziendale
 
     @Id // Indica la chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo del team
 
     private String name; // Nome del team

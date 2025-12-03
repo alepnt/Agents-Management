@@ -11,6 +11,7 @@ import java.util.Objects; // Utility per equals e hashCode
 public class InvoiceLine { // Rappresenta una riga di dettaglio di fattura
 
     @Id // Identificativo univoco della riga
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Campo ID della riga
 
     @Column("invoice_id") // Colonna per l'ID della fattura

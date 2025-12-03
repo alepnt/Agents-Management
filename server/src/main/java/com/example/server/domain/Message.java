@@ -11,6 +11,7 @@ import java.util.Objects; // Utility per equals e hashCode
 public class Message { // Modello che rappresenta un messaggio di chat
 
     @Id // Identificativo univoco del messaggio
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Campo per l'ID del messaggio
 
     @Column("conversation_id") // Colonna che memorizza l'ID della conversazione

@@ -13,6 +13,7 @@ import java.util.Objects; // Importa utilità per confronti e hash
 public class Contract { // Definisce l'entità Contract
 
     @Id // Identifica il campo come chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco del contratto
 
     @Column("agent_id") // Mappa il campo alla colonna agent_id

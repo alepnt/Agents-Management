@@ -15,6 +15,7 @@ import java.util.Objects; // Importa utilità per confronti e hash
 public class Customer { // Definisce l'entità Customer
 
     @Id // Identifica il campo come chiave primaria
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Identificativo univoco del cliente
 
     @NotBlank(message = "Il nome del cliente è obbligatorio")

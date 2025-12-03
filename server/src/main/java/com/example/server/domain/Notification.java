@@ -11,6 +11,7 @@ import java.util.Objects; // Utility per equals e hashCode
 public class Notification { // Modello che rappresenta una notifica
 
     @Id // Identificativo univoco della notifica
+    @Column("id") // Colonna primaria in minuscolo
     private Long id; // Campo ID della notifica
 
     @Column("user_id") // Colonna per l'ID dell'utente destinatario
