@@ -14,11 +14,13 @@ import java.util.Objects; // Importa utility per equals e hashCode
 public class User { // Rappresenta un utente autenticato
 
     @Id // Indica la chiave primaria
+    @Column("id") // Mappa esplicitamente la colonna id (lowercase)
     private Long id; // Identificativo interno dell'utente
 
     @Column("azure_id") // Colonna che memorizza l'id Azure
     private String azureId; // Identificativo esterno di Azure AD
 
+    @Column("email") // Colonna email in lowercase nel database
     private String email; // Indirizzo email dell'utente
 
     @Column("display_name") // Colonna per il nome visualizzato
@@ -33,6 +35,7 @@ public class User { // Rappresenta un utente autenticato
     @Column("team_id") // Colonna che collega il team
     private Long teamId; // Identificativo del team associato
 
+    @Column("active") // Colonna active in lowercase nel database
     private Boolean active; // Stato di attivazione dell'account
 
     @Column("created_at") // Colonna che memorizza la data di creazione
