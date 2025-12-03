@@ -8,7 +8,7 @@
 }
 
 .label.title {
-    -fx-text-fill: rgba(214, 157, 0, 0.95);
+    -fx-text-fill: #241400;
     -fx-font-weight: bold;
 }
 

@@ -15,7 +15,7 @@
             styleClass="app-root">
     <top>
         <ToolBar styleClass="app-toolbar">
-            <Label text="Gestore Agenti" styleClass="title" />
+            <Label text="Agents management" styleClass="title" />
             <Pane HBox.hgrow="ALWAYS" />
             <Button text="Aggiorna" onAction="#refreshData" />
             <Button text="Esci" onAction="#onLogout" />
