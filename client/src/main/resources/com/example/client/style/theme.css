@@ -1,5 +1,5 @@
 .app-root {
-    -fx-background-color: rgba(249, 255, 208, 0.8);
+    -fx-background-color: rgba(242, 247, 184, 0.95);
     -fx-padding: 10;
 }
 
@@ -8,16 +8,16 @@
 }
 
 .label.title {
-    -fx-text-fill: rgba(255, 207, 0, 0.8);
+    -fx-text-fill: rgba(214, 157, 0, 0.95);
     -fx-font-weight: bold;
 }
 
 .label.subtitle {
-    -fx-text-fill: #605d54;
+    -fx-text-fill: #453f30;
 }
 
 .app-toolbar {
-    -fx-background-color: #ffd350;
+    -fx-background-color: #f3b300;
     -fx-padding: 8;
 }
 
@@ -27,11 +27,11 @@
 }
 
 .button {
-    -fx-background-color: rgba(255, 207, 0, 0.8);
-    -fx-text-fill: #000000;
+    -fx-background-color: rgba(234, 178, 0, 0.95);
+    -fx-text-fill: #0f0d07;
     -fx-font-weight: bold;
-    -fx-border-color: #000000;
-    -fx-border-width: 1;
+    -fx-border-color: #322b15;
+    -fx-border-width: 1.5;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
     -fx-padding: 8 14 8 14;
@@ -43,25 +43,25 @@
 .date-picker,
 .text-area {
     -fx-text-fill: #000000;
-    -fx-prompt-text-fill: #8a7a2a;
-    -fx-background-color: #ffffff;
+    -fx-prompt-text-fill: #5e5010;
+    -fx-background-color: #fffdf3;
     -fx-background-radius: 6;
-    -fx-border-color: #000000;
-    -fx-border-width: 1;
+    -fx-border-color: #322b15;
+    -fx-border-width: 1.5;
     -fx-border-radius: 6;
 }
 
 .tab-pane *.tab-header-area {
-    -fx-background-color: #ffd350;
+    -fx-background-color: #f3b300;
 }
 
 .separator *.line {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #d3b000;
 }
 
 .table-view,
 .chart {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #fffbec;
 }
 
 .chart-plot-background {
@@ -69,9 +69,9 @@
 }
 
 .chart-legend {
-    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-color: rgba(255, 255, 255, 0.82);
 }
 
 .hyperlink {
-    -fx-text-fill: #605d54;
+    -fx-text-fill: #3d3628;
 }
