@@ -1,15 +1,11 @@
-INSERT INTO "roles" ("name")
-VALUES ('Amministratore')
-ON CONFLICT ("name") DO NOTHING;
+MERGE INTO "roles" ("name") KEY("name")
+VALUES ('Amministratore');
 
-INSERT INTO "roles" ("name")
-VALUES ('Manager')
-ON CONFLICT ("name") DO NOTHING;
+MERGE INTO "roles" ("name") KEY("name")
+VALUES ('Manager');
 
-INSERT INTO "teams" ("name")
-VALUES ('Supporto')
-ON CONFLICT ("name") DO NOTHING;
+MERGE INTO "teams" ("name") KEY("name")
+VALUES ('Supporto');
 
-INSERT INTO "teams" ("name")
-VALUES ('Marketing')
-ON CONFLICT ("name") DO NOTHING;
+MERGE INTO "teams" ("name") KEY("name")
+VALUES ('Marketing');
