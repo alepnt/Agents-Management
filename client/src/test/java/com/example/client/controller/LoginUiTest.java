@@ -96,6 +96,18 @@ class LoginUiTest extends ApplicationTest {
     }
 
     @Test
+    void existingValidSessionOpensDashboardAutomatically() throws Exception {
+        sessionStore.save(session);
+
+        relaunchLoginView();
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThat("#mainTabPane", NodeMatchers.isVisible());
+        assertEquals(0, loginInvocations.get());
+        assertEquals(0, localLoginInvocations.get());
+    }
+
+    @Test
     void loginsForDifferentAccountsDoNotOverrideSessions() throws Exception {
         AuthSession secondSession = new AuthSession(
                 "second-token",

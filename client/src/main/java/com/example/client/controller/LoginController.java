@@ -180,8 +180,9 @@ public class LoginController {
                     }
                     statusLabel.setText("La sessione salvata è scaduta. Effettua nuovamente il login.");
                 } else {
-                    // Sessione ancora valida
+                    // Sessione ancora valida → apri direttamente la dashboard
                     statusLabel.setText("Sessione attiva per " + session.user().displayName());
+                    openMainView(session);
                 }
                 return;
             }
