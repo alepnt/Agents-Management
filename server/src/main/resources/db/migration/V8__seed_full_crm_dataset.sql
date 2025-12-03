@@ -266,13 +266,34 @@ VALUES
        (SELECT COUNT(*) FROM "customers"),
        (SELECT TOP 1 c.agent_id FROM "contracts" c JOIN "invoices" i ON i.contract_id = c.id WHERE i.status = 'PAID' GROUP BY c.agent_id ORDER BY SUM(i.amount) DESC));
 
+WITH monthly_base AS (
+    SELECT MONTH(issue_date) AS month_no,
+           SUM(CASE WHEN status = 'PAID' THEN amount ELSE 0 END) AS revenue,
+           SUM(CASE WHEN status = 'PAID' THEN amount * 0.08 ELSE 0 END) AS commissions,
+           COUNT(DISTINCT customer_id) AS active_customers
+    FROM "invoices"
+    GROUP BY MONTH(issue_date)
+), monthly_top_agents AS (
+    SELECT month_no, agent_id
+    FROM (
+        SELECT MONTH(mi.issue_date) AS month_no,
+               c.agent_id,
+               SUM(mi.amount) AS paid_amount,
+               ROW_NUMBER() OVER (PARTITION BY MONTH(mi.issue_date) ORDER BY SUM(mi.amount) DESC) AS rn
+        FROM "invoices" mi
+        JOIN "contracts" c ON mi.contract_id = c.id
+        WHERE mi.status = 'PAID'
+        GROUP BY MONTH(mi.issue_date), c.agent_id
+    ) ranked
+    WHERE rn = 1
+)
 INSERT INTO "statistics_monthly" (reference_year, reference_month, revenue, commissions, active_customers, top_agent_id)
 SELECT 2024,
-       MONTH(i.issue_date),
-       SUM(CASE WHEN i.status = 'PAID' THEN i.amount ELSE 0 END),
-       SUM(CASE WHEN i.status = 'PAID' THEN i.amount * 0.08 ELSE 0 END),
-       COUNT(DISTINCT i.customer_id),
-       (SELECT c.agent_id FROM "contracts" c WHERE c.id = MAX(i.contract_id))
-FROM "invoices" i
-GROUP BY MONTH(i.issue_date)
-ORDER BY MONTH(i.issue_date);
+       mb.month_no,
+       mb.revenue,
+       mb.commissions,
+       mb.active_customers,
+       mta.agent_id
+FROM monthly_base mb
+LEFT JOIN monthly_top_agents mta ON mta.month_no = mb.month_no
+ORDER BY mb.month_no;
