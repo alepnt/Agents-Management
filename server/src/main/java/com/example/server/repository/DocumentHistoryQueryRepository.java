@@ -34,9 +34,9 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
         Instant createdAt = createdAtColumn != null ? createdAtColumn.toInstant() : null; // Converte in Instant solo se valorizzato.
         return new DocumentHistory( // Crea un nuovo oggetto DocumentHistory popolato.
                 id, // Imposta l'ID del record storico.
-                documentType != null ? DocumentType.valueOf(documentType.trim()) : null, // Converte il tipo documento in enum se presente.
+                parseDocumentType(documentType), // Converte il tipo documento in enum se presente.
                 documentId, // Imposta l'ID del documento correlato.
-                action != null ? DocumentAction.valueOf(action.trim()) : null, // Converte l'azione in enum se presente.
+                parseDocumentAction(action), // Converte l'azione in enum se presente.
                 description, // Imposta la descrizione dell'azione.
                 createdAt // Imposta la data di creazione dell'evento.
         );
@@ -76,6 +76,28 @@ public class DocumentHistoryQueryRepository { // Implementa query personalizzate
                 + fromClause // Aggiunge la clausola dinamica costruita.
                 + " ORDER BY \"created_at\" DESC"; // Ordina per data di creazione decrescente.
         return jdbcTemplate.query(sql, parameters, Objects.requireNonNull(ROW_MAPPER, "rowMapper must not be null")); // Esegue la query e mappa i risultati.
+    }
+
+    private static DocumentType parseDocumentType(String source) { // Effettua una conversione sicura del tipo documento.
+        if (source == null) { // Gestisce valori null provenienti dal database.
+            return null; // Nessun enum da restituire.
+        }
+        try {
+            return DocumentType.valueOf(source.trim()); // Converte eliminando spazi superflui.
+        } catch (IllegalArgumentException ex) { // Gestisce valori non contemplati dall'enum.
+            return null; // Evita che un valore legacy causi eccezioni runtime.
+        }
+    }
+
+    private static DocumentAction parseDocumentAction(String source) { // Effettua una conversione sicura dell'azione documento.
+        if (source == null) { // Gestisce valori null provenienti dal database.
+            return null; // Nessun enum da restituire.
+        }
+        try {
+            return DocumentAction.valueOf(source.trim()); // Converte eliminando spazi superflui.
+        } catch (IllegalArgumentException ex) { // Gestisce valori non contemplati dall'enum.
+            return null; // Evita che un valore legacy causi eccezioni runtime.
+        }
     }
 
     private QueryParts buildQuery(DocumentHistoryQuery query) { // Compone dinamicamente la clausola FROM/WHERE in base ai filtri.

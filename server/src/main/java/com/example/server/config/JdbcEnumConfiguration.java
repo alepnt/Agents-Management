@@ -28,7 +28,11 @@ public class JdbcEnumConfiguration { // Definisce la configurazione per i conver
                 return null; // Restituisce null senza sollevare eccezioni.
             }
             String normalized = source.trim().toUpperCase(); // Rimuove spazi e normalizza il case per evitare errori.
-            return ContractStatus.valueOf(normalized); // Converte nel corrispondente valore enum.
+            try {
+                return ContractStatus.valueOf(normalized); // Converte nel corrispondente valore enum.
+            } catch (IllegalArgumentException ex) { // Gestisce valori legacy o non contemplati dall'enum.
+                return null; // Restituisce null per evitare errori runtime mantenendo la consultazione dei dati.
+            }
         }
     }
 }
