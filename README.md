@@ -101,6 +101,19 @@ Per partire più velocemente da Windows è disponibile lo script `scripts/start-
 
 Lo script arresta il server quando chiudi il client o interrompi l'esecuzione.
 
+### Creare un collegamento sul desktop (Windows)
+
+Per lanciare l'app con un doppio clic puoi generare un collegamento `.lnk` che richiama `start-desktop.ps1` con i parametri desiderati:
+
+```powershell
+./scripts/create-desktop-shortcut.ps1
+```
+
+- Usa `-Profile sqlserver` per creare il collegamento con il profilo `sqlserver`.
+- Usa `-JavafxPlatform win` per fissare la piattaforma JavaFX sul collegamento.
+- Cambia il nome del collegamento con `-ShortcutName "Gestore Agenti QA.lnk"`.
+- Aggiungi `-Force` per sovrascrivere un collegamento già presente.
+
 ### Report di coverage
 
 I test del modulo **server** sono strumentati con JaCoCo. Per generare e visualizzare il report di coverage:
