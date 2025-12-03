@@ -1,2 +1,2 @@
-UPDATE contracts SET contract_status = 'TERMINATED'
-WHERE contract_status = 'EXPIRED';
+UPDATE contracts SET status = 'TERMINATED'
+WHERE status = 'EXPIRED';
