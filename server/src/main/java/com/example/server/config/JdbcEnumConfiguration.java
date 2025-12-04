@@ -1,6 +1,7 @@
 package com.example.server.config; // Package di configurazione condiviso dal backend.
 
 import com.example.common.enums.ContractStatus; // Enum che rappresenta gli stati di un contratto.
+import com.example.common.enums.DocumentAction; // Enum che rappresenta le azioni tracciabili sui documenti.
 import java.util.List; // Collezione immutabile di converter registrati.
 import org.springframework.context.annotation.Bean; // Consente di esporre i metodi come bean Spring.
 import org.springframework.context.annotation.Configuration; // Indica che la classe contiene definizioni di bean.
@@ -16,7 +17,10 @@ public class JdbcEnumConfiguration { // Definisce la configurazione per i conver
 
     @Bean // Esporta il bean che registra i converter custom.
     public JdbcCustomConversions jdbcCustomConversions() { // Restituisce le conversioni personalizzate da applicare.
-        return new JdbcCustomConversions(List.of(new ContractStatusReadConverter())); // Registra il converter per ContractStatus.
+        return new JdbcCustomConversions(List.of(
+                new ContractStatusReadConverter(), // Converter per gli stati dei contratti.
+                new DocumentActionReadConverter() // Converter per le azioni documentali.
+        ));
     }
 
     @ReadingConverter // Indica che il converter viene usato in fase di lettura dal database.
@@ -32,6 +36,23 @@ public class JdbcEnumConfiguration { // Definisce la configurazione per i conver
                 return ContractStatus.valueOf(normalized); // Converte nel corrispondente valore enum.
             } catch (IllegalArgumentException ex) { // Gestisce valori legacy o non contemplati dall'enum.
                 return null; // Restituisce null per evitare errori runtime mantenendo la consultazione dei dati.
+            }
+        }
+    }
+
+    @ReadingConverter // Indica che il converter viene usato in fase di lettura dal database.
+    static class DocumentActionReadConverter implements Converter<String, DocumentAction> { // Converte le stringhe delle azioni documentali.
+
+        @Override
+        public DocumentAction convert(String source) { // Converte una stringa in DocumentAction normalizzando il valore.
+            if (source == null) { // Gestisce valori null provenienti dal database.
+                return null; // Restituisce null senza sollevare eccezioni.
+            }
+            String normalized = source.trim().toUpperCase(); // Rimuove spazi e normalizza il case.
+            try {
+                return DocumentAction.valueOf(normalized); // Converte nel corrispondente valore enum.
+            } catch (IllegalArgumentException ex) { // Gestisce valori legacy o non contemplati dall'enum.
+                return null; // Evita che un valore imprevisto causi errori runtime.
             }
         }
     }
