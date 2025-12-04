@@ -55,6 +55,14 @@ import org.springframework.lang.NonNull;
  */
 public class NotificationTabView extends Tab implements Observer<NotificationMessage>, AutoCloseable {
 
+    private static final List<String> DEFAULT_NOTIFICATIONS = List.of(
+            "[09:00] Benvenuto in Agents Management",
+            "[09:05] Suggerimento: usa la barra in alto per aprire chat e notifiche",
+            "[09:10] Le statistiche sono aggiornate ogni ora",
+            "[09:15] Consiglio: prova a ricaricare i dati dal pulsante Aggiorna",
+            "[09:20] Notifiche in tempo reale abilitate"
+    );
+
     private final BackendGateway backendGateway;
     // Accesso al backend (polling, lista notifiche, ecc.).
 
@@ -99,6 +107,9 @@ public class NotificationTabView extends Tab implements Observer<NotificationMes
         // Imposta il contenuto della tab
         setContent(container);
 
+        // Notifiche di default visualizzate finché non arrivano dati reali
+        items.setAll(DEFAULT_NOTIFICATIONS);
+
         // Registra questa vista come observer nel NotificationService
         notificationService.subscribe(this);
     }
@@ -125,12 +136,15 @@ public class NotificationTabView extends Tab implements Observer<NotificationMes
         List<NotificationItem> notifications = backendGateway.listNotifications(userId, null);
 
         // Converte in stringhe leggibili
-        List<String> mapped = notifications.stream()
-                .map(item -> String.format("[%s] %s", item.createdAt(), item.title()))
-                .collect(Collectors.toList());
+        List<String> mapped = mapNotifications(notifications);
+
+        if (mapped.isEmpty()) {
+            mapped = DEFAULT_NOTIFICATIONS;
+        }
 
         // Aggiornamento della UI (thread JavaFX)
-        Platform.runLater(() -> items.setAll(mapped));
+        List<String> finalMapped = mapped;
+        Platform.runLater(() -> items.setAll(finalMapped));
     }
 
     /**
@@ -193,5 +207,11 @@ public class NotificationTabView extends Tab implements Observer<NotificationMes
         running.set(false);
         executor.shutdownNow();
         notificationService.unsubscribe(this);
+    }
+
+    private List<String> mapNotifications(List<NotificationItem> notifications) {
+        return notifications.stream()
+                .map(item -> String.format("[%s] %s", item.createdAt(), item.title()))
+                .collect(Collectors.toList());
     }
 }
