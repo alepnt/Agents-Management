@@ -1,6 +1,7 @@
 package com.example.server.domain; // Pacchetto che contiene le entità di dominio
 
 import com.example.common.enums.InvoiceStatus; // Enum che rappresenta lo stato della fattura
+import org.springframework.data.annotation.CreatedDate; // Gestisce l'impostazione automatica della data di creazione
 import org.springframework.data.annotation.Id; // Indica il campo identificativo
 import org.springframework.data.annotation.LastModifiedDate; // Gestisce l'aggiornamento automatico della data di modifica
 import org.springframework.data.relational.core.mapping.Column; // Mappa un campo su una colonna del database
@@ -45,6 +46,7 @@ public class Invoice { // Entità che rappresenta una fattura
 
     private String notes; // Note aggiuntive sulla fattura
 
+    @CreatedDate // Imposta automaticamente la data di creazione al salvataggio
     @Column("created_at") // Colonna per la data di creazione
     private Instant createdAt; // Timestamp di creazione del record
 
