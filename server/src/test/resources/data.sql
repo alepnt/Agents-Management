@@ -197,3 +197,183 @@ VALUES (
     'Invoice deleted permanently',
     TIMESTAMP '2024-03-01T10:00:00'
 );
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    6,
+    'INVOICE',
+    11,
+    'CREATED',
+    'Invoice created for Q1 follow-up',
+    TIMESTAMP '2024-03-05T09:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    7,
+    'INVOICE',
+    11,
+    'UPDATED',
+    'Adjusted due date after customer request',
+    TIMESTAMP '2024-03-06T14:30:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    8,
+    'CONTRACT',
+    2,
+    'AMENDMENT_ADDED',
+    'Added scope amendment for phase 2',
+    TIMESTAMP '2024-03-07T11:15:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    9,
+    'CONTRACT',
+    1,
+    'STATUS_CHANGED',
+    'Contract moved to negotiation',
+    TIMESTAMP '2024-03-08T16:45:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    10,
+    'INVOICE',
+    12,
+    'CREATED',
+    'Invoice created for March delivery',
+    TIMESTAMP '2024-03-09T08:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    11,
+    'INVOICE',
+    12,
+    'SENT',
+    'Invoice emailed to accounting contact',
+    TIMESTAMP '2024-03-09T09:30:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    12,
+    'INVOICE',
+    12,
+    'REMINDER_SENT',
+    'First payment reminder sent',
+    TIMESTAMP '2024-03-20T10:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    13,
+    'INVOICE',
+    13,
+    'CREATED',
+    'Invoice created for April services',
+    TIMESTAMP '2024-03-21T12:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    14,
+    'INVOICE',
+    13,
+    'SENT',
+    'Invoice sent via portal',
+    TIMESTAMP '2024-03-21T12:05:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    15,
+    'INVOICE',
+    13,
+    'VIEWED',
+    'Customer opened invoice email',
+    TIMESTAMP '2024-03-22T09:45:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    16,
+    'INVOICE',
+    13,
+    'REMINDER_SENT',
+    'Second reminder sent',
+    TIMESTAMP '2024-04-01T10:15:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    17,
+    'INVOICE',
+    13,
+    'PAYMENT_REGISTERED',
+    'Payment received via bank transfer',
+    TIMESTAMP '2024-04-05T15:40:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    18,
+    'CONTRACT',
+    2,
+    'STATUS_CHANGED',
+    'Contract marked as active after signature',
+    TIMESTAMP '2024-04-06T09:20:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    19,
+    'CONTRACT',
+    1,
+    'RENEWAL_PROPOSED',
+    'Renewal proposal sent to customer',
+    TIMESTAMP '2024-04-07T10:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    20,
+    'INVOICE',
+    14,
+    'CREATED',
+    'Backdated invoice added for audit',
+    TIMESTAMP '2022-10-02T08:30:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    21,
+    'INVOICE',
+    14,
+    'SENT',
+    'Invoice sent to legacy contact',
+    TIMESTAMP '2022-10-02T09:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    22,
+    'INVOICE',
+    14,
+    'VIEWED',
+    'Customer viewed invoice in portal',
+    TIMESTAMP '2022-10-03T10:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    23,
+    'INVOICE',
+    14,
+    'PAYMENT_REGISTERED',
+    'Payment registered after reminder',
+    TIMESTAMP '2022-11-12T12:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    24,
+    'INVOICE',
+    11,
+    'PAYMENT_REGISTERED',
+    'Payment confirmed by finance team',
+    TIMESTAMP '2024-03-15T17:00:00'
+);
+INSERT INTO "document_history" (id, document_type, document_id, action, description, created_at)
+VALUES (
+    25,
+    'CONTRACT',
+    2,
+    'TERMINATED',
+    'Contract terminated due to non-renewal',
+    TIMESTAMP '2024-04-30T18:00:00'
+);
