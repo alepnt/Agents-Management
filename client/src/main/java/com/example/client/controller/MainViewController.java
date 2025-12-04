@@ -25,6 +25,7 @@ import com.example.client.service.NotificationService;
 import com.example.client.service.SessionExpiredException;
 import com.example.client.session.SessionStore;
 import com.example.client.view.ChatView;
+import com.example.client.view.NotificationTabView;
 import com.example.client.auth.MsalTokenProvider;
 import com.example.client.auth.TokenProvider;
 import com.example.common.dto.ContractDTO;
@@ -139,6 +140,8 @@ public class MainViewController {
     private boolean sessionExpired;
     private Stage chatStage;
     private ChatView chatView;
+    private Stage notificationStage;
+    private NotificationTabView notificationTabView;
 
     public MainViewController() {
         this(null, new SessionStore());
@@ -887,6 +890,39 @@ public class MainViewController {
             } else {
                 chatStage.toFront();
                 chatStage.requestFocus();
+            }
+            return null;
+        });
+    }
+
+    @FXML
+    public void openNotificationCenter() {
+        withSession(() -> {
+            AuthSession session = sessionStore.currentSession().orElse(null);
+            if (session == null || session.user() == null || session.user().id() == null) {
+                notifyError("Impossibile aprire le notifiche: utente non disponibile.");
+                return null;
+            }
+
+            if (notificationStage == null || !notificationStage.isShowing()) {
+                notificationTabView = new NotificationTabView(new BackendGateway(sessionStore), notificationService);
+                notificationTabView.bindUser(session.user().id());
+
+                TabPane notificationTabs = new TabPane(notificationTabView);
+                Scene scene = new Scene(notificationTabs, 520, 640);
+                URL theme = getClass().getResource("/com/example/client/style/theme.css");
+                if (theme != null) {
+                    scene.getStylesheets().add(theme.toExternalForm());
+                }
+
+                notificationStage = new Stage();
+                notificationStage.setTitle("Notifiche");
+                notificationStage.setScene(scene);
+                notificationStage.setOnCloseRequest(event -> closeNotificationCenter(false));
+                notificationStage.show();
+            } else {
+                notificationStage.toFront();
+                notificationStage.requestFocus();
             }
             return null;
         });
@@ -2139,6 +2175,7 @@ public class MainViewController {
 
     public void shutdown() {
         closeChatWindow(true);
+        closeNotificationCenter(true);
         notificationService.unsubscribe(notificationObserver);
         dataCacheService.unsubscribeDataChanges(dataChangeObserver);
         dataCacheService.getCaretaker().unsubscribe(historyObserver);
@@ -2154,6 +2191,19 @@ public class MainViewController {
                 chatStage.close();
             }
             chatStage = null;
+        }
+    }
+
+    private void closeNotificationCenter(boolean requestClose) {
+        if (notificationTabView != null) {
+            notificationTabView.close();
+            notificationTabView = null;
+        }
+        if (notificationStage != null) {
+            if (requestClose) {
+                notificationStage.close();
+            }
+            notificationStage = null;
         }
     }
 
