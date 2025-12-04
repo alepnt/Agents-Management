@@ -145,8 +145,8 @@ public class InvoiceService { // Service handling invoice operations
         Long requiredId = Objects.requireNonNull(id, "id must not be null"); // Validate id
         return invoiceRepository.findById(requiredId) // Attempt to find invoice
                 .map(invoice -> { // If present
+                    invoiceLineRepository.deleteByInvoiceId(requiredId); // Delete related invoice lines first to satisfy FK constraint
                     invoiceRepository.deleteById(requiredId); // Delete invoice record
-                    invoiceLineRepository.deleteByInvoiceId(requiredId); // Delete related invoice lines
                     documentHistoryService.log(DocumentType.INVOICE, // Log deletion
                             Objects.requireNonNull(invoice.getId(), "invoice id must not be null"), // Validate invoice id
                             DocumentAction.DELETED, // Action type
