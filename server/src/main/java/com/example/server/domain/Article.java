@@ -3,6 +3,7 @@ package com.example.server.domain; // Definisce il package della classe
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.data.annotation.CreatedDate; // Importa l'annotazione per popolare automaticamente la data di creazione
 import org.springframework.data.annotation.Id; // Importa l'annotazione per identificare la chiave primaria
 import org.springframework.data.annotation.LastModifiedDate; // Importa l'annotazione per tracciare l'ultimo aggiornamento
 import org.springframework.data.relational.core.mapping.Column; // Importa l'annotazione per mappare le colonne
@@ -44,6 +45,7 @@ public class Article { // Definisce l'entità Article
     @NotBlank(message = "L'unità di misura è obbligatoria")
     private String unitOfMeasure; // Unità di misura dell'articolo
 
+    @CreatedDate // Imposta automaticamente il timestamp di creazione al salvataggio
     @Column("created_at") // Mappa il campo alla colonna created_at
     private Instant createdAt; // Timestamp di creazione
 
