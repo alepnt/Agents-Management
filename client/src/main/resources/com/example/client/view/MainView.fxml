@@ -17,6 +17,7 @@
         <ToolBar styleClass="app-toolbar">
             <Label text="Agents management" styleClass="title" />
             <Pane HBox.hgrow="ALWAYS" />
+            <Button text="Notifiche" onAction="#openNotificationCenter" />
             <Button text="Chat" onAction="#openChatWindow" />
             <Button text="Aggiorna" onAction="#refreshData" />
             <Button text="Esci" onAction="#onLogout" />
