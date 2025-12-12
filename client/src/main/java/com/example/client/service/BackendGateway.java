@@ -52,11 +52,11 @@ public class BackendGateway {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final String baseUrl;
+    private final String baseUrl; // URL base del backend, configurabile via BACKEND_BASE_URL.
     private final SessionStore sessionStore;
 
     public BackendGateway() {
-        this("http://localhost:8080");
+        this(BaseUrlResolver.resolve());
     }
 
     public BackendGateway(String baseUrl) {
@@ -64,7 +64,7 @@ public class BackendGateway {
     }
 
     public BackendGateway(SessionStore sessionStore) {
-        this("http://localhost:8080", sessionStore);
+        this(BaseUrlResolver.resolve(), sessionStore);
     }
 
     public BackendGateway(String baseUrl, SessionStore sessionStore) {

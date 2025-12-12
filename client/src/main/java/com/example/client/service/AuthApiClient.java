@@ -34,14 +34,14 @@ public class AuthApiClient {
     // ObjectMapper configurato per Instant e altre date.
 
     private final String baseUrl;
-    // URL base del backend (localhost:8080 per default).
+    // URL base del backend (configurabile via BACKEND_BASE_URL, default localhost:8080).
 
     /**
      * Costruttore predefinito.
      * Punta all'istanza locale del backend.
      */
     public AuthApiClient() {
-        this("http://localhost:8080");
+        this(BaseUrlResolver.resolve());
     }
 
     /**
